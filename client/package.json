@@ -31,6 +31,10 @@
     "style-loader": "^3.3.1",
     "webpack-dev-server": "^4.7.4"
   },
+  "engines": {
+    "node": "16.13.2",
+    "npm": "8.1.2"
+  },
   "dependencies": {
     "webpack": "^5.70.0",
     "@reduxjs/toolkit": "^1.8.1",
