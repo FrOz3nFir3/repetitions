@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "heroku-postbuild": "webpack -p --config ./webpack.config.js --progress",
     "start": "webpack build",
     "watch": "webpack serve ",
     "build": "webpack --mode production",
