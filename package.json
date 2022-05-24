@@ -11,6 +11,7 @@
     "server": "npm run watch --prefix server",
     "client": "npm run watch --prefix client",
     "dev": "npm-run-all --parallel server client",
+    "install": "npm run install --prefix client && npm run install --prefix server",
     "build": "npm run build --prefix client && npm run start --prefix server"
   },
   "keywords": [],
