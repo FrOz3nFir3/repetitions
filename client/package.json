@@ -7,7 +7,7 @@
     "heroku-postbuild": "webpack -p --config ./webpack.config.js --progress",
     "start": "webpack build",
     "watch": "webpack serve ",
-    "build": "webpack --mode production",
+    "build": "webpack --mode production --config ./webpack.prod.js",
     "test": "jest test"
   },
   "babel": {
