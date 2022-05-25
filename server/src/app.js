@@ -5,6 +5,16 @@ const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
 
+// redirecting to https
+const runningInProduction = process.env.NODE_ENV == "production";
+app.enable("trust proxy");
+app.use((req, res, next) => {
+  if (runningInProduction && req.secure == false) {
+    res.redirect("https://" + req.headers.host + req.url);
+  }
+  next();
+});
+
 // needed when developing in development mode
 app.use(
   cors({

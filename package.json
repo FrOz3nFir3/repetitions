@@ -4,10 +4,10 @@
   "description": "full stack project",
   "scripts": {
     "postinstall" : "npm run build --prefix client",
-    "server": "npm run watch --prefix server",
-    "client": "npm run watch --prefix client",
+    "server": "npm run start --prefix server",
+    "client": "npm run build --prefix client",
     "dev": "npm-run-all --parallel server client",
-    "build": "npm run start --prefix server"
+    "build": "npm run client & npm run server"
   },
   "keywords": [],
   "author": "",

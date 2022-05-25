@@ -1,6 +1,6 @@
 const app = require("./app");
 const { mongoConnect } = require("./services/mongo");
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 
 async function startServer() {
   await mongoConnect();
