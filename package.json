@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "full stack project",
   "scripts": {
-    "postinstall" : "npm run build --prefix client",
     "server": "npm run start --prefix server",
     "client": "npm run build --prefix client",
     "dev": "npm-run-all --parallel server client",
