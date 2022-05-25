@@ -6,7 +6,7 @@
     "postinstall": "npm install --prefix server",
     "server": "npm run start --prefix server",
     "client": "npm run build --prefix client",
-    "dev": "npm-run-all --parallel server client",
+    "dev": "npm-run-all --parallel server client"
   },
   "keywords": [],
   "author": "",
