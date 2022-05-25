@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "npm install --dev",
     "start": "webpack build",
     "watch": "webpack serve ",
     "build": "webpack --mode production",
