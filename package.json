@@ -6,7 +6,7 @@
     "server": "npm run start --prefix server",
     "client": "npm run build --prefix client",
     "dev": "npm-run-all --parallel server client",
-    "build": "npm run client & npm run server"
+    "build": "npm run server"
   },
   "keywords": [],
   "author": "",
