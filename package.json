@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "full stack project",
   "scripts": {
-    "heroku-prebuild": "npm install --dev --prefix client & npm run build --prefix client",
+    "heroku-prebuild": "npm install --dev --prefix client && npm run build --prefix client",
     "server": "npm run watch --prefix server",
     "client": "npm run watch --prefix client",
     "dev": "npm-run-all --parallel server client",
