@@ -9,6 +9,7 @@
     "dev": "npm-run-all --parallel server client",
     "deploy": "npm run build --prefix client && npm run start --prefix server"
   },
+  "heroku-run-build-script": true,
   "keywords": [],
   "author": "",
   "license": "ISC",
