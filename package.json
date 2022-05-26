@@ -7,8 +7,7 @@
     "server": "npm run watch --prefix server",
     "client": "npm run watch --prefix client",
     "dev": "npm-run-all --parallel server client",
-    "build": "npm run build --prefix client",
-    "deploy": "npm run start --prefix server"
+    "deploy": "npm run build --prefix client && npm run start --prefix server"
   },
   "keywords": [],
   "author": "",
