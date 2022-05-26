@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "full stack project",
   "scripts": {
+    "postinstall": "npm install --prefix server && npm install --dev --prefix client",
     "server": "npm run start --prefix server",
     "client": "npm run build --prefix client",
     "server-dev": "npm run watch --prefix server",
     "client-dev": "npm run watch --prefix client",
     "dev": "npm-run-all -p client-dev server-dev",
-    "deploy": "npm run server"
+    "deploy": "npm run client && npm run server"
   },
   "keywords": [],
   "author": "",
