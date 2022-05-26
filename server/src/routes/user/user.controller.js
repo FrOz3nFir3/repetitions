@@ -3,7 +3,7 @@ const {
   findUserByEmail,
   updateUserDetails,
 } = require("../../models/users/users.model");
-const { createNewToken } = require("./auth.controller");
+const { createNewToken, sendCookie } = require("./auth.controller");
 const bcrypt = require("bcrypt");
 const User = require("../../models/users/users.mongo");
 const EmailValidator = require("email-deep-validator");
@@ -21,29 +21,28 @@ async function httpGetAuthDetails(req, res) {
 }
 
 async function httpCreateNewUser(req, res) {
-  const user = req.body;
+  const newUser = req.body;
   try {
-    if (user.password != user.confirmPassword) {
+    if (newUser.password != newUser.confirmPassword) {
       return res.status(409).json({ error: "confirm password does not match" });
     }
 
-    const userExists = await findUserByEmail(user.email);
+    const userExists = await findUserByEmail(newUser.email);
     if (userExists != null) {
       return res.status(409).json({ error: "email already exist" });
     }
 
     const { validDomain, validMailbox } = await emailValidator.verify(
-      user.email
+      newUser.email
     );
     if (validDomain == false || validMailbox == false) {
       return res.status(409).json({ error: "Invalid Email" });
     }
 
-    const newUser = await createNewUser(user);
-    // also create jwt token
-    const token = createNewToken(newUser._id);
-    res.cookie("jwt", token, { httpOnly: true });
-    res.status(200).json({ user: newUser });
+    const user = await createNewUser(newUser);
+    sendCookie(res, user._id);
+
+    res.status(200).json({ user });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
@@ -75,8 +74,8 @@ async function httpLoginUser(req, res) {
       return res.status(401).json({ error: "password does not match" });
     }
 
-    const token = createNewToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true });
+    sendCookie(res, user._id);
+
     return res.status(200).json({ user });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -95,16 +94,17 @@ async function httpLoginGoogleUser(req, res) {
       user = await createNewUser({ email });
     }
 
-    const token = createNewToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true });
+    sendCookie(res, user._id);
+
     return res.status(200).json({ user });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error });
   }
 }
 
 function httpLogoutUser(req, res) {
-  let containsCookies = req.cookies.jwt;
+  let containsCookies = req.signedCookies.jwt;
 
   if (containsCookies) {
     res.clearCookie("jwt");

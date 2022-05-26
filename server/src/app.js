@@ -4,6 +4,8 @@ const path = require("path");
 const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
+require("dotenv").config({ path: "../" });
+const cookieSecret = process.env.COOKIE_SECRET;
 
 // redirecting to https
 const runningInProduction = process.env.NODE_ENV == "production";
@@ -26,7 +28,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // cookie parser (sending jwt tokens)
-app.use(cookieParser());
+app.use(cookieParser(cookieSecret));
 
 // all main api routes here
 app.use("/api", apiRouter);

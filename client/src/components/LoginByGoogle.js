@@ -2,11 +2,11 @@ import React from "react";
 import { usePostGoogleLoginMutation } from "../slice/apiSlice";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../slice/authSlice";
-const clientId =
-  "650317328714-q5a463tj89sgofpglmp6p4m9697tmcqk.apps.googleusercontent.com";
 import { GoogleLogin } from "react-google-login";
 import Loading from "./Loading";
 
+const clientId =
+  "650317328714-q5a463tj89sgofpglmp6p4m9697tmcqk.apps.googleusercontent.com";
 function LoginByGoogle(props) {
   const [loginWithGoogle, { isFetching, error, data }] =
     usePostGoogleLoginMutation();
@@ -22,7 +22,7 @@ function LoginByGoogle(props) {
 
   return (
     <div>
-      {error && error.data.error}
+      {error && <div className="bg-error"> {error.data.error}</div>}
       <GoogleLogin
         clientId={clientId}
         buttonText="Login With Google"
