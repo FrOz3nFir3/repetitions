@@ -8,7 +8,7 @@
     "server-dev": "npm run watch --prefix server",
     "client-dev": "npm run watch --prefix client",
     "dev": "npm-run-all -p client-dev server-dev",
-    "deploy": "npm install --dev --prefix client && npm run client && npm run server"
+    "deploy": "npm run server"
   },
   "keywords": [],
   "author": "",
