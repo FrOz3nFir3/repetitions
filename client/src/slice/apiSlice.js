@@ -61,6 +61,10 @@ export const apiSlice = createApi({
       query: () => `/user/authed`,
     }),
 
+    getUserProgress: builder.query({
+      query: (id) => `/user/${id}`,
+    }),
+
     patchUpdateUser: builder.mutation({
       query: (user) => ({
         url: "/user",
@@ -98,4 +102,5 @@ export const {
   usePatchUpdateUserMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
+  useGetUserProgressQuery
 } = apiSlice;

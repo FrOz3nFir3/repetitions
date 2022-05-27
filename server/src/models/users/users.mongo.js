@@ -32,23 +32,3 @@ UsersSchema.pre("save", async function save(next) {
 
 // Connects usersSchema with the "users" collection
 module.exports = mongoose.model("User", UsersSchema);
-
-const ProgressSchema = new mongoose.Schema({
-  _id: false,
-  started: {
-    type: Boolean,
-    default: false,
-  },
-  completed: {
-    type: Boolean,
-    default: false,
-  },
-  "total-correct": {
-    type: Number,
-    default: 0,
-  },
-  "total-wrong": {
-    type: Number,
-    default: 0,
-  },
-});

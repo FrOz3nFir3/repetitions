@@ -2,8 +2,9 @@ const {
   createNewUser,
   findUserByEmail,
   updateUserDetails,
+  getUserProgress,
 } = require("../../models/users/users.model");
-const { createNewToken, sendCookie } = require("./auth.controller");
+const { sendCookie } = require("./auth.controller");
 const bcrypt = require("bcrypt");
 const User = require("../../models/users/users.mongo");
 const EmailValidator = require("email-deep-validator");
@@ -25,6 +26,9 @@ async function httpCreateNewUser(req, res) {
   try {
     if (newUser.password != newUser.confirmPassword) {
       return res.status(409).json({ error: "confirm password does not match" });
+    }
+    if (newUser.password.length < 5) {
+      return res.status(409).json({ error: "Password should be minimum 5 characters" });
     }
 
     const userExists = await findUserByEmail(newUser.email);
@@ -114,6 +118,17 @@ function httpLogoutUser(req, res) {
   }
 }
 
+function httpGetUserProgress(req, res) {
+  const  userId = req.params.userId;
+
+  try {
+    const user = getUserProgress(userId);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+}
+
 module.exports = {
   httpCreateNewUser,
   httpLoginUser,
@@ -121,4 +136,5 @@ module.exports = {
   httpLogoutUser,
   httpGetAuthDetails,
   httpUpdateUser,
+  httpGetUserProgress
 };

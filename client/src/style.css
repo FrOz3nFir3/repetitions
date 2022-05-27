@@ -289,3 +289,12 @@ form.add-card {
 .authentication-container > div {
     padding: 1em 1em 0 1em;
 }
+
+.profile-details{
+    --flow-space: 2rem;
+    font-size: 1.2em;
+    font-weight: bolder;
+}
+.profile-details > * + *{
+    padding: .5em;
+}

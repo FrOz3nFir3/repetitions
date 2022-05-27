@@ -1,14 +1,16 @@
 import React, { useCallback } from "react";
-import { usePatchUpdateCardMutation } from "../slice/apiSlice";
+import {usePatchUpdateCardMutation, usePatchUpdateUserMutation} from "../slice/apiSlice";
 import { NewFlashcard } from "./NewFlashcard";
 import { CardField } from "./CardField";
 import { useOutletContext } from "react-router-dom";
 import { useButtonToggle } from "../hooks/buttonToggle";
 import { BiEdit, BiXCircle } from "react-icons/bi";
+import Loading from "./Loading";
+import {useSelector} from "react-redux";
+import {selectCurrentUser} from "../slice/authSlice";
 
 export function Quiz() {
   const [correctOption = "", changeOption] = React.useState(undefined);
-
   const [autoNext, toggleAutoNext] = useButtonToggle();
   const autoNextCardRef = React.useRef();
 
@@ -52,39 +54,24 @@ export function Quiz() {
         currentStatus={renderCurrentQuizStatus}
       />
 
-      {/*{totalCards == 0 ? null : (*/}
-      {/*  <div className="flex flex-center-all">*/}
-      {/*    <p>*/}
-      {/*      {cardNo}/{totalCards}*/}
-      {/*    </p>*/}
-      {/*    <button className="btn" onClick={nextCard}>*/}
-      {/*      Next*/}
-      {/*    </button>*/}
-      {/*    {autoNext ? (*/}
-      {/*      <button className="btn" onClick={toggleAutoNext}>*/}
-      {/*        Turn Off Auto Next*/}
-      {/*      </button>*/}
-      {/*    ) : (*/}
-      {/*      <button className="btn" onClick={toggleAutoNext}>*/}
-      {/*        Turn On Auto Next*/}
-      {/*      </button>*/}
-      {/*    )}*/}
-      {/*  </div>*/}
-      {/*)}*/}
       <NewFlashcard _id={_id} />
-
-      {cardNo == review.length && correctOption ? (
-        <h2>Congrats you just finished</h2>
-      ) : null}
     </div>
   );
 
-  function renderCurrentQuizStatus() {
+  function renderCurrentQuizStatus(updateUser, user) {
+
+
     if (totalCards == 0) {
       return null;
     }
 
     let cardsFinished = cardNo == review.length && correctOption;
+    // React.useEffect(()=>{
+    //   if(cardNo == review.length && correctOption && user != null){
+    //     updateUser({card_id:_id, email:user.email,type:"times-finished" })
+    //   }
+    // },[cardNo])
+
 
     return (
       <div className="flex flex-center-all">
@@ -118,6 +105,8 @@ function IndividualQuiz(props) {
   const newOptionRef = React.useRef();
   const [editOptions, toggleOptions] = useButtonToggle();
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
+  const [updateUser, ] = usePatchUpdateUserMutation();
+  const user =  useSelector(selectCurrentUser)
 
   const { _id, card, correctOption, changeOption, currentStatus } = props;
   if (card == null) return null;
@@ -129,7 +118,14 @@ function IndividualQuiz(props) {
     if (selectedOption.innerText == answer) {
       changeOption(true);
       selectedOption.classList.add("border-green");
+      if(user != null){
+        updateUser({card_id:_id, email:user.email, type:"total-correct"})
+      }
+
     } else {
+      if(user != null){
+        updateUser({card_id:_id, email:user.email, type:"total-incorrect"})
+      }
       changeOption(false);
       selectedOption.disabled = true;
       selectedOption.classList.add("border-red");
@@ -143,6 +139,10 @@ function IndividualQuiz(props) {
 
     updateCard({ _id, cardId, option });
   };
+
+  if(isLoading){
+    return <Loading/>
+  }
 
   return (
     <>
@@ -167,7 +167,7 @@ function IndividualQuiz(props) {
         </form>
       ) : null}
 
-      {currentStatus()}
+      {currentStatus.call(null, updateUser, user)}
 
       <div className="flow-content">
         <CardField
