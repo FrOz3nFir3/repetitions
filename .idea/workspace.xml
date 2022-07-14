@@ -2,24 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2d001c86-b575-4a53-808c-157d2add6fff" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Repetitions.tech.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/slice/cardSlice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/CardField.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/CardField.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/FullCard.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/FullCard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/Header.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Header.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/Individual.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Individual.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/NewFlashcard.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/NewFlashcard.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/components/Profile.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Profile.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/components/Quiz.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Quiz.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/hooks/auth.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/components/Review.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Review.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/configureStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/configureStore.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/slice/apiSlice.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/slice/apiSlice.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/slice/cards.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/slice/authSlice.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/slice/authSlice.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/public/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/public/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/models/users/users.model.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/models/users/users.model.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/models/users/users.mongo.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/models/users/users.mongo.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/routes/card/card.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/routes/card/card.controller.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/routes/cards/cards.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/routes/cards/cards.controller.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/routes/cards/cards.router.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/routes/cards/cards.router.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/routes/user/user.controller.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/routes/user/user.controller.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/routes/user/user.router.js" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/routes/user/user.router.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +49,8 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;last_opened_file_path&quot;: &quot;D:/Video Courses/Repetitions.tech&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
@@ -265,7 +267,18 @@
       <workItem from="1653589230150" duration="14000" />
       <workItem from="1653643657561" duration="5860000" />
       <workItem from="1653658645910" duration="6560000" />
-      <workItem from="1653669766599" duration="6724000" />
+      <workItem from="1653669766599" duration="6900000" />
+      <workItem from="1653707567578" duration="1416000" />
+      <workItem from="1657007345947" duration="617000" />
+      <workItem from="1657197032321" duration="4330000" />
+      <workItem from="1657605696706" duration="6398000" />
+      <workItem from="1657629793564" duration="4518000" />
+      <workItem from="1657695317445" duration="890000" />
+      <workItem from="1657698856525" duration="2011000" />
+      <workItem from="1657721376856" duration="3973000" />
+      <workItem from="1657735327807" duration="1164000" />
+      <workItem from="1657780111905" duration="287000" />
+      <workItem from="1657780644333" duration="4619000" />
     </task>
     <servers />
   </component>

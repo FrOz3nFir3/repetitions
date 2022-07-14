@@ -3,11 +3,13 @@ import { useButtonToggle } from "../hooks/buttonToggle";
 import React from "react";
 import Loading from "./Loading";
 import { BiCheckSquare, BiEdit, BiXCircle } from "react-icons/bi";
+import {modifyCard} from "../slice/cardSlice";
+import {useDispatch} from "react-redux";
 
 export function CardField(props) {
   var { _id, text, value, cardId, optionIndex } = props;
-
-  const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
+  const dispatch = useDispatch()
+  const [updateCard, { isLoading,isSuccess , error }] = usePatchUpdateCardMutation();
 
   const [buttonClicked, toggleButton] = useButtonToggle();
   const [inputValue = "", changeValue] = React.useState(value);
@@ -30,8 +32,14 @@ export function CardField(props) {
     if (typeof optionIndex == "number") {
       updateDetails.optionIndex = optionIndex;
     }
-    updateCard(updateDetails);
+    updateCard(updateDetails)
+      .then((response)=> {
+        if(response.data){
+          dispatch(modifyCard(updateDetails))
+        }
+      })
   };
+
 
   if (isLoading) {
     return <Loading count={5} />;

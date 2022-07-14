@@ -5,13 +5,15 @@ import { CardField } from "./CardField";
 import { useOutletContext } from "react-router-dom";
 import { useButtonToggle } from "../hooks/buttonToggle";
 import { BiEdit, BiXCircle } from "react-icons/bi";
+import {useSelector} from "react-redux";
+import {selectCurrentCard} from "../slice/cardSlice";
 
 export function Review() {
   const [cardId, changeCardId] = React.useState(1);
-  const [props] = useOutletContext();
   const [editFlashCard, toggleEditFlashCard] = useButtonToggle();
 
-  const { _id, review } = props;
+  const card = useSelector(selectCurrentCard);
+  const { _id, review=[] } = card;
   const cards = review.map((card) => ({
     id: card.cardId,
     front: card.question,

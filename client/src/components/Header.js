@@ -1,16 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useGetAuthDetailsQuery } from "../slice/apiSlice";
-import { selectCurrentUser, updateUser } from "../slice/authSlice";
+import { selectCurrentUser, initialUser } from "../slice/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 function Header(props) {
-  const { data: existingUser, isSuccess } = useGetAuthDetailsQuery();
+  const { data: existingUser = {}, isSuccess } = useGetAuthDetailsQuery();
   const dispatch = useDispatch();
+
   React.useEffect(() => {
-    dispatch(updateUser(existingUser));
+      dispatch(initialUser(existingUser));
   }, [existingUser]);
+
   const user = useSelector(selectCurrentUser);
+  console.log('user changed', user)
 
   return (
     <ul className="header flex">

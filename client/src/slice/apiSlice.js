@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Define our single API slice object
 export const apiSlice = createApi({
   reducerPath: "cards",
+  // in development mode api url (nodejs server is on 3000 port) so http://localhost:3000/api
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
   tagTypes: ["Card"],
   // The "endpoints" represent operations and requests for this server
@@ -18,9 +19,18 @@ export const apiSlice = createApi({
       providesTags: ["Card"],
     }),
 
+    postCardsByIds: builder.mutation({
+        query: (card) => ({
+          url: "/cards/ids",
+          method: "POST",
+          body: card,
+        }),
+        // invalidatesTags: (result, error, arg) => (!error ? ["Card"] : null),
+      }),
+
     getIndividualCard: builder.query({
       query: (id) => `/card/${id}`,
-      providesTags: ["Card"],
+      // providesTags: ["Card"],
     }),
 
     postCreateNewCard: builder.mutation({
@@ -102,5 +112,5 @@ export const {
   usePatchUpdateUserMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
-  useGetUserProgressQuery
+  usePostCardsByIdsMutation
 } = apiSlice;

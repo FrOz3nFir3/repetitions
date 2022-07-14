@@ -6,8 +6,9 @@ import { useOutletContext } from "react-router-dom";
 import { useButtonToggle } from "../hooks/buttonToggle";
 import { BiEdit, BiXCircle } from "react-icons/bi";
 import Loading from "./Loading";
-import {useSelector} from "react-redux";
-import {selectCurrentUser} from "../slice/authSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {modifyUser, selectCurrentUser} from "../slice/authSlice";
+import {modifyCard, selectCurrentCard} from "../slice/cardSlice";
 
 export function Quiz() {
   const [correctOption = "", changeOption] = React.useState(undefined);
@@ -27,8 +28,8 @@ export function Quiz() {
   }, [correctOption]);
 
   const [cardNo, changeCard] = React.useState(1);
-  const [props] = useOutletContext();
-  const { _id, review } = props;
+  const cards = useSelector(selectCurrentCard);
+  const { _id, review = [] } = cards;
 
   const totalCards = review.length;
   const card = review[cardNo - 1];
@@ -66,11 +67,6 @@ export function Quiz() {
     }
 
     let cardsFinished = cardNo == review.length && correctOption;
-    // React.useEffect(()=>{
-    //   if(cardNo == review.length && correctOption && user != null){
-    //     updateUser({card_id:_id, email:user.email,type:"times-finished" })
-    //   }
-    // },[cardNo])
 
 
     return (
@@ -102,6 +98,7 @@ export function Quiz() {
 }
 
 function IndividualQuiz(props) {
+  const dispatch = useDispatch()
   const newOptionRef = React.useRef();
   const [editOptions, toggleOptions] = useButtonToggle();
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
@@ -119,12 +116,24 @@ function IndividualQuiz(props) {
       changeOption(true);
       selectedOption.classList.add("border-green");
       if(user != null){
-        updateUser({card_id:_id, email:user.email, type:"total-correct"})
+        let updateDetails = {card_id:_id, email:user.email, type:"total-correct"};
+        updateUser(updateDetails)
+          .then((response)=>{
+            if(response.data){
+              dispatch(modifyUser(updateDetails))
+            }
+          })
       }
 
     } else {
       if(user != null){
-        updateUser({card_id:_id, email:user.email, type:"total-incorrect"})
+        let updateDetails = {card_id:_id, email:user.email, type:"total-incorrect"};
+        updateUser(updateDetails)
+          .then((response)=>{
+            if(response.data){
+              dispatch(modifyUser(updateDetails))
+            }
+          })
       }
       changeOption(false);
       selectedOption.disabled = true;
@@ -136,8 +145,14 @@ function IndividualQuiz(props) {
     event.preventDefault();
     const option = newOptionRef.current.value;
     const cardId = id;
+    const updateDetails = { _id, cardId, option};
 
-    updateCard({ _id, cardId, option });
+    updateCard(updateDetails)
+      .then((response)=> {
+        if(response.data){
+        dispatch(modifyCard(updateDetails))
+       }
+      });
   };
 
   if(isLoading){

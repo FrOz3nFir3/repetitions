@@ -20,7 +20,7 @@ async function httpPatchUpdateCard(req, res) {
   try {
     const updatedCard = await updateCard(req.body);
 
-    return res.json(updatedCard);
+    return res.json({ok:true});
   } catch (error) {
     console.log(error);
     return res.status(400).json({ error });

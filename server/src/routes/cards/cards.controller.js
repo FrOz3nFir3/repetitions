@@ -3,6 +3,8 @@ const {
   createNewCard,
   getAllCards,
 } = require("../../models/cards/cards.model");
+const Card = require('../../models/cards/cards.mongo');
+const mongoose = require("mongoose");
 
 async function httpGetCardsByCategory(req, res) {
   const { category } = req.params;
@@ -14,7 +16,26 @@ async function httpGetCardsByCategory(req, res) {
     res.status(500).json({ error });
   }
 }
-
+async function httpPostCardsByIds(req, res) {
+  var { cardsIds } = req.body;
+  try {
+    const cards = await Card.find({
+      _id:{
+        $in: cardsIds
+      }
+    }, {
+      _id:0,
+      "main-topic":1,
+      "sub-topic":1,
+      category:1,
+      reviewLength: {$size:"$review"}
+    })
+    return res.json(cards);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(400).json({ error:error.message });
+  }
+}
 async function httpPostCreateNewCard(req, res) {
   const token = req.token;
 
@@ -47,4 +68,5 @@ module.exports = {
   httpGetCardsByCategory,
   httpPostCreateNewCard,
   httpGetAllCards,
+  httpPostCardsByIds
 };

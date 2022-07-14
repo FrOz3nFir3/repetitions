@@ -1,10 +1,13 @@
 import { usePatchUpdateCardMutation } from "../slice/apiSlice";
 import { useButtonToggle } from "../hooks/buttonToggle";
 import React from "react";
+import {modifyCard} from "../slice/cardSlice";
+import {useDispatch} from "react-redux";
 
 export function NewFlashcard(props) {
   const { _id } = props;
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
+  const dispatch = useDispatch()
 
   const [buttonClicked, toggleButton] = useButtonToggle();
   const questionRef = React.useRef();
@@ -15,7 +18,15 @@ export function NewFlashcard(props) {
 
     const question = questionRef.current.value;
     const answer = answerRef.current.value;
-    updateCard({ _id, question, answer });
+
+    const updateDetails = {_id, question, answer};
+
+    updateCard(updateDetails)
+      .then((response)=> {
+        if(response.data){
+          dispatch(modifyCard(updateDetails))
+        }
+      })
   };
 
   return (

@@ -1,9 +1,12 @@
 import { CardField } from "./CardField";
 import { Link, Outlet } from "react-router-dom";
 import React from "react";
+import {useSelector} from "react-redux";
+import {selectCurrentCard} from "../slice/cardSlice";
 
 function FullCard(props) {
-  const { card } = props;
+  const card = useSelector(selectCurrentCard);
+  console.log(card)
 
   const {
     _id,
@@ -35,7 +38,7 @@ function FullCard(props) {
         </Link>
       </div>
 
-      <Outlet context={[card]} />
+      <Outlet />
     </div>
   );
 }
