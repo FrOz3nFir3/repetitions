@@ -1,7 +1,7 @@
 import React from "react";
 import { usePostLoginUserMutation } from "../slice/apiSlice";
 import { useDispatch } from "react-redux";
-import { updateUser } from "../slice/authSlice";
+import { initialUser } from "../slice/authSlice";
 import Loading from "./Loading";
 
 function Login() {
@@ -11,7 +11,9 @@ function Login() {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    dispatch(updateUser(data));
+    if(data != null){
+      dispatch(initialUser(data));
+    }
   }, [data]);
 
   const handleSubmit = (event) => {

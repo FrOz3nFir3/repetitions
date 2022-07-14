@@ -6,7 +6,7 @@ import {selectCurrentCard} from "../slice/cardSlice";
 
 function FullCard(props) {
   const card = useSelector(selectCurrentCard);
-  console.log(card)
+
 
   const {
     _id,

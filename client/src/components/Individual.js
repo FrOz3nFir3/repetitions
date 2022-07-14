@@ -10,7 +10,7 @@ function Individual(props) {
   const params = useParams();
   const { data: card = {}, isFetching } = useGetIndividualCardQuery(params.id);
 
-  console.log(params.id)
+
   const dispatch = useDispatch();
   React.useEffect(() => {
     dispatch(initialCard(card));

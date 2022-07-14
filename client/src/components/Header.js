@@ -13,7 +13,6 @@ function Header(props) {
   }, [existingUser]);
 
   const user = useSelector(selectCurrentUser);
-  console.log('user changed', user)
 
   return (
     <ul className="header flex">

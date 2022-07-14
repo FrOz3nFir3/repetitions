@@ -1,6 +1,6 @@
 import React from "react";
 import { usePostLogoutUserMutation } from "../slice/apiSlice";
-import { updateUser } from "../slice/authSlice";
+import { initialUser } from "../slice/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { gapi } from "gapi-script";
 
@@ -14,7 +14,7 @@ function Logout(props) {
   }, []);
   const dispatch = useDispatch();
   React.useEffect(() => {
-    dispatch(updateUser({ user: null }));
+    dispatch(initialUser({ user: null }));
   }, []);
 
   return (

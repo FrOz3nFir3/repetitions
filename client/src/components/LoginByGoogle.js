@@ -1,7 +1,7 @@
 import React from "react";
 import { usePostGoogleLoginMutation } from "../slice/apiSlice";
 import { useDispatch } from "react-redux";
-import { updateUser } from "../slice/authSlice";
+import { initialUser } from "../slice/authSlice";
 import { GoogleLogin } from "react-google-login";
 import Loading from "./Loading";
 
@@ -13,7 +13,9 @@ function LoginByGoogle(props) {
 
   const dispatch = useDispatch();
   React.useEffect(() => {
-    dispatch(updateUser(data));
+    if(data != null){
+      dispatch(initialUser(data));
+    }
   }, [data]);
 
   if (isFetching) {
