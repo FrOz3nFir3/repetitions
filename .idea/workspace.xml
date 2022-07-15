@@ -3,13 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2d001c86-b575-4a53-808c-157d2add6fff" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/FullCard.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/FullCard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/Header.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Header.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/Individual.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Individual.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/Login.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Login.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/LoginByGoogle.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/LoginByGoogle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/Logout.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Logout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/components/Register.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/components/Register.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/slice/apiSlice.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/slice/apiSlice.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +65,7 @@
       <recent name="D:\Video Courses\Repetitions.tech\backend\src\models\cards" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.deploy">
+  <component name="RunManager" selected="npm.dev">
     <configuration name="deploy" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
       <command value="run" />
@@ -97,8 +92,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.deploy" />
         <item itemvalue="npm.dev" />
+        <item itemvalue="npm.deploy" />
       </list>
     </recent_temporary>
   </component>
@@ -269,7 +264,9 @@
       <workItem from="1657735327807" duration="1164000" />
       <workItem from="1657780111905" duration="287000" />
       <workItem from="1657780644333" duration="4832000" />
-      <workItem from="1657785569276" duration="870000" />
+      <workItem from="1657785569276" duration="1229000" />
+      <workItem from="1657810481408" duration="595000" />
+      <workItem from="1657866724918" duration="4712000" />
     </task>
     <servers />
   </component>
