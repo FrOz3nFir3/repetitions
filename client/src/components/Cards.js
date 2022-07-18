@@ -20,7 +20,7 @@ function Cards(props) {
   );
 }
 
-function CardsBySearch(props) {
+export function CardsBySearch(props) {
   const [searchValue, changeSearch] = React.useState("");
   const filterBySearch = (event) =>
     changeSearch(event.target.value.toLowerCase());
@@ -65,14 +65,16 @@ function cardDetails(data, index) {
     ["main-topic"]: mainTopic,
     ["sub-topic"]: subTopic,
     review,
+    reviewLength = 0
   } = data;
+
   return (
     <li className="bg-blue-france" key={index}>
       <Link to={`/card/${_id}`}>
         <h2>
           {mainTopic.toUpperCase()}: {subTopic.toUpperCase()}
         </h2>
-        <p>{review.length} cards</p>
+        <p>{review && review.length || reviewLength} cards</p>
       </Link>
     </li>
   );

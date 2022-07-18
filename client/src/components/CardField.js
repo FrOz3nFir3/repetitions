@@ -68,12 +68,21 @@ export function CardField(props) {
                 required
               />
             ) : (
-              <input
-                type="text"
-                value={inputValue}
-                onChange={changeInputValue}
-                required
-              />
+              text == "question" || text == "answer" ? (
+                <textarea
+                  type="text"
+                  value={inputValue}
+                  onChange={changeInputValue}
+                  required
+                />
+                ) :
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={changeInputValue}
+                  required
+                />
+
             )}
             <BiCheckSquare size={40} onClick={handleSubmit} />
           </form>

@@ -1,11 +1,25 @@
 import React, { useState } from "react";
-import { useGetAllCardsQuery } from "../slice/apiSlice";
+import {useGetAllCardsQuery, usePostCardsByIdsMutation} from "../slice/apiSlice";
 import CreatableSelect from "react-select/creatable";
 import { Outlet, useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Loading from "./Loading";
+import {useSelector} from "react-redux";
+import {selectCurrentUser} from "../slice/authSlice";
+import {cardDetails, CardsBySearch} from "./Cards";
 
 function Home(props) {
+  const user = useSelector(selectCurrentUser);
+
+  const cardsIds = user && user.studying.map(({card_id})=>card_id);
+  const [getCards, { data:studyingCards = [], isLoading, error }] = usePostCardsByIdsMutation();
+
+  React.useEffect(()=>{
+    if(user != null) {
+      getCards({cardsIds})
+    }
+  }, [user])
+
   const navigate = useNavigate();
   const { data: allCards = [], isFetching } = useGetAllCardsQuery();
   const options = allCards.map(createDropDownOptions);
@@ -38,8 +52,14 @@ function Home(props) {
           placeholder="Select / Create a Category"
           value={defaultCategory}
         />
-
         <Outlet />
+        {user &&
+          <div>
+            <h3>Previously Studied Cards: </h3>
+            <CardsBySearch cards={studyingCards}/>
+          </div>
+        }
+
       </div>
     </>
   );

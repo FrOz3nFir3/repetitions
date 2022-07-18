@@ -24,7 +24,6 @@ async function httpPostCardsByIds(req, res) {
         $in: cardsIds
       }
     }, {
-      _id:0,
       "main-topic":1,
       "sub-topic":1,
       category:1,

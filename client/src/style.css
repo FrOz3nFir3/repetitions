@@ -251,7 +251,7 @@ margin-bottom: 0;
     padding:.3em;
 }
 
-.card-field input {
+.card-field input, .card-field textarea {
     width: 100%;
     font-size: 1.2em;
     padding: .3em;
