@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import {useGetAllCardsQuery, usePostCardsByIdsMutation} from "../slice/apiSlice";
+import {useGetAllCardsQuery, usePostCardsByIdsMutation} from "../../api/apiSlice";
 import CreatableSelect from "react-select/creatable";
 import { Outlet, useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import Loading from "./Loading";
+import Loading from "../../components/common/Loading";
 import {useSelector} from "react-redux";
-import {selectCurrentUser} from "../slice/authSlice";
-import {cardDetails, CardsBySearch} from "./Cards";
+import {selectCurrentUser} from "../authentication/authSlice";
+import {cardDetails, CardsBySearch} from "../cards/Cards";
 
 function Home(props) {
   const user = useSelector(selectCurrentUser);

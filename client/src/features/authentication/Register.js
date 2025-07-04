@@ -1,8 +1,8 @@
 import React from "react";
-import { usePostRegisterUserMutation } from "../slice/apiSlice";
+import { usePostRegisterUserMutation } from "../../api/apiSlice";
 import { useDispatch } from "react-redux";
-import { initialUser } from "../slice/authSlice";
-import Loading from "./Loading";
+import { initialUser } from "./authSlice";
+import Loading from "../../components/common/Loading";
 
 function Register() {
   const [registerUser, { data, isLoading, error }] =

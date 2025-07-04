@@ -1,9 +1,9 @@
 import React from "react";
-import { usePostGoogleLoginMutation } from "../slice/apiSlice";
+import { usePostGoogleLoginMutation } from "../../api/apiSlice";
 import { useDispatch } from "react-redux";
-import { initialUser } from "../slice/authSlice";
+import { initialUser } from "./authSlice";
 import { GoogleLogin } from "react-google-login";
-import Loading from "./Loading";
+import Loading from "../../components/common/Loading";
 
 const clientId =
   "650317328714-q5a463tj89sgofpglmp6p4m9697tmcqk.apps.googleusercontent.com";

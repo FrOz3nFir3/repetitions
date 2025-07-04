@@ -1,9 +1,9 @@
-import { usePatchUpdateCardMutation } from "../slice/apiSlice";
-import { useButtonToggle } from "../hooks/buttonToggle";
+import { usePatchUpdateCardMutation } from "../../api/apiSlice";
+import { useButtonToggle } from "../../hooks/buttonToggle";
 import React from "react";
-import Loading from "./Loading";
+import Loading from "../../components/common/Loading";
 import { BiCheckSquare, BiEdit, BiXCircle } from "react-icons/bi";
-import {modifyCard} from "../slice/cardSlice";
+import {modifyCard} from "./cardSlice";
 import {useDispatch} from "react-redux";
 
 export function CardField(props) {

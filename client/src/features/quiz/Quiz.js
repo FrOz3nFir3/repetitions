@@ -1,14 +1,14 @@
 import React, { useCallback } from "react";
-import {usePatchUpdateCardMutation, usePatchUpdateUserMutation} from "../slice/apiSlice";
-import { NewFlashcard } from "./NewFlashcard";
-import { CardField } from "./CardField";
+import {usePatchUpdateCardMutation, usePatchUpdateUserMutation} from "../../api/apiSlice";
+import { NewFlashcard } from "../cards/NewFlashcard";
+import { CardField } from "../cards/CardField";
 import { useOutletContext } from "react-router-dom";
-import { useButtonToggle } from "../hooks/buttonToggle";
+import { useButtonToggle } from "../../hooks/buttonToggle";
 import { BiEdit, BiXCircle } from "react-icons/bi";
-import Loading from "./Loading";
+import Loading from "../../components/common/Loading";
 import {useDispatch, useSelector} from "react-redux";
-import {modifyUser, selectCurrentUser} from "../slice/authSlice";
-import {modifyCard, selectCurrentCard} from "../slice/cardSlice";
+import {modifyUser, selectCurrentUser} from "../authentication/authSlice";
+import {modifyCard, selectCurrentCard} from "../cards/cardSlice";
 
 export function Quiz() {
   const [correctOption = "", changeOption] = React.useState(undefined);

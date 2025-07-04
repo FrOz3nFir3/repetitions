@@ -1,8 +1,8 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../slice/authSlice";
+import { selectCurrentUser } from "../authentication/authSlice";
 import {Link} from "react-router-dom";
-import {usePostCardsByIdsMutation} from "../slice/apiSlice";
+import {usePostCardsByIdsMutation} from "../../api/apiSlice";
 
 function Profile(props) {
   const user = useSelector(selectCurrentUser);

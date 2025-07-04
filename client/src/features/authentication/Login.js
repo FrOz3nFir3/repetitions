@@ -1,8 +1,8 @@
 import React from "react";
-import { usePostLoginUserMutation } from "../slice/apiSlice";
+import { usePostLoginUserMutation } from "../../api/apiSlice";
 import { useDispatch } from "react-redux";
-import { initialUser } from "../slice/authSlice";
-import Loading from "./Loading";
+import { initialUser } from "./authSlice";
+import Loading from "../../components/common/Loading";
 
 function Login() {
   const [loginUser, { data, isLoading, error }] = usePostLoginUserMutation();

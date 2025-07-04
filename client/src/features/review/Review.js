@@ -1,12 +1,12 @@
 import React from "react";
 import { FlashcardArray } from "react-quizlet-flashcard";
-import { NewFlashcard } from "./NewFlashcard";
-import { CardField } from "./CardField";
+import { NewFlashcard } from "../cards/NewFlashcard";
+import { CardField } from "../cards/CardField";
 import { useOutletContext } from "react-router-dom";
-import { useButtonToggle } from "../hooks/buttonToggle";
+import { useButtonToggle } from "../../hooks/buttonToggle";
 import { BiEdit, BiXCircle } from "react-icons/bi";
 import {useSelector} from "react-redux";
-import {selectCurrentCard} from "../slice/cardSlice";
+import {selectCurrentCard} from "../cards/cardSlice";
 
 export function Review() {
   const [cardId, changeCardId] = React.useState(1);

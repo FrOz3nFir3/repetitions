@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useGetAuthDetailsQuery } from "../slice/apiSlice";
-import { selectCurrentUser, initialUser } from "../slice/authSlice";
+import { useGetAuthDetailsQuery } from "../../api/apiSlice";
+import {
+  selectCurrentUser,
+  initialUser,
+} from "../../features/authentication/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 function Header(props) {
@@ -9,7 +12,7 @@ function Header(props) {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-      dispatch(initialUser(existingUser));
+    dispatch(initialUser(existingUser));
   }, [existingUser]);
 
   const user = useSelector(selectCurrentUser);

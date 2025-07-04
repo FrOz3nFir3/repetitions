@@ -1,7 +1,7 @@
-import { usePatchUpdateCardMutation } from "../slice/apiSlice";
-import { useButtonToggle } from "../hooks/buttonToggle";
+import { usePatchUpdateCardMutation } from "../../api/apiSlice";
+import { useButtonToggle } from "../../hooks/buttonToggle";
 import React from "react";
-import {modifyCard} from "../slice/cardSlice";
+import {modifyCard} from "./cardSlice";
 import {useDispatch} from "react-redux";
 
 export function NewFlashcard(props) {

@@ -1,9 +1,9 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useGetIndividualCardQuery } from "../slice/apiSlice";
-import Loading from "./Loading";
+import { useGetIndividualCardQuery } from "../../api/apiSlice";
+import Loading from "../../components/common/Loading";
 import FullCard from "./FullCard";
-import cardSlice, {initialCard} from "../slice/cardSlice";
+import {initialCard} from "./cardSlice";
 import {useDispatch} from "react-redux";
 
 function Individual(props) {

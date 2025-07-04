@@ -1,8 +1,8 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGetCardsByCategoryQuery } from "../slice/apiSlice";
+import { useGetCardsByCategoryQuery } from "../../api/apiSlice";
 import { NewCard } from "./NewCard";
-import Loading from "./Loading";
+import Loading from "../../components/common/Loading";
 
 function Cards(props) {
   const { name: category } = useParams();

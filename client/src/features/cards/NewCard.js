@@ -1,7 +1,7 @@
-import { useButtonToggle } from "../hooks/buttonToggle";
-import { usePostCreateNewCardMutation } from "../slice/apiSlice";
+import { useButtonToggle } from "../../hooks/buttonToggle";
+import { usePostCreateNewCardMutation } from "../../api/apiSlice";
 import React from "react";
-import Loading from "./Loading";
+import Loading from "../../components/common/Loading";
 
 export function NewCard(props) {
   const { newCard } = props;

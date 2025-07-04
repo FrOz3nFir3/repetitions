@@ -1,6 +1,6 @@
 import React from "react";
-import { usePostLogoutUserMutation } from "../slice/apiSlice";
-import { initialUser } from "../slice/authSlice";
+import { usePostLogoutUserMutation } from "../../api/apiSlice";
+import { initialUser } from "./authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { gapi } from "gapi-script";
 
