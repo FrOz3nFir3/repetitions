@@ -10,13 +10,15 @@ import Cards from "../features/cards/Cards";
 import Authentication from "../features/authentication/Authentication";
 import Logout from "../features/authentication/Logout";
 import Profile from "../features/profile/Profile";
+import LandingPage from "../features/home/LandingPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Header />
       <Routes>
-        <Route exact path="/" element={<Home />}>
+        <Route exact path="/" element={<LandingPage />} />
+        <Route path="/home" element={<Home />}>
           <Route path="category/:name" element={<Cards />} />
         </Route>
 

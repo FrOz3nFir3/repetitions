@@ -320,3 +320,22 @@ input[type="submit"]{
 .profile-details > * + *{
     padding: .5em;
 }
+
+.landing-page .hero-section {
+    padding: 4rem 0;
+}
+
+.landing-page .why-section,
+.landing-page .benefits-section,
+.landing-page .how-it-works-section {
+    padding: 2rem 0;
+}
+
+.landing-page .benefit-card,
+.landing-page .step-card {
+    background: var(--clr-neutral-100);
+    color: var(--clr-neutral-900);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+}
