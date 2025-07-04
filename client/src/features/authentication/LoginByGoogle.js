@@ -2,18 +2,20 @@ import React from "react";
 import { usePostGoogleLoginMutation } from "../../api/apiSlice";
 import { useDispatch } from "react-redux";
 import { initialUser } from "./authSlice";
-import { GoogleLogin } from "react-google-login";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import Loading from "../../components/common/Loading";
+import { jwtDecode } from "jwt-decode";
 
 const clientId =
   "650317328714-q5a463tj89sgofpglmp6p4m9697tmcqk.apps.googleusercontent.com";
+
 function LoginByGoogle(props) {
   const [loginWithGoogle, { isFetching, error, data }] =
     usePostGoogleLoginMutation();
 
   const dispatch = useDispatch();
   React.useEffect(() => {
-    if(data != null){
+    if (data != null) {
       dispatch(initialUser(data));
     }
   }, [data]);
@@ -23,25 +25,22 @@ function LoginByGoogle(props) {
   }
 
   return (
-    <div>
-      {error && <div className="bg-error"> {error.data.error}</div>}
-      <GoogleLogin
-        clientId={clientId}
-        buttonText="Login With Google"
-        onSuccess={successfulLogin}
-        onFailure={unsuccessfulLogin}
-        cookiePolicy={"single_host_origin"}
-      />
-    </div>
+    <GoogleOAuthProvider clientId={clientId}>
+      <div className="flex items-center justify-center">
+        {error && <div className="bg-error"> {error.data.error}</div>}
+        <GoogleLogin onSuccess={successfulLogin} onError={unsuccessfulLogin} />
+      </div>
+    </GoogleOAuthProvider>
   );
 
   // hoisting
-  function successfulLogin(data) {
-    const email = data.profileObj.email;
+  function successfulLogin(credentialResponse) {
+    const decoded = jwtDecode(credentialResponse.credential);
+    const email = decoded.email;
     loginWithGoogle({ email });
   }
-  function unsuccessfulLogin(data) {
-    loginWithGoogle(data);
+  function unsuccessfulLogin() {
+    console.log("Login Failed");
   }
 }
 

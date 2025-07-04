@@ -1,8 +1,7 @@
 import React from "react";
-import { FlashcardArray } from "react-quizlet-flashcard";
+import { FlashcardArray } from "../../components/common/Flashcard";
 import { NewFlashcard } from "../cards/NewFlashcard";
 import { CardField } from "../cards/CardField";
-import { useOutletContext } from "react-router-dom";
 import { useButtonToggle } from "../../hooks/buttonToggle";
 import { BiEdit, BiXCircle } from "react-icons/bi";
 import {useSelector} from "react-redux";
