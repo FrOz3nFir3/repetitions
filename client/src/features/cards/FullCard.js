@@ -1,12 +1,17 @@
-import { CardField } from "./CardField";
-import { Link, Outlet } from "react-router-dom";
 import React from "react";
-import {useSelector} from "react-redux";
-import {selectCurrentCard} from "./cardSlice";
+import { useSelector } from "react-redux";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { selectCurrentCard } from "./cardSlice";
+import { CardField } from "./CardField";
+import { BookOpenIcon, PencilSquareIcon, CogIcon } from "@heroicons/react/24/outline";
 
-function FullCard(props) {
+function FullCard() {
   const card = useSelector(selectCurrentCard);
+  const location = useLocation();
 
+  if (!card) {
+    return null; // Or a loading state
+  }
 
   const {
     _id,
@@ -16,30 +21,67 @@ function FullCard(props) {
     category,
   } = card;
 
+  const isDefaultView = location.pathname === `/card/${_id}`;
+
   return (
-    <div className="container flow-content">
-      <div className="individual-card grid-two-columns">
-        <CardField _id={_id} text="main-topic" value={mainTopic} />
+    <div className="bg-gray-100 min-h-screen">
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">{mainTopic}</h1>
+          <p className="mt-2 text-2xl text-indigo-600 font-semibold">{subTopic}</p>
+        </div>
 
-        <CardField _id={_id} text="sub-topic" value={subTopic} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Card Details & Actions */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white p-6 rounded-xl shadow-md">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Card Details</h2>
+              <CardField _id={_id} text="main-topic" value={mainTopic} />
+              <CardField _id={_id} text="sub-topic" value={subTopic} />
+              <CardField _id={_id} text="category" value={category} />
+              <CardField _id={_id} text="description" value={description} />
+            </div>
+            <div className="bg-white p-6 rounded-xl shadow-md flex flex-col space-y-4">
+                <Link
+                  to="review"
+                  className="w-full text-center rounded-lg bg-indigo-600 px-5 py-3 text-lg font-semibold text-white shadow-sm hover:bg-indigo-700 flex items-center justify-center"
+                >
+                  <BookOpenIcon className="h-6 w-6 mr-2" />
+                  Review
+                </Link>
+                <Link
+                  to="quiz"
+                  className="w-full text-center rounded-lg bg-purple-600 px-5 py-3 text-lg font-semibold text-white shadow-sm hover:bg-purple-700 flex items-center justify-center"
+                >
+                  <PencilSquareIcon className="h-6 w-6 mr-2" />
+                  Quiz
+                </Link>
+                 <Link
+                  to="edit"
+                  className="w-full text-center rounded-lg bg-gray-600 px-5 py-3 text-lg font-semibold text-white shadow-sm hover:bg-gray-700 flex items-center justify-center"
+                >
+                  <CogIcon className="h-6 w-6 mr-2" />
+                  Manage Flashcards
+                </Link>
+            </div>
+          </div>
 
-        <CardField _id={_id} text="category" value={category} />
-
-        <CardField _id={_id} text="description" value={description} />
+          {/* Right Column: Content */}
+          <div className="lg:col-span-2">
+            {isDefaultView ? (
+              <div className="text-center py-10 bg-white rounded-xl shadow-md">
+                <h3 className="text-lg font-medium text-gray-900">Select an action</h3>
+                <p className="mt-1 text-sm text-gray-500">Choose Review, Quiz, or Manage Flashcards to get started.</p>
+              </div>
+            ) : (
+              <Outlet />
+            )}
+          </div>
+        </div>
       </div>
-
-      <div style={{ textAlign: "center" }}>
-        <Link to={`review`}>
-          <button className="btn">Review</button>
-        </Link>
-
-        <Link to={`quiz`}>
-          <button className="btn">Quiz</button>
-        </Link>
-      </div>
-
-      <Outlet />
     </div>
   );
 }
+
 export default FullCard;

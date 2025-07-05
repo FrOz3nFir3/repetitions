@@ -1,229 +1,149 @@
-import React, { useCallback } from "react";
-import {usePatchUpdateCardMutation, usePatchUpdateUserMutation} from "../../api/apiSlice";
-import { NewFlashcard } from "../cards/NewFlashcard";
-import { CardField } from "../cards/CardField";
-import { useOutletContext } from "react-router-dom";
-import { useButtonToggle } from "../../hooks/buttonToggle";
-import { BiEdit, BiXCircle } from "react-icons/bi";
-import Loading from "../../components/common/Loading";
-import {useDispatch, useSelector} from "react-redux";
-import {modifyUser, selectCurrentUser} from "../authentication/authSlice";
-import {modifyCard, selectCurrentCard} from "../cards/cardSlice";
+import React, { useState, useEffect, useMemo } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { usePatchUpdateUserMutation } from "../../api/apiSlice";
+import { selectCurrentCard } from "../cards/cardSlice";
+import { selectCurrentUser, modifyUser } from "../authentication/authSlice";
+import { CheckCircleIcon, XCircleIcon, LightBulbIcon } from "@heroicons/react/24/solid";
 
 export function Quiz() {
-  const [correctOption = "", changeOption] = React.useState(undefined);
-  const [autoNext, toggleAutoNext] = useButtonToggle();
-  const autoNextCardRef = React.useRef();
+  const dispatch = useDispatch();
+  const card = useSelector(selectCurrentCard);
+  const user = useSelector(selectCurrentUser);
+  const { _id, review = [] } = card;
+  
+  const [updateUser] = usePatchUpdateUserMutation();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [score, setScore] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
 
-  React.useEffect(() => {
-    if (autoNext && correctOption && cardNo < review.length) {
-      autoNextCardRef.current = setTimeout(() => {
-        nextCard();
-      }, 1000);
+  const currentQuestion = review[currentQuestionIndex];
+
+  // Memoize the shuffled options so they don't re-shuffle on every render
+  const shuffledOptions = useMemo(() => {
+    if (!currentQuestion) return [];
+    const options = [
+      currentQuestion.answer,
+      ...(currentQuestion.options || []).filter(opt => opt !== currentQuestion.answer)
+    ];
+    return options.sort(() => Math.random() - 0.5);
+  }, [currentQuestion]);
+
+
+  useEffect(() => {
+    if (selectedAnswer) {
+      const timer = setTimeout(() => {
+        if (currentQuestionIndex < review.length - 1) {
+          setCurrentQuestionIndex(currentQuestionIndex + 1);
+          setSelectedAnswer(null);
+        } else {
+          setIsFinished(true);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
     }
+  }, [selectedAnswer, currentQuestionIndex, review.length]);
 
-    return () => {
-      window.clearTimeout(autoNextCardRef.current);
-    };
-  }, [correctOption]);
+  const handleAnswerSelect = (option) => {
+    if (selectedAnswer) return;
 
-  const [cardNo, changeCard] = React.useState(1);
-  const cards = useSelector(selectCurrentCard);
-  const { _id, review = [] } = cards;
+    const isCorrect = option === currentQuestion.answer;
+    setSelectedAnswer({ option, isCorrect });
 
-  const totalCards = review.length;
-  const card = review[cardNo - 1];
-
-  const nextCard = () => {
-    changeOption("");
-    changeCard((cardNo) => {
-      let atLastCard = cardNo == totalCards;
-      if (atLastCard) {
-        return cardNo;
+    if (isCorrect) {
+      setScore(score + 1);
+      if (user) {
+        const updateDetails = { card_id: _id, email: user.email, type: "total-correct" };
+        updateUser(updateDetails).then(res => dispatch(modifyUser(updateDetails)));
       }
-      return cardNo + 1;
-    });
+    } else {
+      if (user) {
+        const updateDetails = { card_id: _id, email: user.email, type: "total-incorrect" };
+        updateUser(updateDetails).then(res => dispatch(modifyUser(updateDetails)));
+      }
+    }
   };
 
-  return (
-    <div className="quiz-container">
-      <IndividualQuiz
-        card={card}
-        _id={_id}
-        correctOption={correctOption}
-        changeOption={changeOption}
-        currentStatus={renderCurrentQuizStatus}
-      />
+  const restartQuiz = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setScore(0);
+    setIsFinished(false);
+  };
 
-      <NewFlashcard _id={_id} />
+  if (review.length === 0) {
+    return (
+      <div className="text-center py-10 bg-white rounded-xl shadow-md">
+        <h3 className="text-lg font-medium text-gray-900">No flashcards for a quiz!</h3>
+        <p className="mt-1 text-sm text-gray-500">Add some flashcards to start a quiz.</p>
+      </div>
+    );
+  }
+
+  if (isFinished) {
+    return (
+      <div className="text-center py-10 bg-white rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold text-gray-800">Quiz Finished!</h2>
+        <p className="mt-4 text-xl text-gray-600">
+          Your score: <span className="font-bold text-indigo-600">{score}</span> / {review.length}
+        </p>
+        <button
+          onClick={restartQuiz}
+          className="mt-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+        >
+          Restart Quiz
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-md">
+      <div className="text-center mb-4">
+        <h2 className="text-3xl font-bold text-gray-800">Quiz Time!</h2>
+        <p className="mt-2 text-md text-gray-600">Test your knowledge by selecting the correct answer.</p>
+      </div>
+      <div className="mb-4">
+        <p className="text-sm text-gray-500">Question {currentQuestionIndex + 1} of {review.length}</p>
+        <h2 className="text-2xl font-bold text-gray-800 mt-1">{currentQuestion.question}</h2>
+      </div>
+      <div className="space-y-4">
+        {shuffledOptions.map((option, index) => {
+          const isSelected = selectedAnswer?.option === option;
+          const isCorrect = currentQuestion.answer === option;
+          
+          let buttonClass = "w-full text-left p-4 rounded-lg border-2 transition-colors ";
+          if (isSelected) {
+            buttonClass += selectedAnswer.isCorrect ? "bg-green-100 border-green-500" : "bg-red-100 border-red-500";
+          } else if (selectedAnswer && isCorrect) {
+            // Highlight the correct answer if a wrong one was chosen
+            buttonClass += "bg-green-100 border-green-500";
+          }
+          else {
+            buttonClass += "bg-gray-50 hover:bg-gray-100 border-gray-200";
+          }
+
+          return (
+            <button
+              key={index}
+              onClick={() => handleAnswerSelect(option)}
+              disabled={!!selectedAnswer}
+              className={buttonClass}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">{option}</span>
+                {isSelected && (
+                  isCorrect ? <CheckCircleIcon className="h-6 w-6 text-green-500" /> : <XCircleIcon className="h-6 w-6 text-red-500" />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+       <div className="text-center text-gray-500 mt-4 text-sm flex items-center justify-center">
+        <LightBulbIcon className="h-5 w-5 mr-2" />
+        Select an option to see if you are correct.
+      </div>
     </div>
   );
-
-  function renderCurrentQuizStatus(updateUser, user) {
-
-
-    if (totalCards == 0) {
-      return null;
-    }
-
-    let cardsFinished = cardNo == review.length && correctOption;
-
-
-    return (
-      <div className="flex flex-center-all">
-        <p>
-          {cardNo}/{totalCards}
-        </p>
-        {cardsFinished ? (
-          <h2>Congrats you just finished</h2>
-        ) : (
-          <>
-            <button className="btn bg-blue-france" onClick={nextCard}>
-              Next
-            </button>
-            {autoNext ? (
-              <button className="btn bg-blue-france" onClick={toggleAutoNext}>
-                Turn Off Auto Next
-              </button>
-            ) : (
-              <button className="btn" onClick={toggleAutoNext}>
-                Turn On Auto Next
-              </button>
-            )}
-          </>
-        )}
-      </div>
-    );
-  }
-}
-
-function IndividualQuiz(props) {
-  const dispatch = useDispatch()
-  const newOptionRef = React.useRef();
-  const [editOptions, toggleOptions] = useButtonToggle();
-  const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
-  const [updateUser, ] = usePatchUpdateUserMutation();
-  const user =  useSelector(selectCurrentUser)
-
-  const { _id, card, correctOption, changeOption, currentStatus } = props;
-  if (card == null) return null;
-
-  const { cardId: id, question, answer, minimumOptions, options } = card;
-
-  const changeSelectedOption = (event) => {
-    let selectedOption = event.target;
-    if (selectedOption.innerText == answer) {
-      changeOption(true);
-      selectedOption.classList.add("border-green");
-      if(user != null){
-        let updateDetails = {card_id:_id, email:user.email, type:"total-correct"};
-        updateUser(updateDetails)
-          .then((response)=>{
-            if(response.data){
-              dispatch(modifyUser(updateDetails))
-            }
-          })
-      }
-
-    } else {
-      if(user != null){
-        let updateDetails = {card_id:_id, email:user.email, type:"total-incorrect"};
-        updateUser(updateDetails)
-          .then((response)=>{
-            if(response.data){
-              dispatch(modifyUser(updateDetails))
-            }
-          })
-      }
-      changeOption(false);
-      selectedOption.disabled = true;
-      selectedOption.classList.add("border-red");
-    }
-  };
-
-  const addNewOption = (event) => {
-    event.preventDefault();
-    const option = newOptionRef.current.value;
-    const cardId = id;
-    const updateDetails = { _id, cardId, option};
-
-    updateCard(updateDetails)
-      .then((response)=> {
-        if(response.data){
-        dispatch(modifyCard(updateDetails))
-       }
-      });
-  };
-
-  if(isLoading){
-    return <Loading/>
-  }
-
-  return (
-    <>
-      {typeof correctOption == "boolean" ? (
-        correctOption ? (
-          <p>Correct!</p>
-        ) : (
-          <p>Incorrect!</p>
-        )
-      ) : null}
-      <h2>{question}</h2>
-      <ul className="quiz-options">{options.map(createOptions)}</ul>
-
-      {options.length < minimumOptions ? (
-        <form className="new-option" onSubmit={addNewOption}>
-          <input type="text" ref={newOptionRef} required />
-          <input
-            className="btn bg-blue-france"
-            type="submit"
-            value="Add Option"
-          />
-        </form>
-      ) : null}
-
-      {currentStatus.call(null, updateUser, user)}
-
-      <div className="flow-content">
-        <CardField
-          _id={_id}
-          text="minimumOptions"
-          value={minimumOptions}
-          cardId={id}
-        />
-        <h2 className="align-svg bg-blue-france">
-          Options
-          {editOptions ? (
-            <BiXCircle size={30} onClick={toggleOptions} />
-          ) : (
-            <BiEdit size={30} onClick={toggleOptions} />
-          )}
-        </h2>
-        <div className="flex-col">
-          {editOptions ? options.map(optionsField) : null}
-        </div>
-      </div>
-    </>
-  );
-
-  // hositing
-  function createOptions(value, index) {
-    return (
-      <li key={value} onClick={changeSelectedOption}>
-        {value}
-      </li>
-    );
-  }
-  function optionsField(value, index) {
-    return (
-      <CardField
-        key={`${value}-${index}`}
-        _id={_id}
-        text="option"
-        value={value}
-        optionIndex={index}
-        cardId={id}
-      />
-    );
-  }
 }

@@ -45,6 +45,7 @@ async function updateCard(details) {
     option,
     question,
     answer,
+    deleteCard,
     ...otherDetails
   } = details;
 
@@ -73,6 +74,8 @@ async function updateCard(details) {
       } else if (minimumOptions) {
         let changeOption = `${review}.minimumOptions`;
         cardUpdate = { $set: { [changeOption]: Number(minimumOptions) } };
+      } else if (deleteCard) {
+        cardUpdate = { $pull: { review: { cardId } } };
       }
       console.log(cardUpdate);
       card = await Card.findOneAndUpdate({ _id }, { ...cardUpdate });
