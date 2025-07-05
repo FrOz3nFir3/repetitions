@@ -34,7 +34,8 @@ app.use(cookieParser(cookieSecret));
 app.use("/api", apiRouter);
 
 // serving the client here
-app.get("/*", (req, res) => {
+// allRoutes is the param name given in express 5
+app.get("/*allRoutes", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 

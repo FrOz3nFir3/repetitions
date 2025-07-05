@@ -16,7 +16,8 @@ function getToken(token = "") {
     let decoded = jwt.verify(token, JWT_SECRET);
     return decoded;
   } catch (e) {
-    console.log(e);
+    // stopping log temporary
+    // console.log(e);
     return null;
   }
 }

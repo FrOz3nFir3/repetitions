@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
+const dns = require("node:dns/promises");
+// used to solve the mongodb connection issue with DNS
+dns.setServers(["1.1.1.1"]);
 
-require("dotenv").config({path:"../.env"});
+require("dotenv").config({ path: "../.env" });
 
 // Update below to match your own MongoDB connection string.
 const MONGO_URI = process.env.MONGO_URI;
