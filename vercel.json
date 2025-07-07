@@ -12,6 +12,5 @@
       "dest": "server/src/server.js"
     }
   ],
-  "installCommand": "npm run install-all",
-  "buildCommand": "npm run client"
+  "buildCommand": "npm run install-deploy"
 }

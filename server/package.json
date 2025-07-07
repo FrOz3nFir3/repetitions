@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "postinstall": "cd ../client && npm install && npm run build",
     "start": "node src/server.js",
     "watch": "nodemon src/server.js",
     "test": "jest test"
@@ -19,7 +20,8 @@
     "email-deep-validator": "^3.3.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.1"
+    "mongoose": "^8.16.1",
+    "repetitions.tech": "file:.."
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
