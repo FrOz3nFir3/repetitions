@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "full stack project",
   "scripts": {
-    "postinstall": "npm install --prefix server && npm install --dev --prefix client",
+    "install-all": "npm install && npm run client-install && npm run server-install",
+    "client-install": "npm install --prefix ./client",
+    "server-install": "npm install --prefix ./server",
     "server": "npm run start --prefix server",
     "client": "npm run build --prefix client",
     "server-dev": "npm run watch --prefix server",
