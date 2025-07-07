@@ -4,12 +4,13 @@ const path = require("path");
 const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
+const { accessLimiter } = require("./middleware/rateLimiter.middleware");
 require("dotenv").config({ path: "../" });
 const cookieSecret = process.env.COOKIE_SECRET;
 
 // redirecting to https
 const runningInProduction = process.env.NODE_ENV == "production";
-app.enable("trust proxy");
+app.set("trust proxy", 1);
 app.use((req, res, next) => {
   if (runningInProduction && req.secure == false) {
     res.redirect("https://" + req.headers.host + req.url);
@@ -35,7 +36,7 @@ app.use("/api", apiRouter);
 
 // serving the client here
 // allRoutes is the param name given in express 5
-app.get("/*allRoutes", (req, res) => {
+app.get("/*allRoutes", accessLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 

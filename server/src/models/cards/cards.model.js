@@ -1,41 +1,37 @@
 const Card = require("./cards.mongo");
 
+// Fetches all cards that belong to a specific category.
+// Uses $eq to prevent NoSQL injection.
 async function cardsByCategory(category) {
-  try {
-    const cards = await Card.find({ category });
-    return cards;
-  } catch (e) {
-    throw e;
-  }
+  return Card.find({ category: { $eq: category } });
 }
 
+// Fetches a list of all distinct card categories.
 async function getAllCards() {
-  try {
-    const cards = await Card.distinct("category");
-    return cards;
-  } catch (e) {
-    throw e;
-  }
+  return Card.distinct("category");
 }
 
+// Creates a new card document.
 async function createNewCard(card) {
-  try {
-    const newCard = new Card(card);
-    return await newCard.save();
-  } catch (e) {
-    throw e;
-  }
+  const newCard = new Card(card);
+  return newCard.save();
 }
 
+// Fetches a single card by its MongoDB document ID.
+// Uses findOne with $eq to prevent NoSQL injection.
 async function getCardById(id) {
-  try {
-    const card = await Card.findById(id);
-    return card;
-  } catch (e) {
-    throw e;
-  }
+  return Card.findOne({ _id: { $eq: id } });
 }
 
+/**
+ * Updates a card document based on the provided details.
+ * This function handles multiple update scenarios:
+ * 1. Updating a specific flashcard within the 'review' array.
+ * 2. Adding a new flashcard to the 'review' array.
+ * 3. Deleting a flashcard from the 'review' array.
+ * 4. Updating top-level fields of the card document.
+ * Uses $eq in queries to prevent NoSQL injection.
+ */
 async function updateCard(details) {
   const {
     _id,
@@ -49,62 +45,77 @@ async function updateCard(details) {
     ...otherDetails
   } = details;
 
-  try {
-    let card = await getCardById(_id);
+  const options = { new: true }; // Return the updated document
 
-    let updatingSpecificCard = cardId != null;
-    let addingNewCard = question && answer;
-    let updatingOtherFields = Object.keys(otherDetails).length > 0;
+  // The original logic fetches the card first. This is only strictly necessary
+  // for adding a new card to determine the new cardId.
+  // getCardById is already secured against NoSQL injection.
+  const card = await getCardById(_id);
+  if (!card) {
+    // To prevent errors on subsequent operations, we stop here.
+    // Consider throwing an error for better error handling upstream.
+    return null;
+  }
 
-    if (updatingSpecificCard) {
-      let cardUpdate;
-      let review = `review.${cardId - 1}`;
-      if (question) {
-        let questionUpdate = `${review}.question`;
-        cardUpdate = { $set: { [questionUpdate]: question } };
-      } else if (answer) {
-        let answerUpdate = `${review}.answer`;
-        cardUpdate = { $set: { [answerUpdate]: answer } };
-      } else if (typeof optionIndex == "number" && option) {
-        let updateOption = `${review}.options.${optionIndex}`;
-        cardUpdate = { $set: { [updateOption]: option } };
-      } else if (option) {
-        let addOption = `${review}.options`;
-        cardUpdate = { $push: { [addOption]: option } };
-      } else if (minimumOptions) {
-        let changeOption = `${review}.minimumOptions`;
-        cardUpdate = { $set: { [changeOption]: Number(minimumOptions) } };
-      } else if (deleteCard) {
-        cardUpdate = { $pull: { review: { cardId } } };
-      }
-      console.log(cardUpdate);
-      card = await Card.findOneAndUpdate({ _id }, { ...cardUpdate });
-    } else if (addingNewCard) {
-      const cardsLength = card.review.length + 1;
+  const isUpdatingSpecificCard = cardId != null;
+  // This condition is broad and will trigger if question and answer are present,
+  // but it's handled correctly by the if/else-if structure.
+  const isAddingNewCard = question && answer;
+  const isUpdatingOtherFields = Object.keys(otherDetails).length > 0;
 
-      let cardDetails = {
-        cardId: cardsLength,
-        question,
-        answer,
-        minimumOptions: 2,
-        options: [answer],
-      };
-      card = await Card.findOneAndUpdate(
-        { _id },
-        { $push: { review: cardDetails } }
-      );
-    } else if (updatingOtherFields) {
-      card = await Card.findOneAndUpdate(
-        { _id },
-        { $set: { ...otherDetails } }
-      );
+  // Scenario 1: Update a specific flashcard in the 'review' array
+  if (isUpdatingSpecificCard) {
+    let cardUpdate;
+    // Note: This positional index update is fragile. If the order of cards in the
+    // 'review' array changes, this will update the wrong card.
+    // A more robust solution would use arrayFilters with the unique cardId.
+    const review = `review.${cardId - 1}`;
+
+    if (question) {
+      cardUpdate = { $set: { [`${review}.question`]: question } };
+    } else if (answer) {
+      cardUpdate = { $set: { [`${review}.answer`]: answer } };
+    } else if (typeof optionIndex === "number" && option) {
+      cardUpdate = { $set: { [`${review}.options.${optionIndex}`]: option } };
+    } else if (option) {
+      cardUpdate = { $push: { [`${review}.options`]: option } };
+    } else if (minimumOptions) {
+      cardUpdate = { $set: { [`${review}.minimumOptions`]: Number(minimumOptions) } };
+    } else if (deleteCard) {
+      cardUpdate = { $pull: { review: { cardId } } };
     }
 
-    return card;
-  } catch (e) {
-    throw e;
+    if (cardUpdate) {
+      return Card.findOneAndUpdate({ _id: { $eq: _id } }, cardUpdate, options);
+    }
+  } else if (isAddingNewCard) {
+    // Scenario 2: Add a new flashcard to the 'review' array
+    const cardsLength = card.review.length + 1;
+    const cardDetails = {
+      cardId: cardsLength,
+      question,
+      answer,
+      minimumOptions: 2,
+      options: [answer],
+    };
+    return Card.findOneAndUpdate(
+      { _id: { $eq: _id } },
+      { $push: { review: cardDetails } },
+      options
+    );
+  } else if (isUpdatingOtherFields) {
+    // Scenario 3: Update top-level fields of the card document
+    return Card.findOneAndUpdate(
+      { _id: { $eq: _id } },
+      { $set: { ...otherDetails } },
+      options
+    );
   }
+
+  // Return original card if no update logic was triggered
+  return card;
 }
+
 module.exports = {
   cardsByCategory,
   createNewCard,
