@@ -23,12 +23,13 @@ const apiLimiter = rateLimit({
 });
 
 const accessLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 30 * 60 * 1000, // 30 mins
   max: 100, // Limit each IP to 100 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    error: "Too many requests from this IP, please try again after an hour",
+    error:
+      "Too many requests from this IP, please try again after half an hour",
   },
 });
 

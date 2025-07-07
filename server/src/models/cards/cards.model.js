@@ -80,7 +80,9 @@ async function updateCard(details) {
     } else if (option) {
       cardUpdate = { $push: { [`${review}.options`]: option } };
     } else if (minimumOptions) {
-      cardUpdate = { $set: { [`${review}.minimumOptions`]: Number(minimumOptions) } };
+      cardUpdate = {
+        $set: { [`${review}.minimumOptions`]: Number(minimumOptions) },
+      };
     } else if (deleteCard) {
       cardUpdate = { $pull: { review: { cardId } } };
     }
@@ -105,11 +107,35 @@ async function updateCard(details) {
     );
   } else if (isUpdatingOtherFields) {
     // Scenario 3: Update top-level fields of the card document
-    return Card.findOneAndUpdate(
-      { _id: { $eq: _id } },
-      { $set: { ...otherDetails } },
-      options
-    );
+    const allowedUpdates = {};
+
+    const {
+      description,
+      category,
+      "main-topic": mainTopic,
+      "sub-topic": subTopic,
+    } = otherDetails;
+
+    if (category) {
+      allowedUpdates.category = category;
+    }
+    if (mainTopic) {
+      allowedUpdates["main-topic"] = mainTopic;
+    }
+    if (subTopic) {
+      allowedUpdates["sub-topic"] = subTopic;
+    }
+    if (description) {
+      allowedUpdates.description = description;
+    }
+
+    if (Object.keys(allowedUpdates).length > 0) {
+      return Card.findOneAndUpdate(
+        { _id: { $eq: _id } },
+        { $set: allowedUpdates },
+        options
+      );
+    }
   }
 
   // Return original card if no update logic was triggered
