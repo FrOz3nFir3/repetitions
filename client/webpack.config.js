@@ -17,14 +17,27 @@ module.exports = (env, argv) => {
     plugins.push(new BundleAnalyzerPlugin());
   }
   return {
-    entry: "./src/script.js",
+    entry: {
+      main: "./src/script.js",
+    },
     output: {
       path: path.join(__dirname, "..", "server", "public"),
       publicPath: "/",
+      filename: "[name].bundle.js",
+      chunkFilename: "[name].bundle.js",
+    },
+    optimization: {
+      splitChunks: {
+        chunks: "all",
+        minSize: 0, // Set to 0 to enforce splitting regardless of size
+      },
+    },
+    performance: {
+      maxAssetSize: 500 * 1024, // 500kb in bytes
     },
     module: {
       rules: [
-        { test: /\.(js)$/, use: "babel-loader" },
+        { test: /\.(js)$/, use: "babel-loader", exclude: /node_modules/ },
         {
           test: /\.css$/,
           use: ["style-loader", "css-loader", "postcss-loader"],

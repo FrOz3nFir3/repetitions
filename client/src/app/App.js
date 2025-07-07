@@ -1,43 +1,49 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import Header from "../components/common/Header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import NotFound from "../components/common/NotFound";
-import Individual from "../features/cards/Individual";
-import { Review } from "../features/review/Review";
-import { Quiz } from "../features/quiz/Quiz";
-import Cards from "../features/cards/Cards";
-import Authentication from "../features/authentication/Authentication";
-import Logout from "../features/authentication/Logout";
-import Profile from "../features/profile/Profile";
+import Loading from "../components/common/Loading";
+
 import LandingPage from "../features/home/LandingPage";
-import Category from "../features/category/Category";
-import EditCard from "../features/cards/EditCard";
+const Individual = lazy(() => import("../features/cards/Individual"));
+const Review = lazy(() => import("../features/review/Review"));
+const Quiz = lazy(() => import("../features/quiz/Quiz"));
+const Cards = lazy(() => import("../features/cards/Cards"));
+const Authentication = lazy(() =>
+  import("../features/authentication/Authentication")
+);
+const Logout = lazy(() => import("../features/authentication/Logout"));
+const Profile = lazy(() => import("../features/profile/Profile"));
+const Category = lazy(() => import("../features/category/Category"));
+const EditCard = lazy(() => import("../features/cards/EditCard"));
 
 function App() {
   return (
     <BrowserRouter>
       <Header />
-      <Routes>
-        <Route exact path="/" element={<LandingPage />} />
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route exact path="/" element={<LandingPage />} />
 
-        <Route path="/category" element={<Category />}>
-          <Route path=":name" element={<Cards />} />
-        </Route>
+          <Route path="/category" element={<Category />}>
+            <Route path=":name" element={<Cards />} />
+          </Route>
 
-        <Route exact path="card/:id" element={<Individual />}>
-          <Route path="review" element={<Review />} />
-          <Route path="quiz" element={<Quiz />} />
-          <Route path="edit" element={<EditCard />} />
-        </Route>
+          <Route exact path="card/:id" element={<Individual />}>
+            <Route path="review" element={<Review />} />
+            <Route path="quiz" element={<Quiz />} />
+            <Route path="edit" element={<EditCard />} />
+          </Route>
 
-        <Route path="profile" element={<Profile />} />
+          <Route path="profile" element={<Profile />} />
 
-        <Route path="authenticate" element={<Authentication />} />
+          <Route path="authenticate" element={<Authentication />} />
 
-        <Route path="logout" element={<Logout />} />
+          <Route path="logout" element={<Logout />} />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }
