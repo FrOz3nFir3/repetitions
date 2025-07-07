@@ -29,7 +29,7 @@ module.exports = (env, argv) => {
     optimization: {
       splitChunks: {
         chunks: "all",
-        minSize: 0, // Set to 0 to enforce splitting regardless of size
+        maxSize: 240000,
       },
     },
     performance: {
