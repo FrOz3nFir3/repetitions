@@ -20,30 +20,30 @@ const EditCard = lazy(() => import("../features/cards/EditCard"));
 function App() {
   return (
     <BrowserRouter>
-      <Header />
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route exact path="/" element={<LandingPage />} />
+      <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
+        <Header />
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route exact path="/" element={<LandingPage />} />
 
-          <Route path="/category" element={<Category />}>
-            <Route path=":name" element={<Cards />} />
-          </Route>
+            <Route path="/category" element={<Category />}>
+              <Route path=":name" element={<Cards />} />
+            </Route>
 
-          <Route exact path="card/:id" element={<Individual />}>
-            <Route path="review" element={<Review />} />
-            <Route path="quiz" element={<Quiz />} />
-            <Route path="edit" element={<EditCard />} />
-          </Route>
+            <Route exact path="card/:id" element={<Individual />}>
+              <Route path="review" element={<Review />} />
+              <Route path="quiz" element={<Quiz />} />
+              <Route path="edit" element={<EditCard />} />
+            </Route>
 
-          <Route path="profile" element={<Profile />} />
+            <Route path="profile" element={<Profile />} />
 
-          <Route path="authenticate" element={<Authentication />} />
+            <Route path="authenticate" element={<Authentication />} />
 
-          
-
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </div>
     </BrowserRouter>
   );
 }

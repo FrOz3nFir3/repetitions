@@ -8,11 +8,11 @@ import { modifyCard } from "./cardSlice";
 const FlashcardList = ({ flashcards, cardId }) => {
   if (flashcards.length === 0) {
     return (
-      <div className="text-center py-10 border-t border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">
+      <div className="text-center py-10 border-t border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
           No flashcards yet!
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Click "Add New Flashcard" to get started.
         </p>
       </div>
@@ -20,7 +20,7 @@ const FlashcardList = ({ flashcards, cardId }) => {
   }
 
   return (
-    <div className="space-y-6 border-t border-gray-200 pt-6">
+    <div className="space-y-6 border-t border-gray-200 dark:border-gray-700 pt-6">
       {flashcards.map((flashcard, index) => (
         <FlashcardItem
           key={flashcard._id || index}
@@ -80,7 +80,7 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
   };
 
   return (
-    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
       {error && (
         <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
           {error.data.error}
@@ -94,7 +94,7 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
             value={flashcard.question}
             cardId={flashcard.cardId}
           />
-          <div className="mt-2 border-t pt-2">
+          <div className="mt-2 border-t pt-2 dark:border-gray-700">
             <CardField
               _id={cardId}
               text="answer"
@@ -112,8 +112,8 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
       </div>
 
       {/* Quiz Options Management */}
-      <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
-        <h4 className="text-lg font-semibold text-gray-700 mb-2">
+      <div className="mt-4 pt-4 border-t border-dashed border-gray-300 dark:border-gray-600">
+        <h4 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">
           Quiz Options
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +127,7 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
             {flashcard.options.map((option, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between bg-white p-2 rounded-md border"
+                className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded-md border dark:border-gray-600"
               >
                 <div className="flex-grow">
                   <CardField
@@ -153,7 +153,7 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
                   type="text"
                   ref={newOptionRef}
                   placeholder="Add new option"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10 bg-white"
+                  className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
                 <button
                   type="submit"

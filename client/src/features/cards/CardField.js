@@ -49,7 +49,7 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
 
       <div className="flex justify-between items-center">
         <div className="flex-1">
-          <p className="font-semibold text-gray-500 text-sm capitalize">
+          <p className="font-semibold text-gray-500 dark:text-gray-300 text-sm capitalize">
             {text.replace("-", " ")}
           </p>
           {isEditing ? (
@@ -58,7 +58,7 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
                 <textarea
                   value={inputValue}
                   onChange={handleInputChange}
-                  className="bg-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-24"
+                  className="bg-white dark:bg-gray-600 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-24"
                   rows={text === "description" ? 3 : 2}
                   required
                 />
@@ -67,7 +67,7 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
                   type={text === "minimumOptions" ? "number" : "text"}
                   value={inputValue}
                   onChange={handleInputChange}
-                  className="bg-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10"
+                  className="bg-white dark:bg-gray-600 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10"
                   min={text === "minimumOptions" ? 2 : undefined}
                   max={text === "minimumOptions" ? 4 : undefined}
                   required
@@ -89,10 +89,12 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
             </form>
           ) : (
             <div className="flex items-center justify-between">
-              <p className="text-gray-900 whitespace-pre-wrap">{value}</p>
+              <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+                {value}
+              </p>
               <button
                 onClick={() => setIsEditing(true)}
-                className="cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-gray-500 hover:text-indigo-600"
+                className="cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-gray-500 dark:text-white hover:text-indigo-600"
               >
                 <PencilIcon className="h-5 w-5" />
               </button>

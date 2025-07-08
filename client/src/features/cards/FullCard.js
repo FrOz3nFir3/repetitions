@@ -36,11 +36,11 @@ function FullCard() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl">
+          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-5xl">
             {mainTopic}
           </h1>
           <p className="mt-2 text-2xl text-indigo-600 font-semibold">
@@ -51,8 +51,8 @@ function FullCard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Card Details & Actions */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
                 Card Details
               </h2>
               <CardField _id={_id} text="main-topic" value={mainTopic} />
@@ -60,7 +60,7 @@ function FullCard() {
               <CardField _id={_id} text="category" value={category} />
               <CardField _id={_id} text="description" value={description} />
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-md flex flex-col space-y-4">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex flex-col space-y-4">
               <Link
                 to="review"
                 className={getLinkClass(
@@ -100,11 +100,11 @@ function FullCard() {
           {/* Right Column: Content */}
           <div className="lg:col-span-2">
             {isDefaultView ? (
-              <div className="text-center py-10 bg-white rounded-xl shadow-md">
-                <h3 className="text-lg font-medium text-gray-900">
+              <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                   Select an action
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Choose Review, Quiz, or Manage Flashcards to get started.
                 </p>
               </div>

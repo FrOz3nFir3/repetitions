@@ -41,10 +41,10 @@ export function NewFlashcard({ _id }) {
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               Add a New Flashcard
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Add a question and answer to create a new flashcard.
             </p>
           </div>
@@ -57,7 +57,7 @@ export function NewFlashcard({ _id }) {
           <div>
             <label
               htmlFor="question"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Question
             </label>
@@ -66,14 +66,14 @@ export function NewFlashcard({ _id }) {
               ref={questionRef}
               rows={3}
               required
-              className="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
             />
           </div>
 
           <div>
             <label
               htmlFor="answer"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Answer
             </label>
@@ -82,7 +82,7 @@ export function NewFlashcard({ _id }) {
               ref={answerRef}
               rows={3}
               required
-              className="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
             />
           </div>
 

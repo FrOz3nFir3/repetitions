@@ -44,18 +44,18 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="bg-gray-50 text-slate-800">
+    <div className="bg-gray-50 dark:bg-gray-900 text-slate-800 dark:text-slate-200">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-white">
+      <div className="relative overflow-hidden bg-white dark:bg-gray-800">
         <div className="mx-auto max-w-7xl">
-          <div className="relative z-10 bg-white pb-8 sm:pb-16 md:pb-20 lg:w-full lg:max-w-2xl lg:pb-28 xl:pb-32">
+          <div className="relative z-10 bg-white dark:bg-gray-800 pb-8 sm:pb-16 md:pb-20 lg:w-full lg:max-w-2xl lg:pb-28 xl:pb-32">
             <main className="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
               <div className="sm:text-center lg:text-left">
-                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
                   <span className="block">Learn Smarter,</span>
                   <span className="block text-indigo-600">Remember Longer</span>
                 </h1>
-                <p className="mt-3 text-base text-gray-500 sm:mx-auto sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl lg:mx-0">
+                <p className="mt-3 text-base text-gray-500 dark:text-gray-300 sm:mx-auto sm:mt-5 sm:max-w-xl sm:text-lg md:mt-5 md:text-xl lg:mx-0">
                   The intelligent flashcard app designed to help you conquer any
                   subject. Stop cramming, start learning effectively.
                 </p>
@@ -71,7 +71,7 @@ const LandingPage = () => {
                   <div className="mt-3 sm:mt-0 sm:ml-3">
                     <button
                       onClick={handleLearnMoreClick}
-                      className="cursor-pointer flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-100 px-8 py-3 text-base font-medium text-indigo-700 hover:bg-indigo-200 md:py-4 md:px-10 md:text-lg"
+                      className="cursor-pointer flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-100 dark:bg-indigo-500 px-8 py-3 text-base font-medium text-indigo-700 dark:text-white hover:bg-indigo-200 dark:hover:bg-indigo-600 md:py-4 md:px-10 md:text-lg"
                     >
                       Learn More
                     </button>
@@ -178,16 +178,16 @@ const LandingPage = () => {
       </div> */}
 
       {/* Feature Section */}
-      <div className="py-24 sm:py-32 bg-gray-50">
+      <div className="py-24 sm:py-32 bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-center">
             <h2 className="text-base font-semibold leading-7 text-indigo-600">
               Why Choose Us?
             </h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
               A Better Way to Learn
             </p>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
+            <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
               Our platform is engineered with proven learning methodologies to
               help you achieve your academic and professional aspirations.
             </p>
@@ -196,16 +196,16 @@ const LandingPage = () => {
             {features.map((feature) => (
               <div
                 key={feature.name}
-                className="rounded-2xl bg-white p-8 shadow-lg transition-transform duration-300 hover:-translate-y-2"
+                className="rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-2"
               >
                 <feature.icon
                   className="h-12 w-12 text-indigo-600"
                   aria-hidden="true"
                 />
-                <h3 className="mt-6 text-xl font-semibold leading-8 text-gray-900">
+                <h3 className="mt-6 text-xl font-semibold leading-8 text-gray-900 dark:text-white">
                   {feature.name}
                 </h3>
-                <p className="mt-4 text-base leading-7 text-gray-600">
+                <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-300">
                   {feature.description}
                 </p>
               </div>
@@ -215,46 +215,46 @@ const LandingPage = () => {
       </div>
 
       {/* How It Works Section */}
-      <section ref={howItWorksRef} className="bg-white py-24 sm:py-32">
+      <section ref={howItWorksRef} className="bg-white dark:bg-gray-800 py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-base font-semibold leading-7 text-indigo-600">
               Our Simple Process
             </h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
               Master Knowledge in 3 Easy Steps
             </p>
           </div>
           <div className="relative mt-16">
-            <div className="absolute left-1/2 top-0 h-full w-px bg-gray-400"></div>
+            <div className="absolute left-1/2 top-0 h-full w-px bg-gray-400 dark:bg-gray-600"></div>
             <div className="space-y-16">
               <div className="relative flex items-center">
                 <div className="w-1/2 pr-8 text-right">
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                     1. Create
                   </h3>
-                  <p className="mt-4 text-lg text-gray-600">
+                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                     Start by creating your own flashcard decks. Add questions,
                     answers, and any other information you need to learn.
                   </p>
                 </div>
                 <div className="w-1/2 pl-8">
-                  <div className="absolute left-1/2 -translate-x-1/2 bg-white p-2 rounded-full border-2 border-gray-300">
+                  <div className="absolute left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-full border-2 border-gray-300 dark:border-gray-600">
                     <PencilSquareIcon className="h-8 w-8 text-indigo-600" />
                   </div>
                 </div>
               </div>
               <div className="relative flex items-center">
                 <div className="w-1/2 pr-8">
-                  <div className="absolute left-1/2 -translate-x-1/2 bg-white p-2 rounded-full border-2 border-gray-300">
+                  <div className="absolute left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-full border-2 border-gray-300 dark:border-gray-600">
                     <ArrowPathIcon className="h-8 w-8 text-indigo-600" />
                   </div>
                 </div>
                 <div className="w-1/2 pl-8 text-left">
-                  <h3 className="text-2xl font-bold text-gray-900">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
                     2. Review
                   </h3>
-                  <p className="mt-4 text-lg text-gray-600">
+                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                     Our intelligent system will notify you at the optimal time
                     to review each card, ensuring maximum retention.
                   </p>
@@ -262,14 +262,14 @@ const LandingPage = () => {
               </div>
               <div className="relative flex items-center">
                 <div className="w-1/2 pr-8 text-right">
-                  <h3 className="text-2xl font-bold text-gray-900">3. Quiz</h3>
-                  <p className="mt-4 text-lg text-gray-600">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">3. Quiz</h3>
+                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                     Test your knowledge with our interactive quizzes and track
                     your performance to see how much you've learned.
                   </p>
                 </div>
                 <div className="w-1/2 pl-8">
-                  <div className="absolute left-1/2 -translate-x-1/2 bg-white p-2 rounded-full border-2 border-gray-300">
+                  <div className="absolute left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-full border-2 border-gray-300 dark:border-gray-600">
                     <CheckCircleIcon className="h-8 w-8 text-indigo-600" />
                   </div>
                 </div>
@@ -280,9 +280,9 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <div className="bg-gray-50">
+      <div className="bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-24 lg:px-8">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
             <span className="block">Ready to dive in?</span>
             <span className="block text-indigo-600">
               Start learning for free today.

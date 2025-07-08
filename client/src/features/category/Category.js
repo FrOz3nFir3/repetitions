@@ -51,13 +51,13 @@ function Category() {
   const uniqueCategories = [...new Set(allCards)];
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto !px-4 !py-8">
         <div className="my-8">
-          <h1 className="text-3xl font-semi text-gray-900 sm:text-4xl">
+          <h1 className="text-3xl font-semi text-gray-900 dark:text-white sm:text-4xl">
             Choose a Category
           </h1>
-          <p className="mt-8 text-lg text-gray-600">
+          <p className="mt-8 text-lg text-gray-600 dark:text-gray-300">
             Select a category to start studying or create a new one to begin
             your learning journey.
           </p>
@@ -71,17 +71,17 @@ function Category() {
               className={`relative rounded-xl self-start shadow-lg p-6 flex flex-col justify-between items-center text-center cursor-pointer transition-transform transform hover:scale-105 ${
                 categoryName === category
                   ? "bg-indigo-600 text-white"
-                  : "bg-white"
+                  : "bg-white dark:bg-gray-800"
               }`}
             >
-              <h3 className="text-2xl font-bold">{category}</h3>
+              <h3 className="text-2xl font-bold dark:text-white">{category}</h3>
             </div>
           ))}
 
           {/* Create New Category Card */}
-          <div className="relative rounded-xl shadow-lg p-6 flex flex-col justify-center items-center text-center bg-white">
+          <div className="relative rounded-xl shadow-lg p-6 flex flex-col justify-center items-center text-center bg-white dark:bg-gray-800">
             <PlusCircleIcon className="h-12 w-12 text-indigo-500 mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               Create New
             </h3>
             <form onSubmit={handleCreateCategory} className="w-full">
@@ -90,7 +90,7 @@ function Category() {
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 placeholder="New category name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
               <button
                 type="submit"
@@ -108,7 +108,7 @@ function Category() {
 
         {user && (
           <div className="mt-16">
-            <h3 className="text-3xl font-bold text-gray-900 mb-6">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
               Previously Studied Cards:
             </h3>
             {isLoadingStudyingCards ? (

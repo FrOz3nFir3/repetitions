@@ -7,6 +7,7 @@ import {
 } from "../../features/authentication/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import ThemeToggler from "./header/ThemeToggler";
 
 const ProfileMenu = React.lazy(() => import("./header/ProfileMenu"));
 const MobileMenu = React.lazy(() => import("./header/MobileMenu"));
@@ -51,7 +52,7 @@ function Header() {
   ];
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-white dark:bg-gray-800 shadow-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
@@ -61,7 +62,7 @@ function Header() {
                 src="/images/logo.png"
                 alt="Repetitions Logo"
               />
-              <span className="ml-3 text-xl font-bold text-gray-800">
+              <span className="ml-3 text-xl font-bold text-gray-800 dark:text-white">
                 Repetitions
               </span>
             </Link>
@@ -74,7 +75,7 @@ function Header() {
                     style={({ isActive }) =>
                       isActive ? activeLinkStyle : undefined
                     }
-                    className="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"
+                    className="text-gray-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
                     {item.name}
                   </NavLink>
@@ -82,16 +83,19 @@ function Header() {
               </div>
             </div>
           </div>
-          <ProfileMenu
-            user={user}
-            isProfileOpen={isProfileOpen}
-            setIsProfileOpen={setIsProfileOpen}
-            profileMenuRef={profileMenuRef}
-          />
+          <div className="flex items-center">
+            <ThemeToggler />
+            <ProfileMenu
+              user={user}
+              isProfileOpen={isProfileOpen}
+              setIsProfileOpen={setIsProfileOpen}
+              profileMenuRef={profileMenuRef}
+            />
+          </div>
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-md bg-gray-100 p-2 text-gray-400 hover:bg-gray-200 focus:outline-none"
+              className="inline-flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700 p-2 text-gray-400 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none"
             >
               <span className="sr-only">Open main menu</span>
               {isOpen ? (

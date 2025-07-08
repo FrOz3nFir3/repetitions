@@ -4,11 +4,13 @@ import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 function NotFound() {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center text-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col justify-center items-center text-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         <p className="text-5xl font-extrabold text-indigo-600">404</p>
-        <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Page Not Found</h1>
-        <p className="mt-4 text-base text-gray-500">
+        <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+          Page Not Found
+        </h1>
+        <p className="mt-4 text-base text-gray-500 dark:text-gray-300">
           Sorry, we couldn’t find the page you’re looking for.
         </p>
         <div className="mt-10">

@@ -105,10 +105,12 @@ function Review() {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md overflow-hidden">
       <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">Review Session</h2>
-        <p className="mt-2 text-md text-gray-600">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
+          Review Session
+        </h2>
+        <p className="mt-2 text-md text-gray-600 dark:text-gray-300">
           Click the card to flip it and reveal the answer.
         </p>
       </div>
@@ -157,25 +159,25 @@ function Review() {
       <div className="flex justify-center items-center mt-6 space-x-4">
         <button
           onClick={handlePrev}
-          className="cursor-pointer flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+          className="cursor-pointer flex items-center justify-center p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
         >
-          <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
+          <ChevronLeftIcon className="h-6 w-6 text-gray-700 dark:text-white" />
         </button>
-        <p className="text-lg font-semibold text-gray-700">
+        <p className="text-lg font-semibold text-gray-700 dark:text-white">
           {currentIndex + 1} / {review.length}
         </p>
         <button
           onClick={handleNext}
-          className="cursor-pointer flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+          className="cursor-pointer flex items-center justify-center p-3 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
         >
-          <ChevronRightIcon className="h-6 w-6 text-gray-700" />
+          <ChevronRightIcon className="h-6 w-6 text-gray-700 dark:text-white" />
         </button>
       </div>
-      <div className="text-center text-gray-500 mt-4 text-sm flex items-center justify-center">
+      <div className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm flex items-center justify-center">
         <ArrowsRightLeftIcon className="h-5 w-5 mr-2" />
         Use Left/Right arrow keys to navigate
       </div>
-      <div className="text-center text-gray-500 mt-2 text-sm sm:hidden flex items-center justify-center">
+      <div className="text-center text-gray-500 dark:text-gray-400 mt-2 text-sm sm:hidden flex items-center justify-center">
         <InformationCircleIcon className="h-5 w-5 mr-2" />
         Swipe left or right to navigate on mobile
       </div>

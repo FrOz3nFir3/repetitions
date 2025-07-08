@@ -37,10 +37,10 @@ export function NewCard({ category, newCard }) {
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               Create a New Card
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               This will create a new card with a main topic and a sub-topic.
             </p>
           </div>
@@ -54,7 +54,7 @@ export function NewCard({ category, newCard }) {
           <div>
             <label
               htmlFor="category"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Category
             </label>
@@ -63,14 +63,14 @@ export function NewCard({ category, newCard }) {
               id="category"
               value={category}
               disabled
-              className="block w-full mt-1 rounded-md bg-gray-100 sm:text-sm border-gray-300 shadow-sm p-2"
+              className="block w-full mt-1 rounded-md bg-gray-100 dark:bg-gray-700 sm:text-sm border-gray-300 dark:border-gray-600 shadow-sm p-2 text-gray-900 dark:text-white"
             />
           </div>
 
           <div>
             <label
               htmlFor="topic"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Main Topic
             </label>
@@ -79,14 +79,14 @@ export function NewCard({ category, newCard }) {
               id="topic"
               ref={topicRef}
               required
-              className="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              className="block w-full mt-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
 
           <div>
             <label
               htmlFor="sub-topic"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               Sub-Topic
             </label>
@@ -95,7 +95,7 @@ export function NewCard({ category, newCard }) {
               id="sub-topic"
               ref={subTopicRef}
               required
-              className="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              className="block w-full mt-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           </div>
 

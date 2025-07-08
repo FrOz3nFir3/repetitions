@@ -36,7 +36,7 @@ const MobileMenu = ({
   if (!isOpen) return null;
 
   return (
-    <div className="md:hidden">
+    <div className="md:hidden bg-white dark:bg-gray-800">
       <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
         {navigation.map((item) => (
           <NavLink
@@ -44,19 +44,19 @@ const MobileMenu = ({
             to={item.href}
             onClick={() => setIsOpen(false)}
             style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
-            className="block rounded-md px-3 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-indigo-600"
+            className="block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-white"
           >
             {item.name}
           </NavLink>
         ))}
       </div>
-      <div className="border-t border-gray-200 pb-3 pt-4">
+      <div className="border-t border-gray-200 dark:border-gray-700 pb-3 pt-4">
         {user ? (
           <>
             <div className="flex items-center px-5">
               <UserCircleIcon className="h-10 w-10 text-gray-400" />
               <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">
+                <div className="text-base font-medium text-gray-800 dark:text-white">
                   {user.email}
                 </div>
               </div>
@@ -65,13 +65,13 @@ const MobileMenu = ({
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
-                className="block rounded-md px-3 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-indigo-600"
+                className="block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-white"
               >
                 Your Profile
               </Link>
               <button
                 onClick={handleLogout}
-                className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-indigo-600"
+                className="block w-full text-left rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-white"
               >
                 Sign out
               </button>
