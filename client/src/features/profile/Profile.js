@@ -9,6 +9,7 @@ import {
   QuestionMarkCircleIcon,
   CheckCircleIcon,
   LockClosedIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 function Profile() {
@@ -66,9 +67,17 @@ function Profile() {
     (acc, deck) => acc + (deck["total-incorrect"] || 0),
     0
   );
+  const totalQuizzesFinished = user.studying.reduce(
+    (acc, deck) => acc + (deck["times-finished"] || 0),
+    0
+  );
   const totalAnswers = totalCorrect + totalIncorrect;
   const overallAccuracy =
     totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+  const completionRate =
+    totalQuizzesTaken > 0
+      ? Math.round((totalQuizzesFinished / totalQuizzesTaken) * 100)
+      : 0;
 
   const stats = [
     { name: "Decks Studied", stat: totalDecksStudied, icon: BookOpenIcon },
@@ -81,6 +90,11 @@ function Profile() {
       name: "Overall Accuracy",
       stat: `${overallAccuracy}%`,
       icon: CheckCircleIcon,
+    },
+    {
+      name: "Overall Completion",
+      stat: `${completionRate}%`,
+      icon: ChartBarIcon,
     },
   ];
 
@@ -99,7 +113,7 @@ function Profile() {
         </header>
 
         {/* Overall Stats */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-12">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
           {stats.map((item) => (
             <div
               key={item.name}
@@ -136,6 +150,13 @@ function Profile() {
                 const total = correct + incorrect;
                 const accuracy =
                   total > 0 ? Math.round((correct / total) * 100) : 0;
+                const timesStarted = progress["times-started"] || 0;
+                const timesFinished = progress["times-finished"] || 0;
+
+                const completion =
+                  timesStarted > 0
+                    ? Math.round((timesFinished / timesStarted) * 100)
+                    : 0;
 
                 return (
                   <div
@@ -170,7 +191,39 @@ function Profile() {
                         </div>
                       </div>
 
+                      <div className="mt-4">
+                        <div className="flex justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-700">
+                            Completion
+                          </span>
+                          <span className="text-sm font-medium text-gray-700">
+                            {completion}%
+                          </span>
+                        </div>
+
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div
+                            className="bg-indigo-600 h-2.5 rounded-full"
+                            style={{
+                              width: `${completion}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+
                       <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-sm text-gray-500">Started</p>
+                          <p className="text-lg font-bold text-blue-600">
+                            {progress["times-started"] || 0}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Finished</p>
+                          <p className="text-lg font-bold text-gray-800">
+                            {progress["times-finished"] || 0}
+                          </p>
+                        </div>
                         <div>
                           <p className="text-sm text-gray-500">Correct</p>
                           <p className="text-lg font-bold text-green-600">
@@ -183,15 +236,10 @@ function Profile() {
                             {incorrect}
                           </p>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Finished</p>
-                          <p className="text-lg font-bold text-gray-800">
-                            {progress["times-finished"] || 0}
-                          </p>
-                        </div>
                       </div>
                     </div>
-                    <div className="bg-gray-50 px-6 py-4">
+
+                    <div className="bg-gray-50 px-6 py-4 mt-auto">
                       <Link
                         to={`/card/${progress.card_id}`}
                         className="w-full text-center block rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"

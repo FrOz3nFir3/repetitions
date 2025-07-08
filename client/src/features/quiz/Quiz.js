@@ -43,17 +43,39 @@ function Quiz() {
           setSelectedAnswer(null);
         } else {
           setIsFinished(true);
+          if (user) {
+            const updateDetails = {
+              card_id: _id,
+              email: user.email,
+              type: "times-finished",
+            };
+            updateUser(updateDetails).then((res) =>
+              dispatch(modifyUser(updateDetails))
+            );
+          }
         }
       }, 2000);
       return () => clearTimeout(timer);
     }
   }, [selectedAnswer, currentQuestionIndex, review.length]);
 
-  const handleAnswerSelect = (option) => {
+  const handleAnswerSelect = (option, index) => {
     if (selectedAnswer) return;
 
     const isCorrect = option === currentQuestion.answer;
     setSelectedAnswer({ option, isCorrect });
+
+    const hasStarted = currentQuestionIndex === 0 ? true : false;
+    if (user && hasStarted) {
+      const updateDetails = {
+        card_id: _id,
+        email: user.email,
+        type: "times-started",
+      };
+      updateUser(updateDetails).then((res) =>
+        dispatch(modifyUser(updateDetails))
+      );
+    }
 
     if (isCorrect) {
       setScore(score + 1);
@@ -129,14 +151,14 @@ function Quiz() {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-end mb-2">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Quiz Time!</h2>
             <p className="mt-2 text-md text-gray-600">
               Test your knowledge by selecting the correct answer.
             </p>
           </div>
-          <p className="text-xl font-semibold text-gray-600">
+          <p className="text-xl font-semibold text-gray-600 whitespace-nowrap">
             {currentQuestionIndex + 1} / {review.length}
           </p>
         </div>
@@ -174,7 +196,7 @@ function Quiz() {
           return (
             <button
               key={index}
-              onClick={() => handleAnswerSelect(option)}
+              onClick={() => handleAnswerSelect(option, index)}
               disabled={!!selectedAnswer}
               className={buttonClass}
             >
