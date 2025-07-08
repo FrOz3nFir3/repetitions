@@ -1,6 +1,5 @@
 node_modules/
 .env
 server/public/*.html
-server/public/*.js
-server/public/*.txt
+server/public/js
 .vercel

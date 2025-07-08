@@ -62,7 +62,7 @@ function Header() {
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 className="h-12 w-auto"
-                src="/logo.png"
+                src="/images/logo.png"
                 alt="Repetitions Logo"
               />
               <span className="ml-3 text-xl font-bold text-gray-800">

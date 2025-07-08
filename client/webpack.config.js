@@ -23,8 +23,8 @@ module.exports = (env, argv) => {
     output: {
       path: path.join(__dirname, "..", "server", "public"),
       publicPath: "/",
-      filename: "[name].bundle.js",
-      chunkFilename: "[name].bundle.js",
+      filename: "js/[name].bundle.js",
+      chunkFilename: "js/[name].bundle.js",
     },
     optimization: {
       splitChunks: {
