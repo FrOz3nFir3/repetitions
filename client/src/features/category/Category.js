@@ -94,7 +94,7 @@ function Category() {
               />
               <button
                 type="submit"
-                className="mt-4 w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+                className="cursor-pointer mt-4 w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
               >
                 Create
               </button>

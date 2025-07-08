@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentCard } from "../cards/cardSlice";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ArrowsRightLeftIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/solid";
 
 function Review() {
@@ -12,18 +13,50 @@ function Review() {
   const { review = [] } = card;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [slideDirection, setSlideDirection] = useState("");
+  const touchStartX = useRef(0);
+  const isSwiping = useRef(false);
 
   const handleNext = useCallback(() => {
     setIsFlipped(false);
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % review.length);
+    setSlideDirection("left");
+    setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % review.length);
+      setSlideDirection("in-right");
+    }, 150);
   }, [review.length]);
 
   const handlePrev = useCallback(() => {
     setIsFlipped(false);
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + review.length) % review.length
-    );
+    setSlideDirection("right");
+    setTimeout(() => {
+      setCurrentIndex(
+        (prevIndex) => (prevIndex - 1 + review.length) % review.length
+      );
+      setSlideDirection("in-left");
+    }, 150);
   }, [review.length]);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    isSwiping.current = true;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isSwiping.current) return;
+    const touchCurrentX = e.touches[0].clientX;
+    if (touchStartX.current - touchCurrentX > 50) {
+      handleNext();
+      isSwiping.current = false;
+    } else if (touchStartX.current - touchCurrentX < -50) {
+      handlePrev();
+      isSwiping.current = false;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    isSwiping.current = false;
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -56,17 +89,37 @@ function Review() {
 
   const currentFlashcard = review[currentIndex];
 
+  const getSlideClass = () => {
+    switch (slideDirection) {
+      case "left":
+        return "transform -translate-x-full transition-transform duration-150 ease-in-out";
+      case "right":
+        return "transform translate-x-full transition-transform duration-150 ease-in-out";
+      case "in-right":
+        return "transform translate-x-0 transition-transform duration-150 ease-in-out";
+      case "in-left":
+        return "transform translate-x-0 transition-transform duration-150 ease-in-out";
+      default:
+        return "";
+    }
+  };
+
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md">
+    <div className="bg-white p-6 rounded-xl shadow-md overflow-hidden">
       <div className="text-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Review Session</h2>
         <p className="mt-2 text-md text-gray-600">
           Click the card to flip it and reveal the answer.
         </p>
       </div>
-      <div className="flex items-center justify-center">
+      <div
+        className="flex items-center justify-center"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div
-          className="w-full max-w-xl h-80"
+          className={`w-full max-w-xl h-80 ${getSlideClass()}`}
           style={{ perspective: "1000px" }}
           onClick={() => setIsFlipped(!isFlipped)}
         >
@@ -79,7 +132,7 @@ function Review() {
           >
             {/* Front of the card */}
             <div
-              className="absolute w-full h-full flex items-center justify-center p-6 bg-indigo-500 rounded-lg shadow-lg"
+              className="absolute w-full h-full flex items-center justify-center p-6 bg-indigo-500 rounded-lg shadow-lg overflow-y-auto"
               style={{ backfaceVisibility: "hidden" }}
             >
               <p className="text-2xl text-white text-center">
@@ -88,7 +141,7 @@ function Review() {
             </div>
             {/* Back of the card */}
             <div
-              className="absolute w-full h-full flex items-center justify-center p-6 bg-green-500 rounded-lg shadow-lg"
+              className="absolute w-full h-full flex items-center justify-center p-6 bg-green-500 rounded-lg shadow-lg overflow-y-auto"
               style={{
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)",
@@ -101,10 +154,10 @@ function Review() {
           </div>
         </div>
       </div>
-      <div className="flex justify-between items-center mt-6 max-w-xl mx-auto">
+      <div className="flex justify-center items-center mt-6 space-x-4">
         <button
           onClick={handlePrev}
-          className="flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+          className="cursor-pointer flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition"
         >
           <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
         </button>
@@ -113,7 +166,7 @@ function Review() {
         </p>
         <button
           onClick={handleNext}
-          className="flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition"
+          className="cursor-pointer flex items-center justify-center p-3 rounded-full bg-gray-200 hover:bg-gray-300 transition"
         >
           <ChevronRightIcon className="h-6 w-6 text-gray-700" />
         </button>
@@ -121,6 +174,10 @@ function Review() {
       <div className="text-center text-gray-500 mt-4 text-sm flex items-center justify-center">
         <ArrowsRightLeftIcon className="h-5 w-5 mr-2" />
         Use Left/Right arrow keys to navigate
+      </div>
+      <div className="text-center text-gray-500 mt-2 text-sm sm:hidden flex items-center justify-center">
+        <InformationCircleIcon className="h-5 w-5 mr-2" />
+        Swipe left or right to navigate on mobile
       </div>
     </div>
   );

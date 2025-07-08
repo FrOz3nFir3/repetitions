@@ -12,7 +12,7 @@ const Cards = lazy(() => import("../features/cards/Cards"));
 const Authentication = lazy(() =>
   import("../features/authentication/Authentication")
 );
-const Logout = lazy(() => import("../features/authentication/Logout"));
+
 const Profile = lazy(() => import("../features/profile/Profile"));
 const Category = lazy(() => import("../features/category/Category"));
 const EditCard = lazy(() => import("../features/cards/EditCard"));
@@ -39,7 +39,7 @@ function App() {
 
           <Route path="authenticate" element={<Authentication />} />
 
-          <Route path="logout" element={<Logout />} />
+          
 
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -7,6 +7,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   LightBulbIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/solid";
 
 function Quiz() {
@@ -23,7 +24,6 @@ function Quiz() {
 
   const currentQuestion = review[currentQuestionIndex];
 
-  // Memoize the shuffled options so they don't re-shuffle on every render
   const shuffledOptions = useMemo(() => {
     if (!currentQuestion) return [];
     const options = [
@@ -44,7 +44,7 @@ function Quiz() {
         } else {
           setIsFinished(true);
         }
-      }, 1500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [selectedAnswer, currentQuestionIndex, review.length]);
@@ -103,17 +103,24 @@ function Quiz() {
 
   if (isFinished) {
     return (
-      <div className="text-center py-10 bg-white rounded-xl shadow-md">
-        <h2 className="text-3xl font-bold text-gray-800">Quiz Finished!</h2>
-        <p className="mt-4 text-xl text-gray-600">
-          Your score: <span className="font-bold text-indigo-600">{score}</span>{" "}
-          / {review.length}
+      <div className="text-center py-10 bg-white rounded-xl shadow-md flex flex-col items-center">
+        <h2 className="text-4xl font-bold text-gray-800">Quiz Complete!</h2>
+        <p className="mt-4 text-2xl text-gray-600">You scored</p>
+        <p className="text-6xl font-extrabold text-indigo-600 my-4">
+          {score} / {review.length}
         </p>
+        <div className="w-full bg-gray-200 rounded-full h-4 my-4">
+          <div
+            className="bg-indigo-600 h-4 rounded-full"
+            style={{ width: `${(score / review.length) * 100}%` }}
+          ></div>
+        </div>
         <button
           onClick={restartQuiz}
-          className="mt-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700"
+          className="mt-8 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-4 text-lg font-medium text-white shadow-sm hover:bg-indigo-700"
         >
-          Restart Quiz
+          <ArrowPathIcon className="h-6 w-6 mr-3" />
+          Take Again
         </button>
       </div>
     );
@@ -121,36 +128,47 @@ function Quiz() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
-      <div className="text-center mb-4">
-        <h2 className="text-3xl font-bold text-gray-800">Quiz Time!</h2>
-        <p className="mt-2 text-md text-gray-600">
-          Test your knowledge by selecting the correct answer.
-        </p>
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">Quiz Time!</h2>
+            <p className="mt-2 text-md text-gray-600">
+              Test your knowledge by selecting the correct answer.
+            </p>
+          </div>
+          <p className="text-xl font-semibold text-gray-600">
+            {currentQuestionIndex + 1} / {review.length}
+          </p>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div
+            className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500"
+            style={{
+              width: `${((currentQuestionIndex + 1) / review.length) * 100}%`,
+            }}
+          ></div>
+        </div>
       </div>
-      <div className="mb-4">
-        <p className="text-sm text-gray-500">
-          Question {currentQuestionIndex + 1} of {review.length}
-        </p>
-        <h2 className="text-2xl font-bold text-gray-800 mt-1">
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">
           {currentQuestion.question}
-        </h2>
+        </h3>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {shuffledOptions.map((option, index) => {
           const isSelected = selectedAnswer?.option === option;
           const isCorrect = currentQuestion.answer === option;
 
           let buttonClass =
-            "w-full text-left p-4 rounded-lg border-2 transition-colors ";
+            "cursor-pointer w-full text-left p-4 rounded-lg border-2 transition-all duration-300 ease-in-out transform hover:scale-105 ";
           if (isSelected) {
             buttonClass += selectedAnswer.isCorrect
-              ? "bg-green-100 border-green-500"
-              : "bg-red-100 border-red-500";
+              ? "bg-green-100 border-green-500 ring-4 ring-green-200"
+              : "bg-red-100 border-red-500 ring-4 ring-red-200";
           } else if (selectedAnswer && isCorrect) {
-            // Highlight the correct answer if a wrong one was chosen
             buttonClass += "bg-green-100 border-green-500";
           } else {
-            buttonClass += "bg-gray-50 hover:bg-gray-100 border-gray-200";
+            buttonClass += "bg-gray-50 hover:bg-indigo-50 border-gray-200";
           }
 
           return (
@@ -161,21 +179,21 @@ function Quiz() {
               className={buttonClass}
             >
               <div className="flex items-center justify-between">
-                <span className="font-semibold">{option}</span>
+                <span className="font-medium text-lg">{option}</span>
                 {isSelected &&
                   (isCorrect ? (
-                    <CheckCircleIcon className="h-6 w-6 text-green-500" />
+                    <CheckCircleIcon className="h-8 w-8 text-green-500" />
                   ) : (
-                    <XCircleIcon className="h-6 w-6 text-red-500" />
+                    <XCircleIcon className="h-8 w-8 text-red-500" />
                   ))}
               </div>
             </button>
           );
         })}
       </div>
-      <div className="text-center text-gray-500 mt-4 text-sm flex items-center justify-center">
+      <div className="text-center text-gray-500 mt-6 text-sm flex items-center justify-center">
         <LightBulbIcon className="h-5 w-5 mr-2" />
-        Select an option to see if you are correct.
+        <p>Select an option to test your knowledge.</p>
       </div>
     </div>
   );

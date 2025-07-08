@@ -105,7 +105,7 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
         </div>
         <button
           onClick={handleDeleteFlashcard}
-          className="ml-4 text-red-500 hover:text-red-700 flex-shrink-0"
+          className="cursor-pointer ml-4 text-red-500 hover:text-red-700 flex-shrink-0"
         >
           <TrashIcon className="h-6 w-6" />
         </button>
@@ -153,11 +153,11 @@ const FlashcardItem = ({ flashcard, cardId, flashcardIndex }) => {
                   type="text"
                   ref={newOptionRef}
                   placeholder="Add new option"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10 bg-white"
                 />
                 <button
                   type="submit"
-                  className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600"
+                  className="cursor-pointer p-2 rounded-full bg-green-500 text-white hover:bg-green-600"
                 >
                   <PlusCircleIcon className="h-6 w-6" />
                 </button>
