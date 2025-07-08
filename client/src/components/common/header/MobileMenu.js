@@ -4,7 +4,6 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { usePostLogoutUserMutation } from "../../../api/apiSlice";
 import { useDispatch } from "react-redux";
 import { initialUser } from "../../../features/authentication/authSlice";
-import { gapi } from "gapi-script";
 
 const MobileMenu = ({
   isOpen,
@@ -19,6 +18,7 @@ const MobileMenu = ({
   const handleLogout = async () => {
     try {
       await logoutUser().unwrap();
+      const gapi = import("gapi-script").then((module) => module.gapi);
       if (gapi.auth2) {
         const auth2 = gapi.auth2.getAuthInstance();
         if (auth2) {

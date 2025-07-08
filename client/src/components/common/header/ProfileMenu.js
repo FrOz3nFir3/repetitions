@@ -4,7 +4,6 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { usePostLogoutUserMutation } from "../../../api/apiSlice";
 import { useDispatch } from "react-redux";
 import { initialUser } from "../../../features/authentication/authSlice";
-import { gapi } from "gapi-script";
 
 const ProfileMenu = ({
   user,
@@ -18,6 +17,7 @@ const ProfileMenu = ({
   const handleLogout = async () => {
     try {
       await logoutUser().unwrap();
+      const gapi = import("gapi-script").then((module) => module.gapi);
       if (gapi.auth2) {
         const auth2 = gapi.auth2.getAuthInstance();
         if (auth2) {
@@ -47,7 +47,7 @@ const ProfileMenu = ({
               </button>
             </div>
             {isProfileOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <div className="absolute right-0 z-999 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="px-4 py-2 text-sm text-gray-700 border-b">
                   Signed in as <br />
                   <span className="font-medium">{user.email}</span>
