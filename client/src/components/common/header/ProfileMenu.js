@@ -34,7 +34,7 @@ const ProfileMenu = ({
 
   return (
     <div className="hidden md:block">
-      <div className="ml-4 flex items-center md:ml-6">
+      <div className="flex items-center ml-4">
         {user ? (
           <div className="relative ml-3" ref={profileMenuRef}>
             <div>

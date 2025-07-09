@@ -2,12 +2,13 @@ import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   AcademicCapIcon,
-  ArrowPathIcon,
-  CheckCircleIcon,
   PencilSquareIcon,
   SparklesIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+
+const CtaSection = React.lazy(() => import("./CtaSection"));
+const HowItWorks = React.lazy(() => import("./HowItWorks"));
 
 const LandingPage = () => {
   const features = [
@@ -215,91 +216,9 @@ const LandingPage = () => {
       </div>
 
       {/* How It Works Section */}
-      <section ref={howItWorksRef} className="bg-white dark:bg-gray-800 py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-base font-semibold leading-7 text-indigo-600">
-              Our Simple Process
-            </h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-              Master Knowledge in 3 Easy Steps
-            </p>
-          </div>
-          <div className="relative mt-16">
-            <div className="absolute left-1/2 top-0 h-full w-px bg-gray-400 dark:bg-gray-600"></div>
-            <div className="space-y-16">
-              <div className="relative flex items-center">
-                <div className="w-1/2 pr-8 text-right">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    1. Create
-                  </h3>
-                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                    Start by creating your own flashcard decks. Add questions,
-                    answers, and any other information you need to learn.
-                  </p>
-                </div>
-                <div className="w-1/2 pl-8">
-                  <div className="absolute left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-full border-2 border-gray-300 dark:border-gray-600">
-                    <PencilSquareIcon className="h-8 w-8 text-indigo-600" />
-                  </div>
-                </div>
-              </div>
-              <div className="relative flex items-center">
-                <div className="w-1/2 pr-8">
-                  <div className="absolute left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-full border-2 border-gray-300 dark:border-gray-600">
-                    <ArrowPathIcon className="h-8 w-8 text-indigo-600" />
-                  </div>
-                </div>
-                <div className="w-1/2 pl-8 text-left">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    2. Review
-                  </h3>
-                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                    Our intelligent system will notify you at the optimal time
-                    to review each card, ensuring maximum retention.
-                  </p>
-                </div>
-              </div>
-              <div className="relative flex items-center">
-                <div className="w-1/2 pr-8 text-right">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">3. Quiz</h3>
-                  <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                    Test your knowledge with our interactive quizzes and track
-                    your performance to see how much you've learned.
-                  </p>
-                </div>
-                <div className="w-1/2 pl-8">
-                  <div className="absolute left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 p-2 rounded-full border-2 border-gray-300 dark:border-gray-600">
-                    <CheckCircleIcon className="h-8 w-8 text-indigo-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HowItWorks ref={howItWorksRef} />
 
-      {/* CTA Section */}
-      <div className="bg-gray-50 dark:bg-gray-900">
-        <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-24 lg:px-8">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-            <span className="block">Ready to dive in?</span>
-            <span className="block text-indigo-600">
-              Start learning for free today.
-            </span>
-          </h2>
-          <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
-            <div className="inline-flex rounded-md shadow">
-              <Link
-                to="/authenticate"
-                className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-5 py-3 text-base font-medium text-white hover:bg-indigo-700"
-              >
-                Sign up now
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+      <CtaSection />
     </div>
   );
 };

@@ -83,7 +83,7 @@ function Header() {
               </div>
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="ml-auto mr-4 flex items-center">
             <ThemeToggler />
             <ProfileMenu
               user={user}

@@ -16,7 +16,6 @@ function Authentication() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    console.log(user);
     if (!user) return;
     // redirect to home if user is already logged in
     navigate("/");
