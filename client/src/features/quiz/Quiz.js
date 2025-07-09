@@ -77,29 +77,29 @@ function Quiz() {
       );
     }
 
+    if (user) {
+      // Detailed quiz attempt tracking using flashcard_id
+      const attemptDetails = {
+        email: user.email,
+        card_id: _id,
+        flashcard_id: currentQuestion.cardId,
+        correct: isCorrect,
+      };
+      updateUser(attemptDetails); // Fire-and-forget is okay here
+
+      // General correct/incorrect tracking
+      const generalDetails = {
+        card_id: _id,
+        email: user.email,
+        type: isCorrect ? "total-correct" : "total-incorrect",
+      };
+      updateUser(generalDetails).then((res) =>
+        dispatch(modifyUser(generalDetails))
+      );
+    }
+
     if (isCorrect) {
       setScore(score + 1);
-      if (user) {
-        const updateDetails = {
-          card_id: _id,
-          email: user.email,
-          type: "total-correct",
-        };
-        updateUser(updateDetails).then((res) =>
-          dispatch(modifyUser(updateDetails))
-        );
-      }
-    } else {
-      if (user) {
-        const updateDetails = {
-          card_id: _id,
-          email: user.email,
-          type: "total-incorrect",
-        };
-        updateUser(updateDetails).then((res) =>
-          dispatch(modifyUser(updateDetails))
-        );
-      }
     }
   };
 

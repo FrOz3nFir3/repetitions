@@ -1,6 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 
-const Modal = ({ isOpen, onClose, children }) => {
+const Modal = ({ className, isOpen, onClose, children }) => {
+  useEffect(() => {
+    if (isOpen) {
+      // When the modal is open, we want to prevent the background from scrolling
+      document.body.style.overflow = "hidden";
+    }
+
+    // Cleanup function to run when the modal is closed or the component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]); // This effect runs whenever the `isOpen` prop changes
+
   if (!isOpen) {
     return null;
   }
@@ -11,7 +23,9 @@ const Modal = ({ isOpen, onClose, children }) => {
       onClick={onClose}
     >
       <div
-        className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+        className={`relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 ${
+          className ?? ""
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

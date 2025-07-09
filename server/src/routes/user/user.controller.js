@@ -3,6 +3,7 @@ const {
   findUserByEmail,
   updateUserDetails,
   getUserProgress,
+  getUserById,
 } = require("../../models/users/users.model");
 const { sendCookie } = require("./auth.controller");
 const bcrypt = require("bcrypt");
@@ -28,7 +29,9 @@ async function httpCreateNewUser(req, res) {
       return res.status(409).json({ error: "confirm password does not match" });
     }
     if (newUser.password.length < 5) {
-      return res.status(409).json({ error: "Password should be minimum 5 characters" });
+      return res
+        .status(409)
+        .json({ error: "Password should be minimum 5 characters" });
     }
 
     const userExists = await findUserByEmail(newUser.email);
@@ -56,7 +59,7 @@ async function httpCreateNewUser(req, res) {
 async function httpUpdateUser(req, res) {
   try {
     const updatedUser = updateUserDetails(req.body);
-    res.status(200).json({ok: true});
+    res.status(200).json({ ok: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -119,13 +122,39 @@ function httpLogoutUser(req, res) {
 }
 
 function httpGetUserProgress(req, res) {
-  const  userId = req.params.userId;
+  const userId = req.params.userId;
 
   try {
     const user = getUserProgress(userId);
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error });
+  }
+}
+
+async function httpGetDetailedReport(req, res) {
+  const { card_id } = req.params;
+  const { id: userId } = req.token;
+
+  try {
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const cardProgress = user.studying.find(
+      (s) => s.card_id && s.card_id.toString() === card_id
+    );
+
+    if (!cardProgress) {
+      return res
+        .status(404)
+        .json({ error: "Card progress not found for this user." });
+    }
+
+    res.status(200).json(cardProgress.quizAttempts || []);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 }
 
@@ -136,5 +165,6 @@ module.exports = {
   httpLogoutUser,
   httpGetAuthDetails,
   httpUpdateUser,
-  httpGetUserProgress
+  httpGetUserProgress,
+  httpGetDetailedReport,
 };

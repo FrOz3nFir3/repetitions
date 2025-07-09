@@ -28,7 +28,11 @@ function Cards() {
   );
 }
 
-export function CardsBySearch({ cards, showCategory = false, actionType = "link" }) {
+export function CardsBySearch({
+  cards,
+  showCategory = false,
+  showContinue = false,
+}) {
   const [searchValue, setSearchValue] = React.useState("");
   const handleSearchChange = (event) =>
     setSearchValue(event.target.value.toLowerCase());
@@ -74,7 +78,12 @@ export function CardsBySearch({ cards, showCategory = false, actionType = "link"
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCards.map((card) => (
-            <CardDetails key={card._id} {...card} showCategory={showCategory} actionType={actionType} />
+            <CardDetails
+              key={card._id}
+              {...card}
+              showCategory={showCategory}
+              showContinue={showContinue}
+            />
           ))}
         </div>
       )}
@@ -91,43 +100,37 @@ function CardDetails(data) {
     review,
     reviewLength = 0,
     showCategory,
-    actionType,
+    showContinue,
   } = data;
 
-  const cardContent = (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-transform transform hover:scale-105 hover:shadow-lg h-full flex flex-col">
-      <div className="flex-grow">
-        {showCategory && (
-          <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mb-1">
-            {category}
-          </p>
-        )}
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
-          {mainTopic}
-        </h2>
-        <p className="text-gray-600 dark:text-gray-300 font-semibold mt-1 truncate">
-          {subTopic}
-        </p>
-      </div>
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {review?.length || reviewLength} flashcards
-        </p>
-        {actionType === 'continue' && (
-          <Link to={`/card/${_id}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-500">
-            Continue &rarr;
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-
-  return actionType === 'link' ? (
+  return (
     <Link to={`/card/${_id}`} className="block">
-      {cardContent}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-transform transform hover:scale-105 hover:shadow-lg h-full flex flex-col">
+        <div className="flex-grow">
+          {showCategory && (
+            <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mb-1">
+              {category}
+            </p>
+          )}
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
+            {mainTopic}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 font-semibold mt-1 truncate">
+            {subTopic}
+          </p>
+        </div>
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {review?.length || reviewLength} flashcards
+          </p>
+          {showContinue && (
+            <button className="pointer-events-none text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+              Continue &rarr;
+            </button>
+          )}
+        </div>
+      </div>
     </Link>
-  ) : (
-    cardContent
   );
 }
 

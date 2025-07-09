@@ -10,7 +10,7 @@ export const apiSlice = createApi({
         ? `http://localhost:3000/api`
         : "/api",
   }),
-  tagTypes: ["Card"],
+  tagTypes: ["Card", "IndividualCard", "Report"],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({
     getAllCards: builder.query({
@@ -34,6 +34,7 @@ export const apiSlice = createApi({
 
     getIndividualCard: builder.query({
       query: (id) => `/card/${id}`,
+      providesTags: ["IndividualCard"],
       // providesTags: ["Card"],
     }),
 
@@ -52,7 +53,8 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: card,
       }),
-      invalidatesTags: (result, error, arg) => (!error ? ["Card"] : null),
+      invalidatesTags: (result, error, arg) =>
+        !error ? ["Card", "IndividualCard"] : null,
     }),
 
     postRegisterUser: builder.mutation({
@@ -79,12 +81,18 @@ export const apiSlice = createApi({
       query: (id) => `/user/${id}`,
     }),
 
+    getDetailedReport: builder.query({
+      query: (card_id) => `/user/report/${card_id}`,
+      providesTags: "Report",
+    }),
+
     patchUpdateUser: builder.mutation({
       query: (user) => ({
         url: "/user",
         method: "PATCH",
         body: user,
       }),
+      invalidatesTags: (result, error, arg) => (!error ? ["Report"] : null),
     }),
 
     postLogoutUser: builder.mutation({
@@ -117,4 +125,5 @@ export const {
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
   usePostCardsByIdsMutation,
+  useGetDetailedReportQuery,
 } = apiSlice;

@@ -5,6 +5,7 @@ const {
   httpLoginGoogleUser,
   httpLogoutUser,
   httpUpdateUser,
+  httpGetDetailedReport,
 } = require("./user.controller");
 const { requireAuthentication } = require("../../middleware/auth.middleware");
 const {
@@ -23,6 +24,13 @@ userRouter.get(
   httpGetAuthDetails
 );
 userRouter.post("/", apiLimiter, httpUpdateUser);
+
+userRouter.get(
+  "/report/:card_id",
+  apiLimiter,
+  requireAuthentication,
+  httpGetDetailedReport
+);
 
 // Apply the stricter auth limiter to registration and login routes
 userRouter.post("/register", authLimiter, httpCreateNewUser);

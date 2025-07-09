@@ -11,12 +11,20 @@ import {
   LockClosedIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
+import DetailedReportModal from "./DetailedReportModal"; // Assuming this will be created
 
 function Profile() {
   const user = useSelector(selectCurrentUser);
   const cardsIds = user?.studying?.map(({ card_id }) => card_id) || [];
   const [getCards, { data: cardDetails = [], isLoading }] =
     usePostCardsByIdsMutation();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [selectedCard, setSelectedCard] = React.useState(null);
+
+  const handleViewReport = (card) => {
+    setSelectedCard(card);
+    setIsModalOpen(true);
+  };
 
   React.useEffect(() => {
     if (user) {
@@ -251,11 +259,17 @@ function Profile() {
 
                     <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 mt-auto">
                       <Link
-                        to={`/card/${progress.card_id}`}
+                        to={`/card/${progress.card_id}/quiz`}
                         className="w-full text-center block rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700"
                       >
                         Continue Studying
                       </Link>
+                      <button
+                        onClick={() => handleViewReport(progress)}
+                        className="w-full text-center block rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 mt-2"
+                      >
+                        View Detailed Report
+                      </button>
                     </div>
                   </div>
                 );
@@ -279,6 +293,13 @@ function Profile() {
           )}
         </div>
       </div>
+      {selectedCard && (
+        <DetailedReportModal
+          isOpen={isModalOpen}
+          card={selectedCard}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

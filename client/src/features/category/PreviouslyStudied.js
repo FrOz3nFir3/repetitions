@@ -105,11 +105,7 @@ const PreviouslyStudied = () => {
         </div>
       </div>
 
-      <CardsBySearch
-        cards={filteredCards}
-        showCategory={true}
-        actionType="continue"
-      />
+      <CardsBySearch cards={filteredCards} showCategory showContinue />
     </div>
   );
 };
