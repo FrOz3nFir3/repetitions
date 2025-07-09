@@ -43,18 +43,8 @@ function Quiz() {
           setSelectedAnswer(null);
         } else {
           setIsFinished(true);
-          if (user) {
-            const updateDetails = {
-              card_id: _id,
-              email: user.email,
-              type: "times-finished",
-            };
-            updateUser(updateDetails).then((res) =>
-              dispatch(modifyUser(updateDetails))
-            );
-          }
         }
-      }, 2000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [selectedAnswer, currentQuestionIndex, review.length]);
@@ -63,44 +53,51 @@ function Quiz() {
     if (selectedAnswer) return;
 
     const isCorrect = option === currentQuestion.answer;
-    setSelectedAnswer({ option, isCorrect });
-
-    const hasStarted = currentQuestionIndex === 0 ? true : false;
-    if (user && hasStarted) {
-      const updateDetails = {
-        card_id: _id,
-        email: user.email,
-        type: "times-started",
-      };
-      updateUser(updateDetails).then((res) =>
-        dispatch(modifyUser(updateDetails))
-      );
-    }
-
-    if (user) {
-      // Detailed quiz attempt tracking using flashcard_id
-      const attemptDetails = {
-        email: user.email,
-        card_id: _id,
-        flashcard_id: currentQuestion.cardId,
-        correct: isCorrect,
-      };
-      updateUser(attemptDetails); // Fire-and-forget is okay here
-
-      // General correct/incorrect tracking
-      const generalDetails = {
-        card_id: _id,
-        email: user.email,
-        type: isCorrect ? "total-correct" : "total-incorrect",
-      };
-      updateUser(generalDetails).then((res) =>
-        dispatch(modifyUser(generalDetails))
-      );
-    }
-
     if (isCorrect) {
       setScore(score + 1);
     }
+    setSelectedAnswer({ option, isCorrect });
+
+    if (!user) return;
+
+    // Construct a single, comprehensive payload for the backend
+    const updateDetails = {
+      email: user.email,
+      card_id: _id,
+      flashcard_id: currentQuestion.cardId,
+      correct: isCorrect,
+      isFirstQuestion: currentQuestionIndex === 0,
+      isLastQuestion: currentQuestionIndex === review.length - 1,
+    };
+
+    // Single API call to update all user progress
+    updateUser(updateDetails).then((res) => {
+      // conditionally update user state
+      if (updateDetails.isFirstQuestion) {
+        dispatch(
+          modifyUser({ card_id: updateDetails.card_id, type: "times-started" })
+        );
+      }
+
+      if (updateDetails.isLastQuestion) {
+        dispatch(
+          modifyUser({ card_id: updateDetails.card_id, type: "times-finished" })
+        );
+      }
+
+      if (updateDetails.correct) {
+        dispatch(
+          modifyUser({ card_id: updateDetails.card_id, type: "total-correct" })
+        );
+      } else {
+        dispatch(
+          modifyUser({
+            card_id: updateDetails.card_id,
+            type: "total-incorrect",
+          })
+        );
+      }
+    });
   };
 
   const restartQuiz = () => {

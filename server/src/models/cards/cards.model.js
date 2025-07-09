@@ -23,6 +23,27 @@ async function getCardById(id) {
   return Card.findOne({ _id: { $eq: id } });
 }
 
+async function getCardsByIds(ids) {
+  // Validate ids to prevent unnecessary database queries with invalid data.
+  if (!ids || ids.length === 0 || !Array.isArray(ids)) {
+    return [];
+  }
+  const cards = await Card.find(
+    {
+      _id: {
+        $in: ids,
+      },
+    },
+    {
+      "main-topic": 1,
+      "sub-topic": 1,
+      category: 1,
+      reviewLength: { $size: "$review" },
+    }
+  );
+  return cards;
+}
+
 /**
  * Updates a card document based on the provided details.
  * This function handles multiple update scenarios:
@@ -147,5 +168,6 @@ module.exports = {
   createNewCard,
   getAllCards,
   getCardById,
+  getCardsByIds,
   updateCard,
 };

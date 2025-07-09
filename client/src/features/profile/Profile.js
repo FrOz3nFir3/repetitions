@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../authentication/authSlice";
 import { Link } from "react-router-dom";
-import { usePostCardsByIdsMutation } from "../../api/apiSlice";
+import { useGetUserProgressQuery } from "../../api/apiSlice";
 import ProfileSkeleton from "../../components/skeletons/ProfileSkeleton";
 import {
   BookOpenIcon,
@@ -15,9 +15,12 @@ import DetailedReportModal from "./DetailedReportModal"; // Assuming this will b
 
 function Profile() {
   const user = useSelector(selectCurrentUser);
-  const cardsIds = user?.studying?.map(({ card_id }) => card_id) || [];
-  const [getCards, { data: cardDetails = [], isLoading }] =
-    usePostCardsByIdsMutation();
+  const { data: studyingCards, isLoading } = useGetUserProgressQuery(
+    undefined,
+    {
+      skip: !user, // Skip fetching if the user is not logged in
+    }
+  );
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedCard, setSelectedCard] = React.useState(null);
 
@@ -25,12 +28,6 @@ function Profile() {
     setSelectedCard(card);
     setIsModalOpen(true);
   };
-
-  React.useEffect(() => {
-    if (user) {
-      getCards({ cardsIds });
-    }
-  }, [user]);
 
   if (isLoading) {
     return <ProfileSkeleton />;
@@ -152,7 +149,7 @@ function Profile() {
           {totalDecksStudied > 0 ? (
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {user.studying.map((progress, index) => {
-                const details = cardDetails[index];
+                const details = studyingCards[index];
                 if (!details) return null;
 
                 const correct = progress["total-correct"] || 0;

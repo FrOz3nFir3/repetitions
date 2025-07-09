@@ -1,28 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../authentication/authSlice";
-import { usePostCardsByIdsMutation } from "../../api/apiSlice";
+import { useGetUserProgressQuery } from "../../api/apiSlice";
 import { CardsBySearch } from "../cards/Cards";
 import PreviouslyStudiedSkeleton from "./PreviouslyStudiedSkeleton";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const PreviouslyStudied = () => {
+  // TODO: if new deck is studied then user.studying doesn't get updated fix this until page is refresh
   const user = useSelector(selectCurrentUser);
-  const cardsIds = user?.studying.map(({ card_id }) => card_id) || [];
-  const [
-    getCards,
-    { data: studyingCards = [], isLoading: isLoadingStudyingCards },
-  ] = usePostCardsByIdsMutation();
+  const { data: studyingCards, isLoading } = useGetUserProgressQuery(
+    undefined,
+    {
+      skip: !user,
+    }
+  );
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    if (user) {
-      getCards({ cardsIds });
-    }
-  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -36,11 +32,11 @@ const PreviouslyStudied = () => {
     };
   }, []);
 
-  if (isLoadingStudyingCards) {
+  if (isLoading) {
     return <PreviouslyStudiedSkeleton />;
   }
 
-  if (!user || cardsIds.length === 0) {
+  if (!user || studyingCards.length === 0) {
     return null;
   }
 

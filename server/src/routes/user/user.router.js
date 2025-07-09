@@ -6,6 +6,7 @@ const {
   httpLogoutUser,
   httpUpdateUser,
   httpGetDetailedReport,
+  httpGetUserProgress,
 } = require("./user.controller");
 const { requireAuthentication } = require("../../middleware/auth.middleware");
 const {
@@ -24,6 +25,13 @@ userRouter.get(
   httpGetAuthDetails
 );
 userRouter.post("/", apiLimiter, httpUpdateUser);
+
+userRouter.get(
+  "/progress",
+  apiLimiter,
+  requireAuthentication,
+  httpGetUserProgress
+);
 
 userRouter.get(
   "/report/:card_id",

@@ -29,6 +29,7 @@ export const apiSlice = createApi({
         method: "POST",
         body: card,
       }),
+      providesTags: ["Report"],
       // invalidatesTags: (result, error, arg) => (!error ? ["Card"] : null),
     }),
 
@@ -78,7 +79,8 @@ export const apiSlice = createApi({
     }),
 
     getUserProgress: builder.query({
-      query: (id) => `/user/${id}`,
+      query: () => `/user/progress`,
+      providesTags: ["Report"],
     }),
 
     getDetailedReport: builder.query({
@@ -125,6 +127,8 @@ export const {
   usePatchUpdateUserMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
-  usePostCardsByIdsMutation,
+  // no longer used now
+  // usePostCardsByIdsMutation
+  useGetUserProgressQuery,
   useGetDetailedReportQuery,
 } = apiSlice;

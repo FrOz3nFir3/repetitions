@@ -1,4 +1,5 @@
 const Users = require("./users.mongo");
+const mongoose = require("mongoose");
 
 async function findUserByEmail(email) {
   return Users.findOne({ email: { $eq: email } });
@@ -23,12 +24,18 @@ async function createNewUser(user) {
 // Uses $eq to prevent NoSQL injection.
 async function getUserProgress(userId) {
   // Validate userId to prevent unnecessary database queries with invalid data.
-  if (userId === "null" || userId === "undefined") {
+  if (
+    !userId ||
+    userId === "null" ||
+    userId === "undefined" ||
+    !mongoose.Types.ObjectId.isValid(userId)
+  ) {
     return [];
   }
-  // The aggregation pipeline was missing a return statement.
+
+  const userObjectId = new mongoose.Types.ObjectId(userId);
   return Users.aggregate([
-    { $match: { _id: { $eq: userId } } },
+    { $match: { _id: { $eq: userObjectId } } },
     {
       $lookup: {
         from: "cards",
@@ -45,109 +52,99 @@ async function getUserProgress(userId) {
  * Handles general progress counters and detailed quiz attempt tracking.
  * Uses $eq in queries to prevent NoSQL injection.
  */
+/**
+ * Atomically updates a user's progress for a single quiz answer.
+ * Handles initial progress creation and all subsequent updates in one operation.
+ * Uses $eq in queries to prevent NoSQL injection.
+ */
 async function updateUserDetails(details) {
-  const { email, card_id, type, flashcard_id, correct } = details;
+  const {
+    email,
+    card_id,
+    flashcard_id,
+    correct,
+    isFirstQuestion,
+    isLastQuestion,
+  } = details;
   const options = { new: true, upsert: true };
 
-  const user = await Users.findOne({ email: { $eq: email } });
+  // Find the user and the specific card progress in one go.
+  const user = await Users.findOne({
+    email: { $eq: email },
+    "studying.card_id": { $eq: card_id },
+  });
 
-  if (!user) {
-    console.error("User not found for email:", email);
-    return null;
-  }
+  if (user) {
+    // The user has studied this card before. Update existing progress.
+    const updateQuery = { $inc: {} };
+    const cardProgress = user.studying.find(
+      (s) => s.card_id.toString() === card_id
+    );
+    const attemptIndex = cardProgress.quizAttempts.findIndex(
+      (qa) => qa.flashcard_id === flashcard_id
+    );
 
-  const cardProgress = user.studying.find(
-    (s) => s.card_id && s.card_id.toString() === card_id
-  );
+    // Increment total correct/incorrect
+    updateQuery.$inc[
+      `studying.$.${correct ? "total-correct" : "total-incorrect"}`
+    ] = 1;
 
-  if (type) {
-    // This handles general progress updates like 'times-started', 'times-finished', etc.
-    if (cardProgress) {
-      const incrementField = `studying.$.${type}`;
-      return Users.findOneAndUpdate(
-        { email: { $eq: email }, "studying.card_id": { $eq: card_id } },
-        { $inc: { [incrementField]: 1 } },
-        options
-      );
-    } else {
-      const newUserProgress = {
-        card_id,
-        "times-started": type === "times-started" ? 1 : 0,
-        "times-finished": type === "times-finished" ? 1 : 0,
-        "total-correct": type === "total-correct" ? 1 : 0,
-        "total-incorrect": type === "total-incorrect" ? 1 : 0,
-        quizAttempts: [],
-      };
-      return Users.findOneAndUpdate(
-        { email: { $eq: email } },
-        { $push: { studying: newUserProgress } },
-        options
-      );
+    // Increment times-started or times-finished if applicable
+    if (isFirstQuestion) {
+      updateQuery.$inc[`studying.$.times-started`] = 1;
     }
-  } else if (flashcard_id) {
-    // This handles specific quiz question attempts using flashcard_id
-    if (cardProgress) {
-      const attemptIndex = cardProgress.quizAttempts.findIndex(
-        (qa) => qa.flashcard_id === flashcard_id
-      );
+    if (isLastQuestion) {
+      updateQuery.$inc[`studying.$.times-finished`] = 1;
+    }
 
-      if (attemptIndex > -1) {
-        // If the question has been attempted before, update it
-        const update = {
-          $inc: {
-            [`studying.$.quizAttempts.${attemptIndex}.attempts`]: 1,
-          },
-        };
-        if (correct) {
-          update.$inc[
-            `studying.$.quizAttempts.${attemptIndex}.timesCorrect`
-          ] = 1;
-        } else {
-          update.$inc[
-            `studying.$.quizAttempts.${attemptIndex}.timesIncorrect`
-          ] = 1;
-        }
-        return Users.findOneAndUpdate(
-          { email: { $eq: email }, "studying.card_id": { $eq: card_id } },
-          update,
-          options
-        );
-      } else {
-        // If this is the first attempt for this question, add it
-        const newAttempt = {
+    if (attemptIndex > -1) {
+      // This specific question has been attempted before.
+      updateQuery.$inc[`studying.$.quizAttempts.${attemptIndex}.attempts`] = 1;
+      updateQuery.$inc[
+        `studying.$.quizAttempts.${attemptIndex}.${
+          correct ? "timesCorrect" : "timesIncorrect"
+        }`
+      ] = 1;
+    } else {
+      // First attempt for this specific question.
+      updateQuery.$push = {
+        "studying.$.quizAttempts": {
           flashcard_id,
           attempts: 1,
           timesCorrect: correct ? 1 : 0,
           timesIncorrect: correct ? 0 : 1,
-        };
-        return Users.findOneAndUpdate(
-          { email: { $eq: email }, "studying.card_id": { $eq: card_id } },
-          { $push: { "studying.$.quizAttempts": newAttempt } },
-          options
-        );
-      }
-    } else {
-      // If the user has never studied this card before, create the entry
-      const newAttempt = {
-        flashcard_id,
-        attempts: 1,
-        timesCorrect: correct ? 1 : 0,
-        timesIncorrect: correct ? 0 : 1,
+        },
       };
-      const newUserProgress = {
-        card_id,
-        "times-started": 1,
-        "times-finished": 0,
-        "total-correct": 0,
-        "total-incorrect": 0,
-        quizAttempts: [newAttempt],
-      };
-      return Users.findOneAndUpdate(
-        { email: { $eq: email } },
-        { $push: { studying: newUserProgress } },
-        options
-      );
     }
+
+    return Users.findOneAndUpdate(
+      { email: { $eq: email }, "studying.card_id": { $eq: card_id } },
+      updateQuery,
+      options
+    );
+  } else {
+    // First time this user is studying this card deck.
+    const newUserProgress = {
+      card_id,
+      "times-started": 1, // Always 1 on the first go
+      "times-finished": isLastQuestion ? 1 : 0, // 1 if it's a single-question quiz
+      "total-correct": correct ? 1 : 0,
+      "total-incorrect": correct ? 0 : 1,
+      quizAttempts: [
+        {
+          flashcard_id,
+          attempts: 1,
+          timesCorrect: correct ? 1 : 0,
+          timesIncorrect: correct ? 0 : 1,
+        },
+      ],
+    };
+
+    return Users.findOneAndUpdate(
+      { email: { $eq: email } },
+      { $push: { studying: newUserProgress } },
+      { ...options, upsert: true }
+    );
   }
 }
 

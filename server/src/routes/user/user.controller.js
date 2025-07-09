@@ -5,6 +5,7 @@ const {
   getUserProgress,
   getUserById,
 } = require("../../models/users/users.model");
+const { getCardsByIds } = require("../../models/cards/cards.model");
 const { sendCookie } = require("./auth.controller");
 const bcrypt = require("bcrypt");
 const User = require("../../models/users/users.mongo");
@@ -121,13 +122,20 @@ function httpLogoutUser(req, res) {
   }
 }
 
-function httpGetUserProgress(req, res) {
-  const userId = req.params.userId;
+async function httpGetUserProgress(req, res) {
+  const { id: userId } = req.token;
 
   try {
-    const user = getUserProgress(userId);
-    res.status(200).json(user);
+    const user = await getUserProgress(userId);
+    const cardsIds = user?.[0]?.studying?.map((s) => s.card_id) ?? [];
+    if (!cardsIds || cardsIds.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const cards = await getCardsByIds(cardsIds);
+    return res.json(cards);
   } catch (error) {
+    console.log(error, "erro");
     res.status(500).json({ error });
   }
 }
