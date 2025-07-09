@@ -297,7 +297,10 @@ function Profile() {
         <DetailedReportModal
           isOpen={isModalOpen}
           card={selectedCard}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedCard(null);
+          }}
         />
       )}
     </div>

@@ -110,4 +110,4 @@ const PreviouslyStudied = () => {
   );
 };
 
-export default PreviouslyStudied;
+export default React.memo(PreviouslyStudied);

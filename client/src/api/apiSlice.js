@@ -83,7 +83,7 @@ export const apiSlice = createApi({
 
     getDetailedReport: builder.query({
       query: (card_id) => `/user/report/${card_id}`,
-      providesTags: "Report",
+      providesTags: ["Report"],
     }),
 
     patchUpdateUser: builder.mutation({
@@ -92,6 +92,7 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: user,
       }),
+      // TODO: for now this invalidates the entire Report tag, but ideally it should only invalidate the specific card's report map the card id later
       invalidatesTags: (result, error, arg) => (!error ? ["Report"] : null),
     }),
 
