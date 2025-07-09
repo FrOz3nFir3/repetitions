@@ -1,51 +1,36 @@
 import React, { useState } from "react";
-import {
-  useGetAllCardsQuery,
-  usePostCardsByIdsMutation,
-} from "../../api/apiSlice";
+import { useGetAllCardsQuery } from "../../api/apiSlice";
 import { Outlet, useParams, useNavigate } from "react-router-dom";
-import Loading from "../../components/common/Loading";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../authentication/authSlice";
-import { CardsBySearch } from "../cards/Cards";
+import CategorySkeleton from "../../components/skeletons/CategorySkeleton";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import PreviouslyStudied from "./PreviouslyStudied";
 
 function Category() {
-  const user = useSelector(selectCurrentUser);
+  const categoryOutletRef = React.useRef(null);
   const navigate = useNavigate();
   const { name: categoryName } = useParams();
 
   const { data: allCards = [], isFetching: isFetchingAllCards } =
     useGetAllCardsQuery();
 
-  const cardsIds = user?.studying.map(({ card_id }) => card_id) || [];
-  const [
-    getCards,
-    { data: studyingCards = [], isLoading: isLoadingStudyingCards },
-  ] = usePostCardsByIdsMutation();
-
-  React.useEffect(() => {
-    if (user) {
-      getCards({ cardsIds });
-    }
-  }, [user]);
-
   const [newCategory, setNewCategory] = useState("");
 
   const handleCategoryClick = (category) => {
+    categoryOutletRef.current.scrollIntoView({ behavior: "smooth" });
     navigate(category);
   };
 
   const handleCreateCategory = (e) => {
     e.preventDefault();
     if (newCategory.trim()) {
+      categoryOutletRef.current.scrollIntoView({ behavior: "smooth" });
       navigate(newCategory.trim());
       setNewCategory("");
     }
   };
 
   if (isFetchingAllCards) {
-    return <Loading />;
+    return <CategorySkeleton />;
   }
 
   const uniqueCategories = [...new Set(allCards)];
@@ -53,16 +38,16 @@ function Category() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto !px-4 !py-8">
+        <PreviouslyStudied />
         <div className="my-8">
-          <h1 className="text-3xl font-semi text-gray-900 dark:text-white sm:text-4xl">
+          <h3 className="text-3xl font-semi text-gray-900 dark:text-white sm:text-4xl">
             Choose a Category
-          </h1>
-          <p className="mt-8 text-lg text-gray-600 dark:text-gray-300">
+          </h3>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
             Select a category to start studying or create a new one to begin
             your learning journey.
           </p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {uniqueCategories.map((category) => (
             <div
@@ -101,23 +86,9 @@ function Category() {
             </form>
           </div>
         </div>
-
-        <div className="mt-16">
+        <div ref={categoryOutletRef} className="mt-16">
           <Outlet />
         </div>
-
-        {user && (
-          <div className="mt-16">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-              Previously Studied Cards:
-            </h3>
-            {isLoadingStudyingCards ? (
-              <Loading />
-            ) : (
-              <CardsBySearch cards={studyingCards} />
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

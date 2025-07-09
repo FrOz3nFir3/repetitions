@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../authentication/authSlice";
 import { Link } from "react-router-dom";
 import { usePostCardsByIdsMutation } from "../../api/apiSlice";
-import Loading from "../../components/common/Loading";
+import ProfileSkeleton from "../../components/skeletons/ProfileSkeleton";
 import {
   BookOpenIcon,
   QuestionMarkCircleIcon,
@@ -14,7 +14,7 @@ import {
 
 function Profile() {
   const user = useSelector(selectCurrentUser);
-  const cardsIds = user?.studying.map(({ card_id }) => card_id) || [];
+  const cardsIds = user?.studying?.map(({ card_id }) => card_id) || [];
   const [getCards, { data: cardDetails = [], isLoading }] =
     usePostCardsByIdsMutation();
 
@@ -24,7 +24,11 @@ function Profile() {
     }
   }, [user]);
 
-  if (!user) {
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
+
+  if (!user && !isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center text-center py-12 px-4">
         <div className="max-w-lg w-full bg-white p-10 rounded-xl shadow-lg">
@@ -47,10 +51,6 @@ function Profile() {
         </div>
       </div>
     );
-  }
-
-  if (isLoading || cardDetails.length !== cardsIds.length) {
-    return <Loading />;
   }
 
   // Calculate overall stats

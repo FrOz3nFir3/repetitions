@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { useGetCardsByCategoryQuery } from "../../api/apiSlice";
 import { NewCard } from "./NewCard";
-import Loading from "../../components/common/Loading";
+import CardSkeleton from "../../components/skeletons/CardSkeleton";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 function Cards() {
@@ -10,7 +10,7 @@ function Cards() {
   const { data = [], isFetching } = useGetCardsByCategoryQuery(category);
 
   if (isFetching) {
-    return <Loading />;
+    return <CardSkeleton />;
   }
 
   return (
@@ -28,7 +28,7 @@ function Cards() {
   );
 }
 
-export function CardsBySearch({ cards }) {
+export function CardsBySearch({ cards, showCategory = false, actionType = "link" }) {
   const [searchValue, setSearchValue] = React.useState("");
   const handleSearchChange = (event) =>
     setSearchValue(event.target.value.toLowerCase());
@@ -74,7 +74,7 @@ export function CardsBySearch({ cards }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCards.map((card) => (
-            <CardDetails key={card._id} {...card} />
+            <CardDetails key={card._id} {...card} showCategory={showCategory} actionType={actionType} />
           ))}
         </div>
       )}
@@ -87,26 +87,47 @@ function CardDetails(data) {
     _id,
     ["main-topic"]: mainTopic,
     ["sub-topic"]: subTopic,
+    category,
     review,
     reviewLength = 0,
+    showCategory,
+    actionType,
   } = data;
 
-  return (
-    <Link to={`/card/${_id}`} className="block">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-transform transform hover:scale-105 hover:shadow-lg">
+  const cardContent = (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-transform transform hover:scale-105 hover:shadow-lg h-full flex flex-col">
+      <div className="flex-grow">
+        {showCategory && (
+          <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 mb-1">
+            {category}
+          </p>
+        )}
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
           {mainTopic}
         </h2>
-        <p className="text-indigo-600 font-semibold mt-1 truncate">
+        <p className="text-gray-600 dark:text-gray-300 font-semibold mt-1 truncate">
           {subTopic}
         </p>
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {review?.length || reviewLength} flashcards
-          </p>
-        </div>
       </div>
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {review?.length || reviewLength} flashcards
+        </p>
+        {actionType === 'continue' && (
+          <Link to={`/card/${_id}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+            Continue &rarr;
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+
+  return actionType === 'link' ? (
+    <Link to={`/card/${_id}`} className="block">
+      {cardContent}
     </Link>
+  ) : (
+    cardContent
   );
 }
 
