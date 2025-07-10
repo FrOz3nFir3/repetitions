@@ -1,50 +1,53 @@
 import React, { useState, useRef } from "react";
-import { usePostCreateNewCardMutation } from "../../../../api/apiSlice";
-import Loading from "../../../../components/ui/Loading";
+import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
+import { useDispatch } from "react-redux";
+import { modifyCard } from "../../state/cardSlice";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import Loading from "../../../../components/ui/Loading";
 import Modal from "../../../../components/ui/Modal";
 
-export function NewFlashcard({ category, newCard }) {
-  const [isOpen, setIsOpen] = useState(newCard);
-  const [createNewCard, { isLoading, error, isSuccess }] =
-    usePostCreateNewCardMutation();
+export function NewFlashcard({ flashcardId }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
+  const dispatch = useDispatch();
 
-  const topicRef = useRef(null);
-  const subTopicRef = useRef(null);
+  const questionRef = useRef();
+  const answerRef = useRef();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const mainTopic = topicRef.current.value;
-    const subTopic = subTopicRef.current.value;
-    createNewCard({ mainTopic, subTopic, category });
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const question = questionRef.current.value;
+    const answer = answerRef.current.value;
+    const updateDetails = { _id: flashcardId, question, answer };
+
+    updateCard(updateDetails).then((response) => {
+      if (response.data) {
+        dispatch(modifyCard(updateDetails));
+        setIsOpen(false);
+      }
+    });
   };
-
-  React.useEffect(() => {
-    if (!open || !isSuccess) return;
-    setIsOpen(false);
-  }, [open, isSuccess]);
 
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-2 sm:px-4 py-2 text-xs sm:text-sm  font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        className="inline-flex items-center gap-x-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
       >
         <PlusIcon className="-ml-0.5 h-5 w-5" />
-        Add New Card
+        Add New Flashcard
       </button>
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Create a New Card
+              Add a New Flashcard
             </h3>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              This will create a new card with a main topic and a sub-topic.
+              Add a question and answer to create a new flashcard.
             </p>
           </div>
-
           {error && (
             <div className="rounded-md bg-red-50 p-4 text-red-700">
               {error.data.error}
@@ -53,49 +56,33 @@ export function NewFlashcard({ category, newCard }) {
 
           <div>
             <label
-              htmlFor="category"
+              htmlFor="question"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Category
+              Question
             </label>
-            <input
-              type="text"
-              id="category"
-              value={category}
-              disabled
-              className="block w-full mt-1 rounded-md bg-gray-100 dark:bg-gray-700 sm:text-sm border-gray-300 dark:border-gray-600 shadow-sm p-2 text-gray-900 dark:text-white"
+            <textarea
+              id="question"
+              ref={questionRef}
+              rows={3}
+              required
+              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
             />
           </div>
 
           <div>
             <label
-              htmlFor="topic"
+              htmlFor="answer"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Main Topic
+              Answer
             </label>
-            <input
-              type="text"
-              id="topic"
-              ref={topicRef}
+            <textarea
+              id="answer"
+              ref={answerRef}
+              rows={3}
               required
-              className="block w-full mt-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="sub-topic"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Sub-Topic
-            </label>
-            <input
-              type="text"
-              id="sub-topic"
-              ref={subTopicRef}
-              required
-              className="block w-full mt-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
             />
           </div>
 
@@ -105,7 +92,7 @@ export function NewFlashcard({ category, newCard }) {
               disabled={isLoading}
               className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
             >
-              {isLoading ? <Loading /> : "Create Card"}
+              {isLoading ? <Loading /> : "Add Flashcard"}
             </button>
           </div>
         </form>

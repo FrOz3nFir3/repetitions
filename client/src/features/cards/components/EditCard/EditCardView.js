@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentCard } from "../../state/cardSlice";
-import { NewFlashcard } from "../../components/EditCard/NewFlashCardForm";
+import { NewFlashcard } from "./NewFlashCardForm";
 import FlashcardList from "./FlashcardList";
 
 const EditCard = () => {
@@ -19,7 +19,7 @@ const EditCard = () => {
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
           Manage Flashcards ({review.length})
         </h2>
-        <NewFlashcard _id={_id} />
+        <NewFlashcard flashcardId={_id} />
       </div>
       <FlashcardList flashcards={review} cardId={_id} />
     </div>

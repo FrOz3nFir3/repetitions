@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
 import { useGetCardsByCategoryQuery } from "../../../api/apiSlice";
-import { NewFlashcard } from "./EditCard/NewFlashCardForm";
+import { NewCard } from "./EditCard/NewCardForm";
 import CardSkeleton from "../../../components/ui/skeletons/CardSkeleton";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
@@ -20,7 +20,7 @@ function Cards() {
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
             Cards in {category}
           </h1>
-          <NewFlashcard category={category} newCard={data.length === 0} />
+          <NewCard category={category} newCard={data.length === 0} />
         </div>
         <CardsBySearch cards={data} />
       </div>
