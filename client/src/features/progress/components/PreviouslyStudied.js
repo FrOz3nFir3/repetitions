@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
 import { useGetUserProgressQuery } from "../../../api/apiSlice";
-import { CardsBySearch } from "../../cards/components/CardsList";
+import SearchableCardGrid from "../../cards/components/SearchableCardGrid";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import PreviouslyStudiedSkeleton from "../../../components/ui/skeletons/PreviouslyStudiedSkeleton";
 
@@ -35,7 +35,7 @@ const PreviouslyStudied = () => {
     return <PreviouslyStudiedSkeleton />;
   }
 
-  if (!user || studyingCards.length === 0) {
+  if (!user || !studyingCards || studyingCards?.length === 0) {
     return null;
   }
 
@@ -100,7 +100,7 @@ const PreviouslyStudied = () => {
         </div>
       </div>
 
-      <CardsBySearch cards={filteredCards} showCategory showContinue />
+      <SearchableCardGrid cards={filteredCards} showCategory showContinue />
     </div>
   );
 };

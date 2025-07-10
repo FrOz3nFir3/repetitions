@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../state/authSlice";
 import { useNavigate } from "react-router-dom";
 import LoginByGoogle from "../components/LoginByGoogle";
 import LoginForm from "../components/LoginForm";
 import RegisterForm from "../components/RegisterForm";
+import AuthTabs from "../components/AuthTabs";
 
 function AuthenticationPage() {
   const user = useSelector(selectCurrentUser);
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
-      // redirect to home if user is already logged in
       navigate("/");
     }
   }, [user, navigate]);
@@ -32,28 +32,7 @@ function AuthenticationPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-2xl rounded-lg sm:px-10">
           <div className="mb-6">
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
-              <button
-                onClick={() => setIsLogin(true)}
-                className={`w-1/2 py-4 text-center font-medium text-sm transition-colors ${
-                  isLogin
-                    ? "border-b-2 border-indigo-600 text-indigo-600"
-                    : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white"
-                }`}
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => setIsLogin(false)}
-                className={`w-1/2 py-4 text-center font-medium text-sm transition-colors ${
-                  !isLogin
-                    ? "border-b-2 border-indigo-600 text-indigo-600"
-                    : "text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white"
-                }`}
-              >
-                Sign Up
-              </button>
-            </div>
+            <AuthTabs isLogin={isLogin} onTabChange={setIsLogin} />
           </div>
 
           {isLogin ? <LoginForm /> : <RegisterForm />}

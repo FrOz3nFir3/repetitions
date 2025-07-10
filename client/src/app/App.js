@@ -10,7 +10,7 @@ const CategoryPage = lazy(() =>
   import("../features/cards/routes/CategoryPage")
 );
 import CategoryPageSkeleton from "../components/ui/skeletons/CategoryPageSkeleton";
-const Cards = lazy(() => import("../features/cards/components/CardsList"));
+const CardsList = lazy(() => import("../features/cards/components/CardsList"));
 
 const IndividualCardPage = lazy(() =>
   import("../features/cards/routes/IndividualCardPage")
@@ -19,9 +19,7 @@ import IndividualCardPageSkeleton from "../components/ui/skeletons/IndividualCar
 const Review = lazy(() =>
   import("../features/cards/components/Flashcard/ReviewView")
 );
-const Quiz = lazy(() =>
-  import("../features/cards/components/Flashcard/QuizView")
-);
+const Quiz = lazy(() => import("../features/cards/components/Quiz/QuizView"));
 const EditCard = lazy(() =>
   import("../features/cards/components/EditCard/EditCardView")
 );
@@ -66,7 +64,7 @@ function App() {
               </Suspense>
             }
           >
-            <Route path=":name" element={<Cards />} />
+            <Route path=":name" element={<CardsList />} />
           </Route>
 
           <Route

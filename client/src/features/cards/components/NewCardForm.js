@@ -1,10 +1,10 @@
 import React, { useState, useRef } from "react";
-import { usePostCreateNewCardMutation } from "../../../../api/apiSlice";
-import Loading from "../../../../components/ui/Loading";
+import { usePostCreateNewCardMutation } from "../../../api/apiSlice";
+import Loading from "../../../components/ui/Loading";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import Modal from "../../../../components/ui/Modal";
+import Modal from "../../../components/ui/Modal";
 
-export function NewCard({ category, newCard }) {
+export function NewCardForm({ category, newCard }) {
   const [isOpen, setIsOpen] = useState(newCard);
   const [createNewCard, { isLoading, error, isSuccess }] =
     usePostCreateNewCardMutation();

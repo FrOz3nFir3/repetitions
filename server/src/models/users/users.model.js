@@ -65,20 +65,14 @@ async function updateUser(userId, userDetails) {
  * Handles initial progress creation and all subsequent updates in one operation.
  * Uses $eq in queries to prevent NoSQL injection.
  */
-async function updateUserDetails(details) {
-  const {
-    email,
-    card_id,
-    flashcard_id,
-    correct,
-    isFirstQuestion,
-    isLastQuestion,
-  } = details;
+async function updateUserDetails(userId, details) {
+  const { card_id, flashcard_id, correct, isFirstQuestion, isLastQuestion } =
+    details;
   const options = { new: true, upsert: true };
 
   // Find the user and the specific card progress in one go.
   const user = await Users.findOne({
-    email: { $eq: email },
+    _id: { $eq: userId },
     "studying.card_id": { $eq: card_id },
   });
 
@@ -126,7 +120,7 @@ async function updateUserDetails(details) {
     }
 
     return Users.findOneAndUpdate(
-      { email: { $eq: email }, "studying.card_id": { $eq: card_id } },
+      { _id: { $eq: userId }, "studying.card_id": { $eq: card_id } },
       updateQuery,
       options
     );
@@ -149,7 +143,7 @@ async function updateUserDetails(details) {
     };
 
     return Users.findOneAndUpdate(
-      { email: { $eq: email } },
+      { _id: { $eq: userId } },
       { $push: { studying: newUserProgress } },
       { ...options, upsert: true }
     );
