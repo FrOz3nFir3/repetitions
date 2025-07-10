@@ -19,8 +19,8 @@ const EditCard = lazy(() => import("../features/cards/EditCard"));
 const Authentication = lazy(() =>
   import("../features/authentication/Authentication")
 );
-const Profile = lazy(() => import("../features/profile/Profile"));
-import ProfileSkeleton from "../components/skeletons/ProfileSkeleton";
+const Progress = lazy(() => import("../features/progress/Progress"));
+import ProgressSkeleton from "../components/skeletons/ProgressSkeleton";
 
 function App() {
   return (
@@ -64,14 +64,13 @@ function App() {
           </Route>
 
           <Route
-            path="profile"
+            path="progress"
             element={
-              <Suspense fallback={<ProfileSkeleton />}>
-                <Profile />
+              <Suspense fallback={<ProgressSkeleton />}>
+                <Progress />
               </Suspense>
             }
           />
-
           <Route path="authenticate" element={<Authentication />} />
 
           <Route path="*" element={<NotFound />} />

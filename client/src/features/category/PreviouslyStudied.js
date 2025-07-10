@@ -7,7 +7,6 @@ import PreviouslyStudiedSkeleton from "./PreviouslyStudiedSkeleton";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const PreviouslyStudied = () => {
-  // TODO: if new deck is studied then user.studying doesn't get updated fix this until page is refresh
   const user = useSelector(selectCurrentUser);
   const { data: studyingCards, isLoading } = useGetUserProgressQuery(
     undefined,

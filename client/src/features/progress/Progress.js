@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../authentication/authSlice";
 import { Link } from "react-router-dom";
 import { useGetUserProgressQuery } from "../../api/apiSlice";
-import ProfileSkeleton from "../../components/skeletons/ProfileSkeleton";
+import ProfileSkeleton from "../../components/skeletons/ProgressSkeleton";
 import {
   BookOpenIcon,
   QuestionMarkCircleIcon,
@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import DetailedReportModal from "./DetailedReportModal"; // Assuming this will be created
 
-function Profile() {
+function Progress() {
   const user = useSelector(selectCurrentUser);
   const { data: studyingCards, isLoading } = useGetUserProgressQuery(
     undefined,
@@ -42,7 +42,7 @@ function Profile() {
             Access Restricted
           </h2>
           <p className="mt-2 text-gray-600">
-            You need to be logged in to view your profile and track your
+            You need to be logged in to view your progress and track your
             progress.
           </p>
           <div className="mt-8">
@@ -107,11 +107,11 @@ function Profile() {
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 !py-12">
         <header className="my-10">
-          <h1 className="!mb-4 text-4xl font-extrabold text-gray-900 dark:text-white">
-            Your Profile
-          </h1>
+          <h2 className="!mb-4 text-4xl font-extrabold text-gray-900 dark:text-white">
+            Your Progress
+          </h2>
           <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-            Welcome back,{" "}
+            Welcome back,
             <span className="font-semibold text-indigo-600">{user.email}</span>!
             Here's a look at your progress.
           </p>
@@ -263,7 +263,7 @@ function Profile() {
                       </Link>
                       <button
                         onClick={() => handleViewReport(progress)}
-                        className="w-full text-center block rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 mt-2"
+                        className="cursor-pointer w-full text-center block rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 mt-2"
                       >
                         View Detailed Report
                       </button>
@@ -293,7 +293,7 @@ function Profile() {
       {selectedCard && (
         <DetailedReportModal
           isOpen={isModalOpen}
-          card={selectedCard}
+          cardId={selectedCard.card_id}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedCard(null);
@@ -304,4 +304,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default Progress;

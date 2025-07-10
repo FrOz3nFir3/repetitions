@@ -9,6 +9,9 @@ import {
   LightBulbIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/solid";
+const DetailedReportModal = React.lazy(() =>
+  import("../progress/DetailedReportModal")
+);
 
 function Quiz() {
   const dispatch = useDispatch();
@@ -21,6 +24,7 @@ function Quiz() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const currentQuestion = review[currentQuestionIndex];
 
@@ -140,11 +144,28 @@ function Quiz() {
         </div>
         <button
           onClick={restartQuiz}
-          className="cursor-pointer mt-8 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-4 text-lg font-medium text-white shadow-sm hover:bg-indigo-700"
+          className="cursor-pointer mt-6 inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
         >
           <ArrowPathIcon className="h-6 w-6 mr-3" />
           Take Again
         </button>
+        {user && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="cursor-pointer mt-4 inline-flex items-center justify-center text-center  rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 "
+          >
+            View Detailed Report
+          </button>
+        )}
+        {isModalOpen && (
+          <DetailedReportModal
+            isOpen={isModalOpen}
+            cardId={card._id}
+            onClose={() => {
+              setIsModalOpen(false);
+            }}
+          />
+        )}
       </div>
     );
   }

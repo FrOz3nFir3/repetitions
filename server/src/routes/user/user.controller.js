@@ -19,7 +19,8 @@ async function httpGetAuthDetails(req, res) {
     res.status(200).json({ user: null });
   } else {
     let user = await User.findById(token.id);
-    res.status(200).json({ user });
+    const { _id, password, __v, ...userDetails } = user._doc; // Exclude certain fields from the response
+    res.status(200).json({ user: userDetails });
   }
 }
 

@@ -7,18 +7,18 @@ import { XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import Modal from "../../components/common/Modal";
 import DetailedReportModalSkeleton from "../../components/skeletons/DetailedReportModalSkeleton";
 
-function DetailedReportModal({ card, isOpen, onClose }) {
+function DetailedReportModal({ cardId, isOpen, onClose }) {
   const {
     data: reportData,
     isLoading: isLoadingReport,
     isError: isErrorReport,
-  } = useGetDetailedReportQuery(card.card_id, { skip: !isOpen });
+  } = useGetDetailedReportQuery(cardId, { skip: !isOpen });
 
   const {
     data: cardData,
     isLoading: isLoadingCard,
     isError: isErrorCard,
-  } = useGetIndividualCardQuery(card.card_id, { skip: !isOpen });
+  } = useGetIndividualCardQuery(cardId, { skip: !isOpen });
 
   const isLoading = isLoadingReport || isLoadingCard;
   const isError = isErrorReport || isErrorCard;
@@ -67,7 +67,7 @@ function DetailedReportModal({ card, isOpen, onClose }) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-600"
+                  className="cursor-pointer p-2 rounded-full text-gray-600 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-600"
                 >
                   <XMarkIcon className="h-6 w-6" />
                 </button>

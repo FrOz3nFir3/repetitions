@@ -10,7 +10,7 @@ export const apiSlice = createApi({
         ? `http://localhost:3000/api`
         : "/api",
   }),
-  tagTypes: ["Card", "IndividualCard", "Report"],
+  tagTypes: ["Card", "IndividualCard", "Report", "User"],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({
     getAllCards: builder.query({
@@ -76,6 +76,7 @@ export const apiSlice = createApi({
 
     getAuthDetails: builder.query({
       query: () => `/user/authed`,
+      providesTags: ["User"],
     }),
 
     getUserProgress: builder.query({
@@ -94,8 +95,15 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: user,
       }),
-      // TODO: for now this invalidates the entire Report tag, but ideally it should only invalidate the specific card's report map the card id later
-      invalidatesTags: (result, error, arg) => (!error ? ["Report"] : null),
+      invalidatesTags: (result, error, arg) => {
+        if (!error && arg.isFirstQuestion) {
+          // TODO: for every first question it will call user auth can optimize this later
+          return ["Report", "User"];
+        }
+        if (!error) {
+          return ["Report"];
+        }
+      },
     }),
 
     postLogoutUser: builder.mutation({

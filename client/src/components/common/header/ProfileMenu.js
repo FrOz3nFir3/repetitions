@@ -53,11 +53,11 @@ const ProfileMenu = ({
                   <span className="font-medium">{user.email}</span>
                 </div>
                 <Link
-                  to="/profile"
+                  to="/progress"
                   onClick={() => setIsProfileOpen(false)}
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                  Your Profile
+                  Your Progress
                 </Link>
                 <button
                   onClick={handleLogout}
