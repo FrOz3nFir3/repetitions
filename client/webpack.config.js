@@ -18,7 +18,7 @@ module.exports = (env, argv) => {
   }
   return {
     entry: {
-      main: "./src/script.js",
+      main: "./src/app/main.js",
     },
     output: {
       path: path.join(__dirname, "..", "server", "public"),

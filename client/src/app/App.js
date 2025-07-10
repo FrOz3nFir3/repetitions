@@ -1,28 +1,46 @@
 import React, { Suspense, lazy } from "react";
-import Header from "../components/common/Header";
+import Header from "../components/layout/Header/Header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NotFound from "../components/common/NotFound";
+import NotFound from "../components/ui/NotFound";
 
-import LandingPage from "../features/home/LandingPage";
-import LandingPageSkeleton from "../features/home/LandingPageSkeleton";
+import LandingPage from "../features/home/routes/LandingPage";
+import LandingPageSkeleton from "../components/ui/skeletons/LandingPageSkeleton";
 
-const Category = lazy(() => import("../features/category/Category"));
-import CategorySkeleton from "../components/skeletons/CategorySkeleton";
-const Cards = lazy(() => import("../features/cards/Cards"));
-
-const Individual = lazy(() => import("../features/cards/Individual"));
-import IndividualSkeleton from "../components/skeletons/IndividualSkeleton";
-const Review = lazy(() => import("../features/review/Review"));
-const Quiz = lazy(() => import("../features/quiz/Quiz"));
-const EditCard = lazy(() => import("../features/cards/EditCard"));
-
-const Authentication = lazy(() =>
-  import("../features/authentication/Authentication")
+const CategoryPage = lazy(() =>
+  import("../features/cards/routes/CategoryPage")
 );
-const Progress = lazy(() => import("../features/progress/Progress"));
-const Profile = lazy(() => import("../features/profile/Profile"));
-import ProfileSkeleton from "../components/skeletons/ProfileSkeleton";
-import ProgressSkeleton from "../components/skeletons/ProgressSkeleton";
+import CategoryPageSkeleton from "../components/ui/skeletons/CategoryPageSkeleton";
+const Cards = lazy(() => import("../features/cards/components/CardsList"));
+
+const IndividualCardPage = lazy(() =>
+  import("../features/cards/routes/IndividualCardPage")
+);
+import IndividualCardPageSkeleton from "../components/ui/skeletons/IndividualCardPageSkeleton";
+const Review = lazy(() =>
+  import("../features/cards/components/Flashcard/ReviewView")
+);
+const Quiz = lazy(() =>
+  import("../features/cards/components/Flashcard/QuizView")
+);
+const EditCard = lazy(() =>
+  import("../features/cards/components/EditCard/EditCardView")
+);
+
+const AuthenticationPage = lazy(() =>
+  import("../features/authentication/routes/AuthenticationPage")
+);
+const ProgressPage = lazy(() =>
+  import("../features/progress/routes/ProgressPage")
+);
+import ProgressPageSkeleton from "../components/ui/skeletons/ProgressPageSkeleton";
+const ProfilePage = lazy(() =>
+  import("../features/profile/routes/ProfilePage")
+);
+import ProfilePageSkeleton from "../components/ui/skeletons/ProfilePageSkeleton";
+
+const NotFoundPage = lazy(() =>
+  import("../features/not-found/routes/NotFoundPage")
+);
 
 function App() {
   return (
@@ -43,8 +61,8 @@ function App() {
           <Route
             path="/category"
             element={
-              <Suspense fallback={<CategorySkeleton />}>
-                <Category />
+              <Suspense fallback={<CategoryPageSkeleton />}>
+                <CategoryPage />
               </Suspense>
             }
           >
@@ -55,8 +73,8 @@ function App() {
             exact
             path="card/:id"
             element={
-              <Suspense fallback={<IndividualSkeleton />}>
-                <Individual />
+              <Suspense fallback={<IndividualCardPageSkeleton />}>
+                <IndividualCardPage />
               </Suspense>
             }
           >
@@ -68,22 +86,22 @@ function App() {
           <Route
             path="progress"
             element={
-              <Suspense fallback={<ProgressSkeleton />}>
-                <Progress />
+              <Suspense fallback={<ProgressPageSkeleton />}>
+                <ProgressPage />
               </Suspense>
             }
           />
           <Route
             path="profile"
             element={
-              <Suspense fallback={<ProfileSkeleton />}>
-                <Profile />
+              <Suspense fallback={<ProfilePageSkeleton />}>
+                <ProfilePage />
               </Suspense>
             }
           />
-          <Route path="authenticate" element={<Authentication />} />
+          <Route path="authenticate" element={<AuthenticationPage />} />
 
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
     </BrowserRouter>
