@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { usePatchUpdateUserMutation } from "../../api/apiSlice";
+import { usePatchUpdateUserProgressMutation } from "../../api/apiSlice";
 import { selectCurrentCard } from "../cards/cardSlice";
 import { selectCurrentUser, modifyUser } from "../authentication/authSlice";
 import {
@@ -19,7 +19,7 @@ function Quiz() {
   const user = useSelector(selectCurrentUser);
   const { _id, review = [] } = card;
 
-  const [updateUser] = usePatchUpdateUserMutation();
+  const [updateUser] = usePatchUpdateUserProgressMutation();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);

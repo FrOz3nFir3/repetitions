@@ -5,6 +5,10 @@ async function findUserByEmail(email) {
   return Users.findOne({ email: { $eq: email } });
 }
 
+async function findUserByGoogleId(googleId) {
+  return Users.findOne({ googleId: { $eq: googleId } });
+}
+
 async function getUserById(userId) {
   // Validate userId to prevent unnecessary database queries with invalid data.
   if (userId === "null" || userId === "undefined") {
@@ -52,6 +56,10 @@ async function getUserProgress(userId) {
  * Handles general progress counters and detailed quiz attempt tracking.
  * Uses $eq in queries to prevent NoSQL injection.
  */
+async function updateUser(userId, userDetails) {
+  return Users.findByIdAndUpdate(userId, userDetails, { new: true });
+}
+
 /**
  * Atomically updates a user's progress for a single quiz answer.
  * Handles initial progress creation and all subsequent updates in one operation.
@@ -150,8 +158,10 @@ async function updateUserDetails(details) {
 
 module.exports = {
   findUserByEmail,
+  findUserByGoogleId,
   createNewUser,
   getUserProgress,
   updateUserDetails,
   getUserById,
+  updateUser,
 };

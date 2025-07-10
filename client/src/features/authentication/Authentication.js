@@ -8,7 +8,11 @@ import { initialUser, selectCurrentUser } from "./authSlice";
 import { useNavigate } from "react-router-dom";
 import Loading from "../../components/common/Loading";
 import LoginByGoogle from "./LoginByGoogle";
-import { AtSymbolIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+import {
+  AtSymbolIcon,
+  LockClosedIcon,
+  UserIcon,
+} from "@heroicons/react/24/solid";
 
 function Authentication() {
   const user = useSelector(selectCurrentUser);
@@ -171,6 +175,7 @@ const RegisterForm = () => {
   const [registerUser, { data, isLoading, error }] =
     usePostRegisterUserMutation();
   const dispatch = useDispatch();
+  const nameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
   const confirmPasswordRef = useRef();
@@ -183,10 +188,11 @@ const RegisterForm = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const name = nameRef.current.value;
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
     const confirmPassword = confirmPasswordRef.current.value;
-    registerUser({ email, password, confirmPassword });
+    registerUser({ name, email, password, confirmPassword });
   };
 
   return (
@@ -196,6 +202,26 @@ const RegisterForm = () => {
           {error.data.error}
         </div>
       )}
+      <div>
+        <label htmlFor="name-register" className="sr-only">
+          Name
+        </label>
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <UserIcon className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            id="name-register"
+            name="name"
+            type="text"
+            autoComplete="name"
+            required
+            ref={nameRef}
+            className={commonInputClass}
+            placeholder="Full Name"
+          />
+        </div>
+      </div>
       <div>
         <label htmlFor="email-register" className="sr-only">
           Email address

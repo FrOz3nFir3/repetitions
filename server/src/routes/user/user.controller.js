@@ -1,7 +1,9 @@
 const {
   createNewUser,
   findUserByEmail,
+  findUserByGoogleId,
   updateUserDetails,
+  updateUser,
   getUserProgress,
   getUserById,
 } = require("../../models/users/users.model");
@@ -19,6 +21,9 @@ async function httpGetAuthDetails(req, res) {
     res.status(200).json({ user: null });
   } else {
     let user = await User.findById(token.id);
+    if (!user) {
+      res.status(200).json({ user: null });
+    }
     const { _id, password, __v, ...userDetails } = user._doc; // Exclude certain fields from the response
     res.status(200).json({ user: userDetails });
   }
@@ -27,6 +32,9 @@ async function httpGetAuthDetails(req, res) {
 async function httpCreateNewUser(req, res) {
   const newUser = req.body;
   try {
+    if (!newUser.name || typeof newUser.name !== "string") {
+      return res.status(400).json({ error: "Name is required" });
+    }
     if (newUser.password != newUser.confirmPassword) {
       return res.status(409).json({ error: "confirm password does not match" });
     }
@@ -60,7 +68,58 @@ async function httpCreateNewUser(req, res) {
 
 async function httpUpdateUser(req, res) {
   try {
-    const updatedUser = updateUserDetails(req.body);
+    const { id } = req.token;
+    const { name, email, googleId } = req.body;
+    const updateFields = {};
+
+    if (name?.trim() === "") {
+      return res.status(400).json({ error: "Name cannot be empty" });
+    }
+    if (name) {
+      updateFields.name = name.trim();
+    }
+
+    if (email?.trim() === "") {
+      return res.status(400).json({ error: "Email cannot be empty" });
+    }
+    if (email) {
+      const { validDomain, validMailbox } = await emailValidator.verify(email);
+      if (!validDomain || !validMailbox) {
+        return res.status(400).json({ error: "Invalid Email" });
+      }
+      const existingUser = await findUserByEmail(email.trim());
+      if (existingUser && existingUser._id.toString() !== id) {
+        return res.status(409).json({ error: "Email already in use" });
+      }
+      updateFields.email = email;
+    }
+
+    if (googleId) {
+      const existingGoogleUser = await findUserByGoogleId(googleId);
+      if (existingGoogleUser && existingGoogleUser._id.toString() !== id) {
+        return res.status(409).json({
+          error: "This Google account is already linked to another user.",
+        });
+      }
+      updateFields.googleId = googleId;
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update." });
+    }
+
+    const updatedUser = await updateUser(id, updateFields);
+    const { _id, password, __v, ...userDetails } = updatedUser._doc;
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+async function httpUpdateUserProgress(req, res) {
+  try {
+    await updateUserDetails(req.body);
     res.status(200).json({ ok: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -92,20 +151,24 @@ async function httpLoginUser(req, res) {
 }
 
 async function httpLoginGoogleUser(req, res) {
-  const { email, error } = req.body;
+  const { email, name, googleId } = req.body;
   try {
-    if (error) {
-      return res.status(409).json(req.body);
+    if (!email) {
+      return res.status(400).json({ error: "Google login failed no email" });
     }
-    let user = await findUserByEmail(email);
+
+    let user = await findUserByGoogleId(googleId);
     if (user == null) {
       // meaning it is first time they are logging in
-      user = await createNewUser({ email });
+      user = await createNewUser({ email, name, googleId });
+    } else if (!user.googleId) {
+      // User exists but googleId is not set
+      user = await updateUser(user._id, { googleId, name });
     }
 
     sendCookie(res, user._id);
-
-    return res.status(200).json({ user });
+    const { _id, password, __v, ...userDetails } = user._doc;
+    return res.status(200).json({ user: userDetails });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error });
@@ -176,4 +239,5 @@ module.exports = {
   httpUpdateUser,
   httpGetUserProgress,
   httpGetDetailedReport,
+  httpUpdateUserProgress,
 };

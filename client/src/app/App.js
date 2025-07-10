@@ -20,6 +20,8 @@ const Authentication = lazy(() =>
   import("../features/authentication/Authentication")
 );
 const Progress = lazy(() => import("../features/progress/Progress"));
+const Profile = lazy(() => import("../features/profile/Profile"));
+import ProfileSkeleton from "../components/skeletons/ProfileSkeleton";
 import ProgressSkeleton from "../components/skeletons/ProgressSkeleton";
 
 function App() {
@@ -68,6 +70,14 @@ function App() {
             element={
               <Suspense fallback={<ProgressSkeleton />}>
                 <Progress />
+              </Suspense>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <Suspense fallback={<ProfileSkeleton />}>
+                <Profile />
               </Suspense>
             }
           />

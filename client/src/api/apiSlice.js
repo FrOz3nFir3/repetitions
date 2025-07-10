@@ -89,9 +89,18 @@ export const apiSlice = createApi({
       providesTags: ["Report"],
     }),
 
-    patchUpdateUser: builder.mutation({
+    patchUpdateUserProfile: builder.mutation({
       query: (user) => ({
         url: "/user",
+        method: "PATCH",
+        body: user,
+      }),
+      invalidatesTags: (result, error, arg) => (!error ? ["User"] : null),
+    }),
+
+    patchUpdateUserProgress: builder.mutation({
+      query: (user) => ({
+        url: "/user/progress",
         method: "PATCH",
         body: user,
       }),
@@ -132,7 +141,8 @@ export const {
   usePostRegisterUserMutation,
   usePostLoginUserMutation,
   useGetAuthDetailsQuery,
-  usePatchUpdateUserMutation,
+  usePatchUpdateUserProfileMutation,
+  usePatchUpdateUserProgressMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
   // no longer used now

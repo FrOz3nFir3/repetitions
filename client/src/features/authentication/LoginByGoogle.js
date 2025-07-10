@@ -52,7 +52,9 @@ function LoginByGoogle(props) {
   function successfulLogin(credentialResponse) {
     const decoded = jwtDecode(credentialResponse.credential);
     const email = decoded.email;
-    loginWithGoogle({ email });
+    const name = decoded.name;
+    const googleId = decoded.sub;
+    loginWithGoogle({ name, email, googleId });
   }
   function unsuccessfulLogin() {
     console.log("Login Failed");
