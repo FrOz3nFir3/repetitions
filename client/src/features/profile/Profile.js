@@ -148,7 +148,7 @@ const ProfileContent = () => {
                 className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               />
             </div>
-            <div className="flex justify-end space-x-2">
+            <div className="flex justify-start space-x-2">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -174,7 +174,7 @@ const ProfileContent = () => {
           <div className="mt-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <svg className="w-6 h-6 mr-2" viewBox="0 0 48 48">
+                <svg className="w-10 h-10 mr-2" viewBox="0 0 48 48">
                   <path
                     fill="#FFC107"
                     d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
@@ -192,14 +192,18 @@ const ProfileContent = () => {
                     d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 35.245 44 30.022 44 24c0-1.341-.138-2.65-.389-3.917z"
                   />
                 </svg>
-                <span className="text-gray-900 dark:text-white">Google</span>
+                <span className="text-2xl text-gray-900 dark:text-white">
+                  Google
+                </span>
               </div>
               {user.googleId ? (
-                <span className="text-green-500 font-medium">Connected</span>
+                <button className="pointer-events-none px-4 py-2 bg-green-500 text-white rounded-md ">
+                  Connected
+                </button>
               ) : (
                 <button
                   onClick={() => login()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  className="cursor-pointer px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                 >
                   Connect
                 </button>
