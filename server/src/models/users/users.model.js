@@ -57,7 +57,7 @@ async function getUserProgress(userId) {
  * Uses $eq in queries to prevent NoSQL injection.
  */
 async function updateUser(userId, userDetails) {
-  return Users.findByIdAndUpdate(userId, userDetails, { new: true });
+  return Users.findByIdAndUpdate({ $eq: userId }, userDetails, { new: true });
 }
 
 /**

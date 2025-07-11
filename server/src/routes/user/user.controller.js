@@ -20,7 +20,7 @@ async function httpGetAuthDetails(req, res) {
   if (token == null) {
     res.status(200).json({ user: null });
   } else {
-    let user = await User.findById(token.id);
+    let user = await User.findById({ $eq: token.id });
     if (!user) {
       res.status(200).json({ user: null });
     }
