@@ -2,8 +2,7 @@ import React, { useState, useRef } from "react";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import { useDispatch } from "react-redux";
 import { modifyCard } from "../../state/cardSlice";
-import { PlusIcon } from "@heroicons/react/24/outline";
-import Loading from "../../../../components/ui/Loading";
+import { PlusIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Modal from "../../../../components/ui/Modal";
 
 export function NewFlashcard({ flashcardId }) {
@@ -32,7 +31,7 @@ export function NewFlashcard({ flashcardId }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-x-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+        className="cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
       >
         <PlusIcon className="-ml-0.5 h-5 w-5" />
         Add New Flashcard
@@ -66,7 +65,8 @@ export function NewFlashcard({ flashcardId }) {
               ref={questionRef}
               rows={3}
               required
-              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              disabled={isLoading}
+              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-600"
             />
           </div>
 
@@ -82,7 +82,8 @@ export function NewFlashcard({ flashcardId }) {
               ref={answerRef}
               rows={3}
               required
-              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+              disabled={isLoading}
+              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-600"
             />
           </div>
 
@@ -90,9 +91,13 @@ export function NewFlashcard({ flashcardId }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+              className="cursor-pointer inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
             >
-              {isLoading ? <Loading /> : "Add Flashcard"}
+              {isLoading ? (
+                <ArrowPathIcon className="h-5 w-5 animate-spin" />
+              ) : (
+                "Add Flashcard"
+              )}
             </button>
           </div>
         </form>

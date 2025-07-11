@@ -2,11 +2,14 @@ import React, { useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { usePostLoginUserMutation } from "../../../api/apiSlice";
 import { initialUser } from "../state/authSlice";
-import Loading from "../../../components/ui/Loading";
-import { AtSymbolIcon, LockClosedIcon } from "@heroicons/react/24/solid";
+import {
+  AtSymbolIcon,
+  LockClosedIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/solid";
 
 const commonInputClass =
-  "block w-full rounded-lg border-gray-300 dark:border-gray-600 pl-12 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white";
+  "block w-full rounded-lg border-gray-300 dark:border-gray-600 pl-12 py-3 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-all bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-600";
 
 const LoginForm = () => {
   const [loginUser, { data, isLoading, error }] = usePostLoginUserMutation();
@@ -51,6 +54,7 @@ const LoginForm = () => {
             ref={emailRef}
             className={commonInputClass}
             placeholder="Email address"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -72,6 +76,7 @@ const LoginForm = () => {
             ref={passwordRef}
             className={commonInputClass}
             placeholder="Password"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -80,9 +85,13 @@ const LoginForm = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-transform transform hover:scale-105"
+          className="cursor-pointer w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-transform transform hover:scale-105"
         >
-          {isLoading ? <Loading count={1} /> : "Sign in"}
+          {isLoading ? (
+            <ArrowPathIcon className="h-5 w-5 animate-spin" />
+          ) : (
+            "Sign in"
+          )}
         </button>
       </div>
     </form>
