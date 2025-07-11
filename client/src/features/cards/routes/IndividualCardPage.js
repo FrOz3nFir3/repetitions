@@ -6,6 +6,7 @@ import IndividualCardPageSkeleton from "../../../components/ui/skeletons/Individ
 import { initialCard, selectCurrentCard } from "../state/cardSlice";
 import CardInfo from "../components/CardInfo";
 import CardActions from "../components/CardActions";
+import CardLogs from "../components/CardLogs";
 
 function IndividualCardPage() {
   const params = useParams();
@@ -25,7 +26,9 @@ function IndividualCardPage() {
     return <IndividualCardPageSkeleton />;
   }
 
-  const isDefaultView = location.pathname === `/card/${card._id}`;
+  const isDefaultView =
+    location.pathname === `/card/${card._id}` ||
+    location.pathname === `/card/${card._id}/`;
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
@@ -43,17 +46,21 @@ function IndividualCardPage() {
           <div className="lg:col-span-1 space-y-6">
             <CardInfo card={card} />
             <CardActions />
+            <CardLogs logs={card.logs || []} />
           </div>
 
           <div className="lg:col-span-2">
             {isDefaultView ? (
-              <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+              <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white ">
                   Select an action
                 </h3>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Choose Review, Quiz, or Manage Flashcards to get started.
                 </p>
+                <div className="mt-4 mx-auto">
+                  <CardActions layout="horizontal" />
+                </div>
               </div>
             ) : (
               <Outlet />

@@ -12,15 +12,38 @@ async function getAllCards() {
 }
 
 // Creates a new card document.
-async function createNewCard(card) {
-  const newCard = new Card(card);
+async function createNewCard(card, userId) {
+  const newCard = new Card({
+    ...card,
+    author: userId,
+    logs: [
+      {
+        eventType: "created",
+        user: userId,
+        summary: "Card created",
+      },
+    ],
+  });
   return newCard.save();
 }
 
 // Fetches a single card by its MongoDB document ID.
 // Uses findOne with $eq to prevent NoSQL injection.
 async function getCardById(id) {
-  return Card.findOne({ _id: { $eq: id } });
+  return Card.findOne({ _id: { $eq: id } })
+    .populate({
+      path: "author",
+      select: "name email -_id",
+    })
+    .populate({
+      path: "lastUpdatedBy",
+      select: "name email -_id",
+    })
+    .populate({
+      path: "logs.user",
+      select: "name email -_id",
+    })
+    .exec();
 }
 
 async function getCardsByIds(ids) {
@@ -46,12 +69,7 @@ async function getCardsByIds(ids) {
 
 /**
  * Updates a card document based on the provided details.
- * This function handles multiple update scenarios:
- * 1. Updating a specific flashcard within the 'review' array.
- * 2. Adding a new flashcard to the 'review' array.
- * 3. Deleting a flashcard from the 'review' array.
- * 4. Updating top-level fields of the card document.
- * Uses $eq in queries to prevent NoSQL injection.
+ * This function handles multiple update scenarios and logs detailed changes.
  */
 async function updateCard(details) {
   const {
@@ -63,104 +81,188 @@ async function updateCard(details) {
     question,
     answer,
     deleteCard,
+    userId,
     ...otherDetails
   } = details;
 
-  const options = { new: true }; // Return the updated document
-
-  // The original logic fetches the card first. This is only strictly necessary
-  // for adding a new card to determine the new cardId.
-  // getCardById is already secured against NoSQL injection.
-  const card = await getCardById(_id);
+  const card = await Card.findById(_id);
   if (!card) {
-    // To prevent errors on subsequent operations, we stop here.
-    // Consider throwing an error for better error handling upstream.
     return null;
   }
 
+  const options = { new: true };
+  let updateQuery = {};
+  const changes = [];
+  let summary = "";
+
   const isUpdatingSpecificCard = cardId != null;
-  // This condition is broad and will trigger if question and answer are present,
-  // but it's handled correctly by the if/else-if structure.
-  const isAddingNewCard = question && answer;
+  const isAddingNewCard = question && answer && !isUpdatingSpecificCard;
   const isUpdatingOtherFields = Object.keys(otherDetails).length > 0;
 
-  // Scenario 1: Update a specific flashcard in the 'review' array
   if (isUpdatingSpecificCard) {
-    let cardUpdate;
-    // Note: This positional index update is fragile. If the order of cards in the
-    // 'review' array changes, this will update the wrong card.
-    // A more robust solution would use arrayFilters with the unique cardId.
-    const review = `review.${cardId - 1}`;
+    const reviewIndex = card.review.findIndex((r) => r.cardId === cardId);
+    if (reviewIndex === -1) return card; // or throw error
 
-    if (question) {
-      cardUpdate = { $set: { [`${review}.question`]: question } };
-    } else if (answer) {
-      cardUpdate = { $set: { [`${review}.answer`]: answer } };
-    } else if (typeof optionIndex === "number" && option) {
-      cardUpdate = { $set: { [`${review}.options.${optionIndex}`]: option } };
-    } else if (option) {
-      cardUpdate = { $push: { [`${review}.options`]: option } };
-    } else if (minimumOptions) {
-      cardUpdate = {
-        $set: { [`${review}.minimumOptions`]: Number(minimumOptions) },
+    const reviewPath = `review.${reviewIndex}`;
+    const oldReview = card.review[reviewIndex];
+    const changedFields = [];
+
+    if (question !== undefined) {
+      updateQuery.$set = {
+        ...updateQuery.$set,
+        [`${reviewPath}.question`]: question,
       };
-    } else if (deleteCard) {
-      cardUpdate = { $pull: { review: { cardId } } };
+      changes.push({
+        field: `Question`,
+        oldValue: oldReview.question,
+        newValue: question,
+      });
+      changedFields.push("question");
     }
-
-    if (cardUpdate) {
-      return Card.findOneAndUpdate({ _id: { $eq: _id } }, cardUpdate, options);
+    if (answer !== undefined) {
+      updateQuery.$set = {
+        ...updateQuery.$set,
+        [`${reviewPath}.answer`]: answer,
+      };
+      changes.push({
+        field: `Answer`,
+        oldValue: oldReview.answer,
+        newValue: answer,
+      });
+      changedFields.push("answer");
+    }
+    if (option !== undefined) {
+      if (optionIndex !== undefined) {
+        updateQuery.$set = {
+          ...updateQuery.$set,
+          [`${reviewPath}.options.${optionIndex}`]: option,
+        };
+        changes.push({
+          field: `Option #${optionIndex + 1}`,
+          oldValue: oldReview.options[optionIndex],
+          newValue: option,
+        });
+      } else {
+        updateQuery.$push = {
+          ...updateQuery.$push,
+          [`${reviewPath}.options`]: option,
+        };
+        changes.push({ field: `New Option`, oldValue: null, newValue: option });
+      }
+      changedFields.push("options");
+    }
+    if (minimumOptions !== undefined) {
+      updateQuery.$set = {
+        ...updateQuery.$set,
+        [`${reviewPath}.minimumOptions`]: Number(minimumOptions),
+      };
+      changes.push({
+        field: `Minimum Options`,
+        oldValue: oldReview.minimumOptions,
+        newValue: Number(minimumOptions),
+      });
+      changedFields.push("minimum options");
+    }
+    if (deleteCard) {
+      updateQuery.$pull = { review: { cardId: cardId } };
+      changes.push({
+        field: `Flashcard #${cardId}`,
+        oldValue: oldReview,
+        newValue: "Deleted",
+      });
+      summary = `Deleted flashcard #${cardId}.`;
+    } else {
+      summary = `Updated ${changedFields.join(", ")} in flashcard #${cardId}.`;
     }
   } else if (isAddingNewCard) {
-    // Scenario 2: Add a new flashcard to the 'review' array
-    const cardsLength = card.review.length + 1;
-    const cardDetails = {
-      cardId: cardsLength,
+    const newFlashcard = {
+      cardId: card.review.length + 1,
       question,
       answer,
       minimumOptions: 2,
       options: [answer],
     };
-    return Card.findOneAndUpdate(
-      { _id: { $eq: _id } },
-      { $push: { review: cardDetails } },
-      options
-    );
+    updateQuery.$push = { review: newFlashcard };
+    changes.push({
+      field: "New Flashcard",
+      oldValue: null,
+      newValue: newFlashcard,
+    });
+    summary = `Added new flashcard #${newFlashcard.cardId}.`;
   } else if (isUpdatingOtherFields) {
-    // Scenario 3: Update top-level fields of the card document
-    const allowedUpdates = {};
-
     const {
       description,
       category,
       "main-topic": mainTopic,
       "sub-topic": subTopic,
     } = otherDetails;
+    const changedFields = [];
 
-    if (category) {
-      allowedUpdates.category = category;
+    if (category !== undefined && card.category !== category) {
+      updateQuery.$set = { ...updateQuery.$set, category };
+      changes.push({
+        field: "Category",
+        oldValue: card.category,
+        newValue: category,
+      });
+      changedFields.push("Category");
     }
-    if (mainTopic) {
-      allowedUpdates["main-topic"] = mainTopic;
+    if (mainTopic !== undefined && card["main-topic"] !== mainTopic) {
+      updateQuery.$set = { ...updateQuery.$set, "main-topic": mainTopic };
+      changes.push({
+        field: "Main Topic",
+        oldValue: card["main-topic"],
+        newValue: mainTopic,
+      });
+      changedFields.push("Main Topic");
     }
-    if (subTopic) {
-      allowedUpdates["sub-topic"] = subTopic;
+    if (subTopic !== undefined && card["sub-topic"] !== subTopic) {
+      updateQuery.$set = { ...updateQuery.$set, "sub-topic": subTopic };
+      changes.push({
+        field: "Sub Topic",
+        oldValue: card["sub-topic"],
+        newValue: subTopic,
+      });
+      changedFields.push("Sub Topic");
     }
-    if (description) {
-      allowedUpdates.description = description;
+    if (description !== undefined && card.description !== description) {
+      updateQuery.$set = { ...updateQuery.$set, description };
+      changes.push({
+        field: "Description",
+        oldValue: card.description,
+        newValue: description,
+      });
+      changedFields.push("Description");
     }
-
-    if (Object.keys(allowedUpdates).length > 0) {
-      return Card.findOneAndUpdate(
-        { _id: { $eq: _id } },
-        { $set: allowedUpdates },
-        options
-      );
+    if (changedFields.length > 0) {
+      summary = `Updated ${changedFields.join(", ")}.`;
     }
   }
 
-  // Return original card if no update logic was triggered
-  return card;
+  if (changes.length > 0) {
+    const logEntry = {
+      eventType: "updated",
+      user: userId,
+      summary: summary || "Card updated.",
+      changes,
+    };
+
+    if (updateQuery.$push) {
+      updateQuery.$push.logs = logEntry;
+    } else {
+      updateQuery.$push = { logs: logEntry };
+    }
+
+    if (updateQuery.$set) {
+      updateQuery.$set.lastUpdatedBy = userId;
+    } else {
+      updateQuery.$set = { lastUpdatedBy: userId };
+    }
+
+    return Card.findByIdAndUpdate(_id, updateQuery, options);
+  }
+
+  return card; // No changes made
 }
 
 module.exports = {

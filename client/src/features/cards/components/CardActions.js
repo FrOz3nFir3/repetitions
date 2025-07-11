@@ -10,7 +10,8 @@ const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
   const location = useLocation();
   const isActive = location.pathname.includes(to);
 
-  const activeClass = "bg-gray-200 text-indigo-600";
+  const activeClass =
+    "bg-gray-200 text-indigo-600 dark:bg-gray-700 dark:text-indigo-300";
   const inactiveClass = `text-white ${baseBg} ${hoverBg}`;
 
   const linkClass = isActive ? activeClass : inactiveClass;
@@ -26,9 +27,15 @@ const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
   );
 };
 
-const CardActions = () => {
+const CardActions = ({ layout = "vertical" }) => {
+  const layoutClasses = {
+    vertical:
+      "flex flex-col space-y-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md",
+    horizontal: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-2 ",
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md flex flex-col space-y-4">
+    <div className={` ${layoutClasses[layout]}`}>
       <ActionLink
         to="review"
         icon={BookOpenIcon}

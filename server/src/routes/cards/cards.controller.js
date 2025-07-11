@@ -35,11 +35,14 @@ async function httpPostCreateNewCard(req, res) {
   }
   var { mainTopic, subTopic, category } = req.body;
   try {
-    const card = await createNewCard({
-      "main-topic": mainTopic,
-      "sub-topic": subTopic,
-      category,
-    });
+    const card = await createNewCard(
+      {
+        "main-topic": mainTopic,
+        "sub-topic": subTopic,
+        category,
+      },
+      token.id
+    );
     return res.json(card);
   } catch (error) {
     console.log(error);

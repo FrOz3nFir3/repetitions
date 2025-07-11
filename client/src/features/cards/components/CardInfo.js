@@ -1,5 +1,6 @@
 import React from "react";
 import { CardField } from "./CardField";
+import CardMetaInfo from "./CardMetaInfo";
 
 const CardInfo = ({ card }) => {
   const {
@@ -19,6 +20,7 @@ const CardInfo = ({ card }) => {
       <CardField _id={_id} text="sub-topic" value={subTopic} />
       <CardField _id={_id} text="category" value={category} />
       <CardField _id={_id} text="description" value={description} />
+      <CardMetaInfo card={card} />
     </div>
   );
 };

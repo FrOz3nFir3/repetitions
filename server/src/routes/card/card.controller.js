@@ -18,7 +18,7 @@ async function httpPatchUpdateCard(req, res) {
     return res.status(401).json({ error: "Authentication / Login required" });
   }
   try {
-    const updatedCard = await updateCard(req.body);
+    const updatedCard = await updateCard({ ...req.body, userId: token.id });
 
     return res.json({ok:true});
   } catch (error) {
