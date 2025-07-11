@@ -28,7 +28,7 @@ const CardLogs = ({ logs }) => {
           No activity has been logged for this card yet.
         </p>
       )}
-      {logs.length > 4 && (
+      {logs.length > 5 && (
         <button
           onClick={toggleModal}
           className="cursor-pointer mt-5 w-full text-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"

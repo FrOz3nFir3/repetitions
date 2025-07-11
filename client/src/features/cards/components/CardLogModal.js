@@ -16,11 +16,11 @@ const CardLogModal = ({ isOpen, onClose, logs }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 bg-opacity-60 flex justify-start z-50"
+      className="fixed inset-0 bg-black/70 bg-opacity-60 flex justify-end z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-gray-800 w-full max-w-md h-full shadow-xl transform transition-transform duration-300 ease-in-out"
+        className="bg-white dark:bg-gray-800 w-full max-w-lg h-full shadow-xl transform transition-transform duration-300 ease-in-out"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">

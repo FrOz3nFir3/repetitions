@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const ValueDisplay = ({ value }) => {
-  if (value === null || value === undefined || value.trim() === "") {
+  if (
+    value === null ||
+    value === undefined ||
+    (typeof value === "string" && value.trim() === "")
+  ) {
     return (
       <span className="text-gray-600 dark:text-white italic ">Not set</span>
     );
