@@ -85,7 +85,7 @@ async function updateCard(details) {
     ...otherDetails
   } = details;
 
-  const card = await Card.findById({ $eq: _id });
+  const card = await Card.findOne({ _id: { $eq: _id } });
   if (!card) {
     return null;
   }
@@ -259,7 +259,7 @@ async function updateCard(details) {
       updateQuery.$set = { lastUpdatedBy: userId };
     }
 
-    return Card.findByIdAndUpdate({ $eq: _id }, updateQuery, options);
+    return Card.findOneAndUpdate({ _id: { $eq: _id } }, updateQuery, options);
   }
 
   return card; // No changes made
