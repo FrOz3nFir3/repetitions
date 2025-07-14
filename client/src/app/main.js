@@ -4,7 +4,6 @@ import App from "./App";
 import { Provider } from "react-redux";
 import store from "./configureStore";
 import "../styles/main.css";
-import "react-loading-skeleton/dist/skeleton.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
