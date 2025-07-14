@@ -6,6 +6,7 @@ import {
 import { XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import Modal from "../../../components/ui/Modal";
 import DetailedReportModalSkeleton from "../../../components/ui/skeletons/DetailedReportModalSkeleton";
+import HtmlRenderer from "../../../components/ui/HtmlRenderer";
 
 function DetailedReportModal({ cardId, isOpen, onClose }) {
   const {
@@ -91,8 +92,8 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
                           key={item.flashcard_id}
                           className="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-lg shadow-md"
                         >
-                          <p className="font-semibold text-lg text-gray-800 dark:text-gray-200">
-                            {item.question}
+                          <p>
+                            <HtmlRenderer htmlContent={item.question} />
                           </p>
                           <div className="mt-4 space-y-2">
                             {item.options.map((option, i) => (
@@ -113,7 +114,7 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
                                     "font-semibold text-green-800 dark:text-green-300"
                                   }`}
                                 >
-                                  {option}
+                                  <HtmlRenderer htmlContent={option} />
                                 </span>
                               </div>
                             ))}

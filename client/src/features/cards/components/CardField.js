@@ -8,6 +8,8 @@ import {
   XMarkIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
+import RichTextEditor from "../../../components/ui/RichTextEditor";
+import HtmlRenderer from "../../../components/ui/HtmlRenderer";
 
 export function CardField({ _id, text, value, cardId, optionIndex }) {
   const dispatch = useDispatch();
@@ -15,13 +17,12 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value);
 
-  // Ensure internal state updates if the prop value changes from outside
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+  const handleRichTextChange = (newContent) => {
+    setInputValue(newContent);
   };
 
   const handleSubmit = (event) => {
@@ -35,50 +36,47 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
     }
     updateCard(updateDetails).then((response) => {
       if (response.data) {
-        dispatch(modifyCard(updateDetails));
         setIsEditing(false);
+        // TODO: implement this later
+        // dispatch(modifyCard(updateDetails));
       }
     });
   };
 
   const handleCancel = () => {
-    setInputValue(value); // Reset to original value
+    setInputValue(value);
     setIsEditing(false);
   };
 
   const isUnchanged = inputValue === value;
-  const isTextArea =
-    text === "question" || text === "answer" || text === "description";
+  const isRichTextField =
+    text === "question" || text === "answer" || text === "option";
 
   return (
     <div className="card-field group relative py-2">
-      {error && (
-        <div className="text-sm text-red-600 bg-red-50 p-2 rounded-md mb-2">
-          Update failed: {error.data?.error || "Unknown error"}
-        </div>
-      )}
-
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <p className="font-semibold text-gray-500 dark:text-gray-300 text-sm capitalize">
             {text.replace("-", " ")}
           </p>
           {isEditing ? (
-            <form onSubmit={handleSubmit} className="flex items-center gap-2">
-              {isTextArea ? (
-                <textarea
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  className="bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                  rows={text === "description" ? 4 : 3}
-                  required
-                  disabled={isLoading}
+            <form onSubmit={handleSubmit} className="space-y-2">
+              {error && (
+                <div className="text-sm text-red-600 bg-red-50 p-2 rounded-md mb-2">
+                  Update failed: {error.data?.error || "Unknown error"}
+                </div>
+              )}
+              {isRichTextField ? (
+                <RichTextEditor
+                  initialContent={inputValue}
+                  onChange={handleRichTextChange}
+                  editable={!isLoading}
                 />
               ) : (
                 <input
                   type={text === "minimumOptions" ? "number" : "text"}
                   value={inputValue}
-                  onChange={handleInputChange}
+                  onChange={(e) => setInputValue(e.target.value)}
                   className="bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10"
                   min={text === "minimumOptions" ? 2 : undefined}
                   max={text === "minimumOptions" ? 4 : undefined}
@@ -86,7 +84,7 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
                   disabled={isLoading}
                 />
               )}
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-end">
                 <button
                   type="submit"
                   disabled={isUnchanged || isLoading}
@@ -109,10 +107,16 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
               </div>
             </form>
           ) : (
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-gray-900 dark:text-white whitespace-pre-wrap pr-8">
-                {value}
-              </p>
+            <div className="flex items-center justify-between mt-2">
+              <div className="w-full">
+                {isRichTextField ? (
+                  <HtmlRenderer htmlContent={value} />
+                ) : (
+                  <p className="text-gray-900 dark:text-white whitespace-pre-wrap pr-8">
+                    {value}
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => setIsEditing(true)}
                 className="absolute top-2 right-0 cursor-pointer opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 dark:text-gray-400 hover:text-indigo-600 p-1"

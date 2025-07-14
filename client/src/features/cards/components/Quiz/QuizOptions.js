@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 
 const OptionButton = ({ option, answer, selectedAnswer, onSelect }) => {
   const isSelected = selectedAnswer?.option === option;
@@ -27,14 +28,18 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect }) => {
       disabled={!!selectedAnswer}
       className={buttonClass}
     >
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-lg ">{option}</span>
-        {isSelected &&
-          (isCorrect ? (
-            <CheckCircleIcon className="h-8 w-8 text-green-500" />
-          ) : (
-            <XCircleIcon className="h-8 w-8 text-red-500" />
-          ))}
+      <div className="flex items-center jusify-between">
+        <div className="w-[90%] sm:w-full">
+          <HtmlRenderer htmlContent={option} />
+        </div>
+        <div className="flex-shrink-0 h-8 w-8">
+          {isSelected &&
+            (isCorrect ? (
+              <CheckCircleIcon className="h-8 w-8 text-green-500" />
+            ) : (
+              <XCircleIcon className="h-8 w-8 text-red-500" />
+            ))}
+        </div>
       </div>
     </button>
   );

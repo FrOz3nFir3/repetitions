@@ -7,6 +7,7 @@ import {
   ArrowsRightLeftIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/solid";
+import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 
 function Review() {
   const card = useSelector(selectCurrentCard);
@@ -121,7 +122,7 @@ function Review() {
         onTouchEnd={handleTouchEnd}
       >
         <div
-          className={`w-full max-w-xl h-80 ${getSlideClass()}`}
+          className={`w-full h-80 ${getSlideClass()}`}
           style={{ perspective: "1000px" }}
           onClick={() => setIsFlipped(!isFlipped)}
         >
@@ -134,24 +135,24 @@ function Review() {
           >
             {/* Front of the card */}
             <div
-              className="absolute w-full h-full flex items-center justify-center p-6 bg-indigo-500 rounded-lg shadow-lg overflow-y-auto"
+              className="absolute w-full h-full p-6 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-lg overflow-y-auto"
               style={{ backfaceVisibility: "hidden" }}
             >
-              <p className="text-2xl text-white text-center">
-                {currentFlashcard.question}
-              </p>
+              <div className="overflow-x-auto">
+                <HtmlRenderer htmlContent={currentFlashcard.question} />
+              </div>
             </div>
             {/* Back of the card */}
             <div
-              className="absolute w-full h-full flex items-center justify-center p-6 bg-green-500 rounded-lg shadow-lg overflow-y-auto"
+              className="absolute w-full h-full p-6 bg-gray-200 dark:bg-gray-600 rounded-lg shadow-lg overflow-y-auto"
               style={{
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)",
               }}
             >
-              <p className="text-2xl text-white text-center">
-                {currentFlashcard.answer}
-              </p>
+              <div className="overflow-x-auto">
+                <HtmlRenderer htmlContent={currentFlashcard.answer} />
+              </div>
             </div>
           </div>
         </div>

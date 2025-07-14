@@ -23,7 +23,7 @@ const Modal = ({ className, isOpen, onClose, children }) => {
       onClick={onClose}
     >
       <div
-        className={`relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 ${
+        className={`relative transform overflow-y-auto max-h-[90vh] rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 ${
           className ?? ""
         }`}
         onClick={(e) => e.stopPropagation()}

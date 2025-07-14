@@ -1,4 +1,34 @@
 const Card = require("./cards.mongo");
+const createDOMPurify = require("dompurify");
+const { JSDOM } = require("jsdom");
+
+const window = new JSDOM("").window;
+const DOMPurify = createDOMPurify(window);
+
+function getTextFromHTML(html) {
+  if (!html) return "";
+
+  // Sanitize the HTML
+  const sanitizedHtml = DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+  });
+
+  // Replace block-level elements with newlines
+  let text = sanitizedHtml.replace(/<\/(div|p|h[1-6])>/gi, "\n");
+  text = text.replace(/<br\s*\/?>/gi, "\n");
+
+  // Strip all other tags
+  text = text.replace(/<[^>]+>/g, "");
+
+  // Collapse multiple spaces into a single space
+  text = text.replace(/ +/g, " ");
+
+  // Reduce multiple newlines to a maximum of two
+  text = text.replace(/\n{3,}/g, "\n\n");
+
+  // Trim leading/trailing whitespace
+  return text.trim();
+}
 
 // Fetches all cards that belong to a specific category.
 // Uses $eq to prevent NoSQL injection.
@@ -114,8 +144,8 @@ async function updateCard(details) {
       };
       changes.push({
         field: `Question`,
-        oldValue: oldReview.question,
-        newValue: question,
+        oldValue: getTextFromHTML(oldReview.question),
+        newValue: getTextFromHTML(question),
       });
       changedFields.push("question");
     }
@@ -126,8 +156,8 @@ async function updateCard(details) {
       };
       changes.push({
         field: `Answer`,
-        oldValue: oldReview.answer,
-        newValue: answer,
+        oldValue: getTextFromHTML(oldReview.answer),
+        newValue: getTextFromHTML(answer),
       });
       changedFields.push("answer");
     }
@@ -139,15 +169,19 @@ async function updateCard(details) {
         };
         changes.push({
           field: `Option #${optionIndex + 1}`,
-          oldValue: oldReview.options[optionIndex],
-          newValue: option,
+          oldValue: getTextFromHTML(oldReview.options[optionIndex]),
+          newValue: getTextFromHTML(option),
         });
       } else {
         updateQuery.$push = {
           ...updateQuery.$push,
           [`${reviewPath}.options`]: option,
         };
-        changes.push({ field: `New Option`, oldValue: null, newValue: option });
+        changes.push({
+          field: `New Option`,
+          oldValue: null,
+          newValue: getTextFromHTML(option),
+        });
       }
       changedFields.push("options");
     }
@@ -167,7 +201,11 @@ async function updateCard(details) {
       updateQuery.$pull = { review: { cardId: cardId } };
       changes.push({
         field: `Flashcard #${cardId}`,
-        oldValue: oldReview,
+        oldValue: {
+          ...oldReview,
+          question: getTextFromHTML(oldReview.question),
+          answer: getTextFromHTML(oldReview.answer),
+        },
         newValue: "Deleted",
       });
       summary = `Deleted flashcard #${cardId}.`;
@@ -186,7 +224,12 @@ async function updateCard(details) {
     changes.push({
       field: "New Flashcard",
       oldValue: null,
-      newValue: newFlashcard,
+      newValue: {
+        ...newFlashcard,
+        question: getTextFromHTML(newFlashcard.question),
+        answer: getTextFromHTML(newFlashcard.answer),
+        options: [getTextFromHTML(newFlashcard.answer)],
+      },
     });
     summary = `Added new flashcard #${newFlashcard.cardId}.`;
   } else if (isUpdatingOtherFields) {
@@ -272,4 +315,5 @@ module.exports = {
   getCardById,
   getCardsByIds,
   updateCard,
+  getTextFromHTML,
 };

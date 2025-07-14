@@ -4,25 +4,29 @@ import { useDispatch } from "react-redux";
 import { modifyCard } from "../../state/cardSlice";
 import { PlusIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Modal from "../../../../components/ui/Modal";
+import RichTextEditor from "../../../../components/ui/RichTextEditor";
 
 export function NewFlashcard({ flashcardId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const dispatch = useDispatch();
 
-  const questionRef = useRef();
-  const answerRef = useRef();
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+
+  const questionEditorRef = useRef(null);
+  const answerEditorRef = useRef(null);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const question = questionRef.current.value;
-    const answer = answerRef.current.value;
     const updateDetails = { _id: flashcardId, question, answer };
 
     updateCard(updateDetails).then((response) => {
       if (response.data) {
         dispatch(modifyCard(updateDetails));
         setIsOpen(false);
+        setQuestion("");
+        setAnswer("");
       }
     });
   };
@@ -55,42 +59,38 @@ export function NewFlashcard({ flashcardId }) {
 
           <div>
             <label
-              htmlFor="question"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              onClick={() => questionEditorRef.current?.focus()}
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
             >
               Question
             </label>
-            <textarea
-              id="question"
-              ref={questionRef}
-              rows={3}
-              required
-              disabled={isLoading}
-              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-600"
+            <RichTextEditor
+              ref={questionEditorRef}
+              initialContent={question}
+              onChange={setQuestion}
+              editable={!isLoading}
             />
           </div>
 
           <div>
             <label
-              htmlFor="answer"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              onClick={() => answerEditorRef.current?.focus()}
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
             >
               Answer
             </label>
-            <textarea
-              id="answer"
-              ref={answerRef}
-              rows={3}
-              required
-              disabled={isLoading}
-              className="dark:bg-gray-600 dark:text-white block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-600"
+            <RichTextEditor
+              ref={answerEditorRef}
+              initialContent={answer}
+              onChange={setAnswer}
+              editable={!isLoading}
             />
           </div>
 
           <div className="mt-5 sm:mt-6">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !question || !answer}
               className="cursor-pointer inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
             >
               {isLoading ? (

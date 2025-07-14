@@ -13,13 +13,13 @@ const ValueDisplay = ({ value }) => {
   }
   if (typeof value === "object") {
     return (
-      <pre className="!text-left bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs whitespace-pre-wrap">
+      <pre className="overflow-auto !text-left bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs ">
         {JSON.stringify(value, null, 2)}
       </pre>
     );
   }
   return (
-    <span className="text-gray-700 dark:text-gray-300">{String(value)}</span>
+    <span className="text-gray-700 dark:text-gray-300 ">{String(value)}</span>
   );
 };
 
@@ -79,10 +79,10 @@ const LogItem = ({ log }) => {
                 </strong>
                 <div className="mt-1 space-y-1">
                   <div className="flex items-start">
-                    <span className="text-red-500 font-bold w-10 flex-shrink-0">
+                    <span className=" text-red-500 font-bold w-10 flex-shrink-0">
                       Old:
                     </span>
-                    <div className="p-1.5 rounded bg-red-200 dark:bg-red-900 text-red-600 dark:text-red-400 w-full text-center">
+                    <div className="overflow-auto p-1.5 rounded bg-red-200 dark:bg-red-900 text-red-600 dark:text-red-400 w-[1%] flex-grow text-center">
                       <ValueDisplay value={change.oldValue} />
                     </div>
                   </div>
@@ -90,7 +90,7 @@ const LogItem = ({ log }) => {
                     <span className="text-green-500 font-bold w-10 flex-shrink-0">
                       New:
                     </span>
-                    <div className="p-1.5 mt-1 rounded bg-green-200 dark:bg-green-900 text-green-600 dark:text-green-400 w-full text-center">
+                    <div className="overflow-auto p-1.5 mt-1 rounded bg-green-200 dark:bg-green-900 text-green-600 dark:text-green-400 w-[1%] flex-grow text-center">
                       <ValueDisplay value={change.newValue} />
                     </div>
                   </div>
