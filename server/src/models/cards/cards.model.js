@@ -1,25 +1,7 @@
+const { getTextFromHTML } = require("../../utils/dom");
 const Card = require("./cards.mongo");
-const createDOMPurify = require("dompurify");
-const { JSDOM } = require("jsdom");
+
 const mongoose = require("mongoose");
-
-const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
-
-function getTextFromHTML(html) {
-  if (!html) return "";
-  const sanitizedHtml = DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-  });
-  let text = sanitizedHtml
-    .replace(/<\/(div|p|h[1-6])>/gi, "\n")
-    .replace(/<br\s*\/?>/gi, "\n");
-  text = text
-    .replace(/<[^>]+>/g, "")
-    .replace(/ +/g, " ")
-    .replace(/\n{3,}/g, "\n\n");
-  return text.trim();
-}
 
 async function cardsByCategory(category) {
   return Card.find({ category: { $eq: category } });
@@ -197,7 +179,7 @@ async function updateCard(details) {
     ...otherDetails
   } = details;
 
-  const card = await Card.findById(_id);
+  const card = await Card.findOne({ _id: { $eq: _id } });
   if (!card) return null;
 
   let updateQuery = {};
@@ -469,7 +451,9 @@ async function updateCard(details) {
     };
     updateQuery.$push = { ...updateQuery.$push, logs: logEntry };
     updateQuery.$set = { ...updateQuery.$set, lastUpdatedBy: userId };
-    return Card.findByIdAndUpdate(_id, updateQuery, { new: true });
+    return Card.findOneAndUpdate({ _id: { $eq: _id } }, updateQuery, {
+      new: true,
+    });
   }
 
   return card;
@@ -555,6 +539,5 @@ module.exports = {
   getCardById,
   getCardsByIds,
   updateCard,
-  getTextFromHTML,
   getCardLogs,
 };

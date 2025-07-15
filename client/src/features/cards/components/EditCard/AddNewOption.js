@@ -17,8 +17,7 @@ const AddNewOption = ({ cardId, flashcardId, quiz }) => {
 
   const handleAddOption = (e) => {
     e.preventDefault();
-    if (!newOption || newOption.replace(/<(.|\n)*?>/g, "").trim().length === 0)
-      return;
+    if (!newOption) return;
 
     const updateDetails = {
       _id: cardId,
@@ -39,8 +38,8 @@ const AddNewOption = ({ cardId, flashcardId, quiz }) => {
     editorRef.current?.clearContent();
   };
 
-  const isInputEmpty =
-    !newOption || newOption.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+  // sanitization and empty input is handled in backend
+  const isInputEmpty = !newOption;
 
   return (
     <div>

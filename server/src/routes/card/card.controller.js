@@ -1,14 +1,9 @@
 const {
   getCardById,
   updateCard,
-  getTextFromHTML,
   getCardLogs,
 } = require("../../models/cards/cards.model");
-const createDOMPurify = require("dompurify");
-const { JSDOM } = require("jsdom");
-
-const window = new JSDOM("").window;
-const DOMPurify = createDOMPurify(window);
+const { getTextFromHTML, sanitizeHTML } = require("../../utils/dom");
 
 async function httpGetCardById(req, res) {
   const { id } = req.params;
@@ -64,7 +59,7 @@ async function httpPatchUpdateCard(req, res) {
     if (getTextFromHTML(description)?.trim() === "") {
       return res.status(400).json({ error: "Description cannot be empty" });
     }
-    description = DOMPurify.sanitize(description);
+    description = sanitizeHTML(description);
   }
   if (question) {
     if (
@@ -73,35 +68,35 @@ async function httpPatchUpdateCard(req, res) {
     ) {
       return res.status(400).json({ error: "Question cannot be empty" });
     }
-    question = DOMPurify.sanitize(question);
+    question = sanitizeHTML(question);
   }
 
   if (answer) {
     if (getTextFromHTML(answer)?.trim() === "") {
       return res.status(400).json({ error: "Answer cannot be empty" });
     }
-    answer = DOMPurify.sanitize(answer);
+    answer = sanitizeHTML(answer);
   }
 
   if (option) {
     if (getTextFromHTML(option)?.trim() === "") {
       return res.status(400).json({ error: "Option cannot be empty" });
     }
-    option = DOMPurify.sanitize(option);
+    option = sanitizeHTML(option);
   }
 
   if (quizQuestion) {
     if (getTextFromHTML(quizQuestion)?.trim() === "") {
       return res.status(400).json({ error: "Quiz Question cannot be empty" });
     }
-    quizQuestion = DOMPurify.sanitize(quizQuestion);
+    quizQuestion = sanitizeHTML(quizQuestion);
   }
 
   if (quizAnswer) {
     if (getTextFromHTML(quizAnswer)?.trim() === "") {
       return res.status(400).json({ error: "Quiz Answer cannot be empty" });
     }
-    quizAnswer = DOMPurify.sanitize(quizAnswer);
+    quizAnswer = sanitizeHTML(quizAnswer);
   }
 
   if (newOptions) {
@@ -111,7 +106,7 @@ async function httpPatchUpdateCard(req, res) {
     ) {
       return res.status(400).json({ error: "Options cannot be empty" });
     }
-    newOptions = newOptions.map((opt) => DOMPurify.sanitize(opt));
+    newOptions = newOptions.map((opt) => sanitizeHTML(opt));
   }
 
   if (minimumOptions) {

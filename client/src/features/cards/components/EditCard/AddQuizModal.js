@@ -31,11 +31,8 @@ const AddQuizModal = ({ isOpen, onClose, cardId, flashcardId }) => {
     });
   };
 
-  const isInputEmpty =
-    !quizQuestion ||
-    quizQuestion.replace(/<(.|\n)*?>/g, "").trim().length === 0 ||
-    !quizAnswer ||
-    quizAnswer.replace(/<(.|\n)*?>/g, "").trim().length === 0;
+  // sanitization and empty input is handled in backend
+  const isInputEmpty = !quizQuestion || !quizAnswer;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Quiz">
