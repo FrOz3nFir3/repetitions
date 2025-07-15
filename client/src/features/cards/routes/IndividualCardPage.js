@@ -33,19 +33,9 @@ function IndividualCardPage() {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <header className="mb-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight sm:text-5xl">
-            {card["main-topic"]}
-          </h1>
-          <p className="mt-2 text-2xl text-indigo-600 font-semibold">
-            {card["sub-topic"]}
-          </p>
-        </header>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-6">
             <CardInfo card={card} />
-            <CardActions />
             <CardLogs logs={card.logs || []} cardId={card._id} />
           </div>
 
@@ -63,7 +53,10 @@ function IndividualCardPage() {
                 </div>
               </div>
             ) : (
-              <Outlet />
+              <div className="space-y-6">
+                <Outlet />
+                <CardActions showInfo />
+              </div>
             )}
           </div>
         </div>

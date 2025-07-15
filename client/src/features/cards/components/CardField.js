@@ -25,7 +25,7 @@ export function CardField({ _id, text, value, cardId, quizId, optionId }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     const updateDetails = { _id, [text]: inputValue, cardId, quizId, optionId };
-    
+
     updateCard(updateDetails).then((response) => {
       if (response.data) {
         setIsEditing(false);
@@ -40,7 +40,10 @@ export function CardField({ _id, text, value, cardId, quizId, optionId }) {
 
   const isUnchanged = inputValue === value;
   const isRichTextField =
-    text === "question" || text === "answer" || text === "option";
+    text === "question" ||
+    text === "answer" ||
+    text === "option" ||
+    text === "description";
 
   return (
     <div className="card-field group relative py-2">

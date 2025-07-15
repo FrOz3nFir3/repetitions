@@ -232,7 +232,7 @@ async function updateCard(details) {
         summary = `Deleted quiz: "${getTextFromHTML(oldQuiz.quizQuestion)}"`;
         changes.push({
           field: `Quiz`,
-          oldValue: oldQuiz.quizQuestion,
+          oldValue: getTextFromHTML(oldQuiz.quizQuestion),
           newValue: "Deleted",
         });
       } else {
@@ -450,8 +450,8 @@ async function updateCard(details) {
       updateQuery.$set = { ...updateQuery.$set, description };
       changes.push({
         field: "Description",
-        oldValue: card.description,
-        newValue: description,
+        oldValue: getTextFromHTML(card.description),
+        newValue: getTextFromHTML(description),
       });
       changedFields.push("Description");
     }

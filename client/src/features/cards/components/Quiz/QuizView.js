@@ -11,11 +11,8 @@ import QuizResults from "./QuizResults";
 import QuizHeader from "./QuizHeader";
 import QuizQuestion from "./QuizQuestion";
 import QuizOptions from "./QuizOptions";
-import { ActionLink } from "../CardActions";
-import { useParams } from "react-router-dom";
 
 function QuizView() {
-  const params = useParams();
   const dispatch = useDispatch();
   const card = useSelector(selectCurrentCard);
   const user = useSelector(selectCurrentUser);
@@ -117,14 +114,6 @@ function QuizView() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
           Add some quizzes from Manage Flaschards to start a quiz.
         </p>
-        <ActionLink
-          to={`/card/${params.id}/edit`}
-          icon={CogIcon}
-          baseBg="mt-2 px-4 bg-gray-600"
-          hoverBg="hover:bg-gray-700"
-        >
-          Manage Flashcards
-        </ActionLink>
       </div>
     );
   }

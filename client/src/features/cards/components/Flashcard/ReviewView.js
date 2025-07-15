@@ -83,19 +83,11 @@ function Review() {
     return (
       <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md">
         <h3 className="text-xl font-medium text-gray-900 dark:text-white">
-          No flashcards to review!
+          No Flashcards to Review!
         </h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
-          Add some flashcards to get started.
+          Add some Flashcards from Manage Flaschards to get started.
         </p>
-        <ActionLink
-          to={`/card/${params.id}/edit`}
-          icon={CogIcon}
-          baseBg="mt-2 px-4 bg-gray-600"
-          hoverBg="hover:bg-gray-700"
-        >
-          Manage Flashcards
-        </ActionLink>
       </div>
     );
   }

@@ -4,6 +4,7 @@ import {
   BookOpenIcon,
   PencilSquareIcon,
   CogIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
 export const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
@@ -27,7 +28,7 @@ export const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
   );
 };
 
-const CardActions = ({ layout = "vertical" }) => {
+const CardActions = ({ layout = "vertical", showInfo = false }) => {
   const layoutClasses = {
     vertical:
       "flex flex-col space-y-4 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md",
@@ -36,6 +37,12 @@ const CardActions = ({ layout = "vertical" }) => {
 
   return (
     <div className={` ${layoutClasses[layout]}`}>
+      {showInfo && (
+        <div className="text-center text-gray-500 dark:text-gray-400 mt-0 text-sm flex items-center justify-center">
+          <InformationCircleIcon className="h-5 w-5 mr-2" />
+          Select any action below to navigate
+        </div>
+      )}
       <ActionLink
         to="review"
         icon={BookOpenIcon}

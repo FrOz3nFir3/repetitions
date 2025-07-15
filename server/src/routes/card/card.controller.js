@@ -55,10 +55,17 @@ async function httpPatchUpdateCard(req, res) {
     quizAnswer,
     options: newOptions,
     minimumOptions,
+    description,
     ...otherBody
   } = req.body;
 
   // --- Input Validation ---
+  if (description) {
+    if (getTextFromHTML(description)?.trim() === "") {
+      return res.status(400).json({ error: "Description cannot be empty" });
+    }
+    description = DOMPurify.sanitize(description);
+  }
   if (question) {
     if (
       getTextFromHTML(question)?.trim() === "" &&
@@ -109,11 +116,9 @@ async function httpPatchUpdateCard(req, res) {
 
   if (minimumOptions) {
     if (typeof minimumOptions !== "number" || minimumOptions < 2) {
-      return res
-        .status(400)
-        .json({
-          error: "Minimum options must be a number greater than or equal to 2",
-        });
+      return res.status(400).json({
+        error: "Minimum options must be a number greater than or equal to 2",
+      });
     }
   }
   // --- End Validation ---
@@ -126,6 +131,7 @@ async function httpPatchUpdateCard(req, res) {
       quizQuestion,
       quizAnswer,
       options: newOptions,
+      description,
       minimumOptions,
       ...otherBody,
       userId: token.id,
