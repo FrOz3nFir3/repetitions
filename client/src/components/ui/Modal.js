@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 const Modal = ({ className, isOpen, onClose, children }) => {
   useEffect(() => {
@@ -17,7 +18,7 @@ const Modal = ({ className, isOpen, onClose, children }) => {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
       onClick={onClose}
@@ -30,7 +31,8 @@ const Modal = ({ className, isOpen, onClose, children }) => {
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

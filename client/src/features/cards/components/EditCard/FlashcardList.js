@@ -1,29 +1,23 @@
 import React from "react";
-import FlashcardItem from "./FlashcardItem"; // Import the new, clean component
+import FlashcardItem from "./FlashcardItem";
 
-const FlashcardList = ({ flashcards, cardId }) => {
-  if (flashcards.length === 0) {
+const FlashcardList = ({ flashcard, cardId }) => {
+  if (!flashcard) {
     return (
-      <div className="text-center py-10 border-t border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-          No flashcards yet!
+      <div className="text-center py-20 border-t border-gray-200 dark:border-gray-700">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          No flashcards found.
         </h3>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Click "Add New Flashcard" to get started.
+        <p className="mt-2 text-md text-gray-500 dark:text-gray-400">
+          Try a different search term, or create a new flashcard to get started.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 border-t border-gray-200 dark:border-gray-700 pt-6">
-      {flashcards.map((flashcard, index) => (
-        <FlashcardItem
-          key={flashcard._id || index}
-          flashcard={flashcard}
-          cardId={cardId}
-        />
-      ))}
+    <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+      <FlashcardItem flashcard={flashcard} cardId={cardId} />
     </div>
   );
 };

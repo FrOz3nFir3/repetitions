@@ -5,6 +5,7 @@ import { modifyCard } from "../../state/cardSlice";
 import { PlusIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Modal from "../../../../components/ui/Modal";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
+import { DocumentPlusIcon } from "@heroicons/react/24/solid";
 
 export function NewFlashcard({ flashcardId }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +40,7 @@ export function NewFlashcard({ flashcardId }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 "
+        className="shrink-0 cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 "
       >
         <PlusIcon className="-ml-0.5 h-5 w-5" />
         Add Review
@@ -47,14 +48,23 @@ export function NewFlashcard({ flashcardId }) {
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Add a New Flashcard
-            </h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Add a question and answer to create a new flashcard.
-            </p>
+          <div className="p-1">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
+                <DocumentPlusIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Add a New Flashcard
+                </h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Create a new flashcard with a front (question) and back
+                  (answer).
+                </p>
+              </div>
+            </div>
           </div>
+
           {error && (
             <div className="rounded-md bg-red-50 p-4 text-red-700">
               {error.data.error}

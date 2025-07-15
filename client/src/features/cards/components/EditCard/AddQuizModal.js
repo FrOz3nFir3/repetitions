@@ -5,6 +5,7 @@ import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import { modifyCard } from "../../state/cardSlice";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { LightBulbIcon } from "@heroicons/react/24/solid";
 
 const AddQuizModal = ({ isOpen, onClose, cardId, flashcardId }) => {
   const [quizQuestion, setQuizQuestion] = useState("");
@@ -38,14 +39,21 @@ const AddQuizModal = ({ isOpen, onClose, cardId, flashcardId }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add New Quiz">
-      <div>
-        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Add a New Quiz
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Create a new quiz with a question and answer. You can add more options
-          after creating it.
-        </p>
+      <div className="p-1">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-full">
+            <LightBulbIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+              Add a New Quiz
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Create a new quiz to test understanding. You can add more
+              incorrect options after it's created.
+            </p>
+          </div>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,14 +95,14 @@ const AddQuizModal = ({ isOpen, onClose, cardId, flashcardId }) => {
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isInputEmpty || isLoading}
-            className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed"
+            className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:bg-purple-300 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <ArrowPathIcon className="h-5 w-5 animate-spin" />
