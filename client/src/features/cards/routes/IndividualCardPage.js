@@ -46,7 +46,7 @@ function IndividualCardPage() {
           <div className="lg:col-span-1 space-y-6">
             <CardInfo card={card} />
             <CardActions />
-            <CardLogs logs={card.logs || []} />
+            <CardLogs logs={card.logs || []} cardId={card._id} />
           </div>
 
           <div className="lg:col-span-2">

@@ -43,7 +43,7 @@ const CardMetaInfo = ({ card }) => {
         </div>
       )}
 
-      {lastUpdatedBy && (
+      {lastUpdatedBy?.name && (
         <div>
           <h4 className="text-md font-semibold text-indigo-600 dark:text-indigo-400 mb-2 pt-2 border-t border-gray-200 dark:border-gray-700">
             Last Update

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CardLogModal from "./CardLogModal";
 import LogItem from "./LogItem";
 
-const CardLogs = ({ logs }) => {
+const CardLogs = ({ logs, cardId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
@@ -39,7 +39,7 @@ const CardLogs = ({ logs }) => {
       <CardLogModal
         isOpen={isModalOpen}
         onClose={toggleModal}
-        logs={sortedLogs}
+        cardId={cardId}
       />
     </div>
   );

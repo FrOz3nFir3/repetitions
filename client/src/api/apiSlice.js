@@ -89,6 +89,22 @@ export const apiSlice = createApi({
       providesTags: ["Report"],
     }),
 
+    getCardLogs: builder.query({
+      query: ({ cardId, page }) => `/card/${cardId}/logs?page=${page}`,
+      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
+        return endpointName;
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
+      merge: (currentCache, newItems) => {
+        return {
+          logs: [...currentCache.logs, ...newItems.logs],
+          hasMore: newItems.hasMore,
+        };
+      },
+    }),
+
     patchUpdateUserProfile: builder.mutation({
       query: (user) => ({
         url: "/user",
@@ -149,4 +165,5 @@ export const {
   // usePostCardsByIdsMutation
   useGetUserProgressQuery,
   useGetDetailedReportQuery,
+  useGetCardLogsQuery,
 } = apiSlice;
