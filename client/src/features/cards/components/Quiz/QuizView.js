@@ -6,13 +6,16 @@ import {
   selectCurrentUser,
   modifyUser,
 } from "../../../authentication/state/authSlice";
-import { LightBulbIcon } from "@heroicons/react/24/solid";
+import { CogIcon, LightBulbIcon } from "@heroicons/react/24/solid";
 import QuizResults from "./QuizResults";
 import QuizHeader from "./QuizHeader";
 import QuizQuestion from "./QuizQuestion";
 import QuizOptions from "./QuizOptions";
+import { ActionLink } from "../CardActions";
+import { useParams } from "react-router-dom";
 
 function QuizView() {
+  const params = useParams();
   const dispatch = useDispatch();
   const card = useSelector(selectCurrentCard);
   const user = useSelector(selectCurrentUser);
@@ -24,7 +27,18 @@ function QuizView() {
 
   const [updateUser] = usePatchUpdateUserProgressMutation();
 
-  const review = useMemo(() => card?.review || [], [card]);
+  const review = useMemo(
+    () =>
+      card?.review.reduce((previous, current) => {
+        const quizzesSoFar = current.quizzes || [];
+        // TODO: optimize this later
+        for (let quiz of quizzesSoFar) {
+          let newQuiz = { ...quiz };
+        }
+        return previous.concat(quizzesSoFar);
+      }, []) || [],
+    [card]
+  );
   const currentQuestion = useMemo(
     () => review[currentQuestionIndex],
     [review, currentQuestionIndex]
@@ -32,11 +46,12 @@ function QuizView() {
 
   const shuffledOptions = useMemo(() => {
     if (!currentQuestion) return [];
+
     const options = [
-      currentQuestion.answer,
-      ...(currentQuestion.options || []).filter(
-        (opt) => opt !== currentQuestion.answer
-      ),
+      currentQuestion.quizAnswer,
+      ...(currentQuestion.options || [])
+        .map((opt) => opt.value)
+        .filter((opt) => opt !== currentQuestion.quizAnswer),
     ];
     return options.sort(() => Math.random() - 0.5);
   }, [currentQuestion]);
@@ -58,16 +73,15 @@ function QuizView() {
   const handleAnswerSelect = (option) => {
     if (selectedAnswer || !currentQuestion) return;
 
-    const isCorrect = option === currentQuestion.answer;
+    const isCorrect = option === currentQuestion.quizAnswer;
     if (isCorrect) setScore(score + 1);
-
     setSelectedAnswer({ option, isCorrect });
 
     if (!user) return;
 
     const updateDetails = {
       card_id: card._id,
-      flashcard_id: currentQuestion.cardId,
+      quiz_id: currentQuestion._id,
       correct: isCorrect,
       isFirstQuestion: currentQuestionIndex === 0,
       isLastQuestion: currentQuestionIndex === review.length - 1,
@@ -92,17 +106,25 @@ function QuizView() {
     setIsFinished(false);
   };
 
-  if (!card) return null; // Guard against no card data
+  if (!card) return null;
 
   if (review.length === 0) {
     return (
-      <div className="text-center py-10 bg-white rounded-xl shadow-md">
-        <h3 className="text-lg font-medium text-gray-900">
-          No flashcards for a quiz!
+      <div className="text-center py-10 bg-white dark:bg-gray-800  rounded-xl shadow-md">
+        <h3 className="text-xl font-medium text-gray-900 dark:text-white">
+          No Quiz to show!
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Add some flashcards to start a quiz.
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
+          Add some quizzes from Manage Flaschards to start a quiz.
         </p>
+        <ActionLink
+          to={`/card/${params.id}/edit`}
+          icon={CogIcon}
+          baseBg="mt-2 px-4 bg-gray-600"
+          hoverBg="hover:bg-gray-700"
+        >
+          Manage Flashcards
+        </ActionLink>
       </div>
     );
   }
@@ -121,10 +143,10 @@ function QuizView() {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md">
       <QuizHeader current={currentQuestionIndex + 1} total={review.length} />
-      <QuizQuestion questionText={currentQuestion.question} />
+      <QuizQuestion questionText={currentQuestion.quizQuestion} />
       <QuizOptions
         options={shuffledOptions}
-        answer={currentQuestion.answer}
+        answer={currentQuestion.quizAnswer}
         selectedAnswer={selectedAnswer}
         onSelect={handleAnswerSelect}
       />

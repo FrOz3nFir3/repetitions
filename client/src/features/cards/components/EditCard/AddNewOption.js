@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 
-const AddNewOption = ({ cardId, flashcard }) => {
+const AddNewOption = ({ cardId, flashcardId, quiz }) => {
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const dispatch = useDispatch();
   const [newOption, setNewOption] = useState("");
@@ -22,12 +22,13 @@ const AddNewOption = ({ cardId, flashcard }) => {
 
     const updateDetails = {
       _id: cardId,
-      cardId: flashcard.cardId,
+      cardId: flashcardId,
+      quizId: quiz.quizId,
       option: newOption,
     };
     updateCard(updateDetails).then((res) => {
       if (res.data) {
-        dispatch(modifyCard(updateDetails));
+        // dispatch(modifyCard(updateDetails));
         handleCancel();
       }
     });

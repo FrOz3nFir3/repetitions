@@ -27,45 +27,67 @@ async function httpPatchUpdateCard(req, res) {
     return res.status(401).json({ error: "Authentication / Login required" });
   }
 
-  let { question, answer, option, ...otherBody } = req.body;
+  let { question, answer, option, quizQuestion, quizAnswer, options: newOptions, minimumOptions, ...otherBody } = req.body;
 
+  // --- Input Validation ---
   if (question) {
-    let questionText = getTextFromHTML(question);
-    if (questionText?.trim() === "" && !otherBody.isUpdatingOption) {
+    if (getTextFromHTML(question)?.trim() === "" && !otherBody.isUpdatingOption) {
       return res.status(400).json({ error: "Question cannot be empty" });
     }
-  }
-
-  if (answer) {
-    let answerText = getTextFromHTML(answer);
-    if (answerText?.trim() === "") {
-      return res.status(400).json({ error: "Answer cannot be empty" });
-    }
-  }
-
-  if (option) {
-    let optionText = getTextFromHTML(option);
-    if (optionText?.trim() === "") {
-      return res.status(400).json({ error: "Option cannot be empty" });
-    }
-  }
-
-  // these are html input so we need to sanitize them
-  if (question) {
     question = DOMPurify.sanitize(question);
   }
+
   if (answer) {
+    if (getTextFromHTML(answer)?.trim() === "") {
+      return res.status(400).json({ error: "Answer cannot be empty" });
+    }
     answer = DOMPurify.sanitize(answer);
   }
+
   if (option) {
+    if (getTextFromHTML(option)?.trim() === "") {
+      return res.status(400).json({ error: "Option cannot be empty" });
+    }
     option = DOMPurify.sanitize(option);
   }
+
+  if (quizQuestion) {
+    if (getTextFromHTML(quizQuestion)?.trim() === "") {
+      return res.status(400).json({ error: "Quiz Question cannot be empty" });
+    }
+    quizQuestion = DOMPurify.sanitize(quizQuestion);
+  }
+
+  if (quizAnswer) {
+    if (getTextFromHTML(quizAnswer)?.trim() === "") {
+      return res.status(400).json({ error: "Quiz Answer cannot be empty" });
+    }
+    quizAnswer = DOMPurify.sanitize(quizAnswer);
+  }
+
+  if (newOptions) {
+    if (!Array.isArray(newOptions) || newOptions.some(opt => getTextFromHTML(opt)?.trim() === '')) {
+      return res.status(400).json({ error: "Options cannot be empty" });
+    }
+    newOptions = newOptions.map(opt => DOMPurify.sanitize(opt));
+  }
+
+  if (minimumOptions) {
+    if (typeof minimumOptions !== 'number' || minimumOptions < 2) {
+      return res.status(400).json({ error: "Minimum options must be a number greater than or equal to 2" });
+    }
+  }
+  // --- End Validation ---
 
   try {
     const updatedCard = await updateCard({
       question,
       answer,
       option,
+      quizQuestion,
+      quizAnswer,
+      options: newOptions,
+      minimumOptions,
       ...otherBody,
       userId: token.id,
     });
@@ -73,7 +95,7 @@ async function httpPatchUpdateCard(req, res) {
     return res.json({ ok: true });
   } catch (error) {
     console.log(error);
-    return res.status(400).json({ error });
+    return res.status(400).json({ error: error.message });
   }
 }
 

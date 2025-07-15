@@ -6,10 +6,14 @@ import {
   ChevronRightIcon,
   ArrowsRightLeftIcon,
   InformationCircleIcon,
+  CogIcon,
 } from "@heroicons/react/24/solid";
 import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
+import { ActionLink } from "../CardActions";
+import { useParams } from "react-router-dom";
 
 function Review() {
+  const params = useParams();
   const card = useSelector(selectCurrentCard);
   const { review = [] } = card;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -77,13 +81,21 @@ function Review() {
 
   if (review.length === 0) {
     return (
-      <div className="text-center py-10 bg-white rounded-xl shadow-md">
-        <h3 className="text-lg font-medium text-gray-900">
+      <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+        <h3 className="text-xl font-medium text-gray-900 dark:text-white">
           No flashcards to review!
         </h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
           Add some flashcards to get started.
         </p>
+        <ActionLink
+          to={`/card/${params.id}/edit`}
+          icon={CogIcon}
+          baseBg="mt-2 px-4 bg-gray-600"
+          hoverBg="hover:bg-gray-700"
+        >
+          Manage Flashcards
+        </ActionLink>
       </div>
     );
   }

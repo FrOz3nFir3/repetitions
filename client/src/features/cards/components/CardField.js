@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { usePatchUpdateCardMutation } from "../../../api/apiSlice";
-import { useDispatch } from "react-redux";
-import { modifyCard } from "../state/cardSlice";
 import {
   PencilIcon,
   CheckIcon,
@@ -11,8 +9,7 @@ import {
 import RichTextEditor from "../../../components/ui/RichTextEditor";
 import HtmlRenderer from "../../../components/ui/HtmlRenderer";
 
-export function CardField({ _id, text, value, cardId, optionIndex }) {
-  const dispatch = useDispatch();
+export function CardField({ _id, text, value, cardId, quizId, optionId }) {
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value);
@@ -27,18 +24,11 @@ export function CardField({ _id, text, value, cardId, optionIndex }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const updateDetails = { _id, [text]: inputValue };
-    if (cardId) {
-      updateDetails.cardId = cardId;
-    }
-    if (typeof optionIndex === "number") {
-      updateDetails.optionIndex = optionIndex;
-    }
+    const updateDetails = { _id, [text]: inputValue, cardId, quizId, optionId };
+    
     updateCard(updateDetails).then((response) => {
       if (response.data) {
         setIsEditing(false);
-        // TODO: implement this later
-        // dispatch(modifyCard(updateDetails));
       }
     });
   };

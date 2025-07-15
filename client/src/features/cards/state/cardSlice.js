@@ -10,6 +10,7 @@ const cardSlicer = createSlice({
     modifyCard(state, action) {
       const updateDetails = action.payload;
 
+      // TODO: cardId is no longer used _id is used instead later change this
       if (updateDetails.cardId) {
         // updating a specific flashcard
         const {

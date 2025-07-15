@@ -1,8 +1,9 @@
 import React from "react";
 import { CardField } from "../CardField";
 import AddNewOption from "./AddNewOption";
+import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 
-const QuizOptionsManager = ({ flashcard, cardId }) => {
+const QuizOptionsManager = ({ quiz, cardId, flashcardId }) => {
   return (
     <div className="mt-4 pt-4 border-t border-dashed border-gray-300 dark:border-gray-600">
       <h4 className="text-lg font-semibold text-gray-700 dark:text-white mb-2">
@@ -14,8 +15,9 @@ const QuizOptionsManager = ({ flashcard, cardId }) => {
           <CardField
             _id={cardId}
             text="minimumOptions"
-            value={flashcard.minimumOptions}
-            cardId={flashcard.cardId}
+            value={quiz.minimumOptions}
+            cardId={flashcardId}
+            quizId={quiz.quizId}
           />
         </div>
 
@@ -24,7 +26,13 @@ const QuizOptionsManager = ({ flashcard, cardId }) => {
           <p className="font-semibold text-gray-500 dark:text-gray-300 text-sm">
             Options
           </p>
-          {flashcard.options.map((option, i) => (
+          {/* Display the correct answer as a read-only option */}
+          <div className="flex items-center justify-between bg-green-50 dark:bg-green-900/50 p-2 rounded-md border border-green-200 dark:border-green-800 pointer-events-none">
+            <div className="flex-grow min-w-0 text-green-800 dark:text-green-300">
+              <HtmlRenderer htmlContent={quiz.quizAnswer} />
+            </div>
+          </div>
+          {quiz.options.map((option, i) => (
             <div
               key={i}
               className="flex items-center justify-between bg-white dark:bg-gray-700 p-2 rounded-md border dark:border-gray-600"
@@ -34,7 +42,8 @@ const QuizOptionsManager = ({ flashcard, cardId }) => {
                   _id={cardId}
                   text="option"
                   value={option}
-                  cardId={flashcard.cardId}
+                  cardId={flashcardId}
+                  quizId={quiz.quizId}
                   optionIndex={i}
                 />
               </div>
@@ -43,8 +52,12 @@ const QuizOptionsManager = ({ flashcard, cardId }) => {
         </div>
 
         {/* Add New Option Form */}
-        {flashcard.options.length < flashcard.minimumOptions && (
-          <AddNewOption cardId={cardId} flashcard={flashcard} />
+        {quiz.options.length < quiz.minimumOptions - 1 && (
+          <AddNewOption
+            cardId={cardId}
+            flashcardId={flashcardId}
+            quiz={quiz}
+          />
         )}
       </div>
     </div>

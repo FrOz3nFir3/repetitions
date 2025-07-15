@@ -23,7 +23,7 @@ export function NewFlashcard({ flashcardId }) {
 
     updateCard(updateDetails).then((response) => {
       if (response.data) {
-        dispatch(modifyCard(updateDetails));
+        // dispatch(modifyCard(updateDetails));
         setIsOpen(false);
         setQuestion("");
         setAnswer("");
@@ -31,17 +31,21 @@ export function NewFlashcard({ flashcardId }) {
     });
   };
 
+  const onClose = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+        className="cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 "
       >
         <PlusIcon className="-ml-0.5 h-5 w-5" />
-        Add New Flashcard
+        Add Review
       </button>
 
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+      <Modal isOpen={isOpen} onClose={onClose}>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -87,16 +91,24 @@ export function NewFlashcard({ flashcardId }) {
             />
           </div>
 
-          <div className="mt-5 sm:mt-6">
+          <div className="flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isLoading}
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={isLoading || !question || !answer}
-              className="cursor-pointer inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <ArrowPathIcon className="h-5 w-5 animate-spin" />
               ) : (
-                "Add Flashcard"
+                "Add Review"
               )}
             </button>
           </div>

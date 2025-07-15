@@ -6,7 +6,7 @@ const changeSchema = new mongoose.Schema({
   newValue: { type: mongoose.Schema.Types.Mixed },
 }, { _id: false });
 
-const logEntrySchema = new mongoose.Schema({
+const logEntrySchema = new mongoose.mongoose.Schema({
   eventType: {
     type: String,
     required: true,
@@ -27,6 +27,23 @@ const logEntrySchema = new mongoose.Schema({
   changes: [changeSchema],
 });
 
+const optionSchema = new mongoose.Schema({
+  value: { type: String, required: true },
+});
+
+const quizSchema = new mongoose.Schema({
+  quizQuestion: { type: String, required: true },
+  quizAnswer: { type: String, required: true },
+  options: { type: [optionSchema], default: [] },
+  minimumOptions: { type: Number, default: 2 },
+});
+
+const reviewSchema = new mongoose.Schema({
+  question: { type: String, required: true },
+  answer: { type: String, required: true },
+  quizzes: { type: [quizSchema], default: [] },
+});
+
 const cardsSchema = new mongoose.Schema({
   "main-topic": {
     type: String,
@@ -41,7 +58,7 @@ const cardsSchema = new mongoose.Schema({
     required: true,
   },
   "review":{
-    type:Array,
+    type:[reviewSchema],
     default:[]
   },
   "description":{

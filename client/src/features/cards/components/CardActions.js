@@ -6,7 +6,7 @@ import {
   CogIcon,
 } from "@heroicons/react/24/outline";
 
-const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
+export const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
   const location = useLocation();
   const isActive = location.pathname.includes(to);
 

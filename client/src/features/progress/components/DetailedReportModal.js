@@ -27,20 +27,28 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
   const mergedReport = React.useMemo(() => {
     if (!reportData || !cardData || !cardData.review) return [];
 
-    const reviewMap = new Map(
-      cardData.review.map((flashcard) => [flashcard.cardId, flashcard])
+    const quizMap = new Map(
+      cardData.review
+        .reduce((acc, flashcard) => {
+          flashcard.quizzes.forEach((quiz) => {
+            acc.push([quiz._id, quiz]);
+          });
+          return acc;
+        }, [])
+        .map((quiz) => [quiz[0], quiz[1]])
     );
 
     return reportData
       .map((attempt) => {
-        const flashcardDetails = reviewMap.get(attempt.flashcard_id);
-        if (!flashcardDetails) return null;
+        const quizDetails = quizMap.get(attempt.quiz_id);
+        if (!quizDetails) return null;
 
         return {
           ...attempt,
-          question: flashcardDetails.question,
-          answer: flashcardDetails.answer,
-          options: flashcardDetails.options || [],
+          question: quizDetails.quizQuestion,
+          answer: quizDetails.quizAnswer,
+          options:
+            [...quizDetails.options, { value: quizDetails.quizAnswer }] || [],
         };
       })
       .filter(Boolean);
@@ -89,7 +97,7 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
                     <ul className="space-y-6">
                       {mergedReport.map((item) => (
                         <li
-                          key={item.flashcard_id}
+                          key={item.quiz_id}
                           className="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-lg shadow-md"
                         >
                           <p>
@@ -100,21 +108,21 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
                               <div
                                 key={i}
                                 className={`flex items-center p-3 rounded-md ${
-                                  option === item.answer
+                                  option.value === item.answer
                                     ? "bg-green-100 dark:bg-green-800/50"
                                     : "bg-gray-100 dark:bg-gray-700/50"
                                 }`}
                               >
-                                {option === item.answer && (
+                                {option.value === item.answer && (
                                   <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400 mr-3 flex-shrink-0" />
                                 )}
                                 <span
                                   className={`text-gray-700 dark:text-gray-300 ${
-                                    option === item.answer &&
+                                    option.value === item.answer &&
                                     "font-semibold text-green-800 dark:text-green-300"
                                   }`}
                                 >
-                                  <HtmlRenderer htmlContent={option} />
+                                  <HtmlRenderer htmlContent={option.value} />
                                 </span>
                               </div>
                             ))}

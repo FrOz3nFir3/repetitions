@@ -1,6 +1,50 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const quizAttemptSchema = new mongoose.Schema({
+  quiz_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
+  attempts: {
+    type: Number,
+    default: 0,
+  },
+  timesCorrect: {
+    type: Number,
+    default: 0,
+  },
+  timesIncorrect: {
+    type: Number,
+    default: 0,
+  },
+}, { _id: false });
+
+const studyingSchema = new mongoose.Schema({
+  card_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Card',
+    required: true,
+  },
+  "times-started": {
+    type: Number,
+    default: 0,
+  },
+  "times-finished": {
+    type: Number,
+    default: 0,
+  },
+  "total-correct": {
+    type: Number,
+    default: 0,
+  },
+  "total-incorrect": {
+    type: Number,
+    default: 0,
+  },
+  quizAttempts: [quizAttemptSchema],
+}, { _id: false });
+
 const UsersSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -15,16 +59,12 @@ const UsersSchema = new mongoose.Schema({
   googleId: {
     type: String,
   },
-  studying: {
-    type: [Object],
-    default: [],
-  },
+  studying: [studyingSchema],
 });
 
 const SALT_WORK_FACTOR = 10;
 
 UsersSchema.pre("save", async function save(next) {
-  // only hash the password if it has been modified (or is new)
   if (!this.isModified("password") || !this.password) return next();
 
   try {
@@ -36,5 +76,4 @@ UsersSchema.pre("save", async function save(next) {
   }
 });
 
-// Connects usersSchema with the "users" collection
 module.exports = mongoose.model("User", UsersSchema);
