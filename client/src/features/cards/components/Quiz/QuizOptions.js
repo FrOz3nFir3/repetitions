@@ -4,42 +4,49 @@ import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 
 const OptionButton = ({ option, answer, selectedAnswer, onSelect }) => {
   const isSelected = selectedAnswer?.option === option;
-  const isCorrect = answer === option;
+  const isCorrectAnswer = answer === option;
 
-  let buttonClass =
-    "dark:text-white cursor-pointer w-full text-left p-4 rounded-lg border-2 transition-all duration-300 ease-in-out transform hover:scale-105 ";
+  let baseClasses =
+    "cursor-pointer w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-opacity-50";
 
-  if (isSelected) {
-    buttonClass += selectedAnswer.isCorrect
-      ? "bg-green-100 border-green-500 ring-4 ring-green-200 dark:!text-black"
-      : "bg-red-100 border-red-500 ring-4 ring-red-200 dark:!text-black";
-  } else if (selectedAnswer && isCorrect) {
-    // Show the correct answer if a wrong one was chosen
-    buttonClass += "bg-green-100 border-green-500 dark:!text-black";
+  let stateClasses = "";
+
+  if (selectedAnswer) {
+    if (isCorrectAnswer) {
+      stateClasses = `bg-green-100 border-green-500 text-green-800 dark:bg-green-900/50 dark:border-green-500 dark:text-white ${
+        isSelected ? "ring-4 ring-green-300 dark:ring-green-600" : ""
+      }`;
+    } else if (isSelected) {
+      stateClasses =
+        "bg-red-100 border-red-500 text-red-800 dark:bg-red-900/50 dark:border-red-500 dark:text-white ring-4 ring-red-300 dark:ring-red-600";
+    } else {
+      stateClasses =
+        "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 cursor-not-allowed opacity-50";
+    }
   } else {
-    // Default state
-    buttonClass +=
-      "bg-gray-50 dark:bg-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-600 border-gray-200 dark:border-gray-600";
+    stateClasses =
+      "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-md hover:-translate-y-1 focus:ring-blue-300 dark:focus:ring-blue-500";
   }
 
   return (
     <button
       onClick={() => onSelect(option)}
       disabled={!!selectedAnswer}
-      className={buttonClass}
+      className={`${baseClasses} ${stateClasses}`}
     >
-      <div className="flex items-center jusify-between">
-        <div className="w-[90%] sm:w-full">
+      <div className="flex items-center justify-between">
+        <div className="flex-grow font-semibold">
           <HtmlRenderer htmlContent={option} />
         </div>
-        <div className="flex-shrink-0 h-8 w-8">
-          {isSelected &&
-            (isCorrect ? (
-              <CheckCircleIcon className="h-8 w-8 text-green-500" />
-            ) : (
-              <XCircleIcon className="h-8 w-8 text-red-500" />
-            ))}
-        </div>
+        {selectedAnswer && (
+          <div className="flex-shrink-0 h-6 w-6 ml-4">
+            {isCorrectAnswer ? (
+              <CheckCircleIcon className="text-green-500" />
+            ) : isSelected ? (
+              <XCircleIcon className="text-red-500" />
+            ) : null}
+          </div>
+        )}
       </div>
     </button>
   );
@@ -47,7 +54,7 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect }) => {
 
 const QuizOptions = ({ options, answer, selectedAnswer, onSelect }) => {
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 gap-4">
       {options.map((option, index) => (
         <OptionButton
           key={index}
