@@ -1,19 +1,21 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import { useDispatch } from "react-redux";
-import { modifyCard } from "../../state/cardSlice";
 import { PlusIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import Modal from "../../../../components/ui/Modal";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import { DocumentPlusIcon } from "@heroicons/react/24/solid";
+import Flashcard from "../Flashcard/Review/Flashcard";
 
 export function NewFlashcard({ flashcardId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const dispatch = useDispatch();
+  const errorRef = useRef(null);
 
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const questionEditorRef = useRef(null);
   const answerEditorRef = useRef(null);
@@ -24,10 +26,10 @@ export function NewFlashcard({ flashcardId }) {
 
     updateCard(updateDetails).then((response) => {
       if (response.data) {
-        // dispatch(modifyCard(updateDetails));
         setIsOpen(false);
         setQuestion("");
         setAnswer("");
+        setIsFlipped(false);
       }
     });
   };
@@ -35,6 +37,14 @@ export function NewFlashcard({ flashcardId }) {
   const onClose = () => {
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
+
+  const previewData = { question, answer };
 
   return (
     <>
@@ -46,10 +56,10 @@ export function NewFlashcard({ flashcardId }) {
         Add Review
       </button>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="p-1">
-            <div className="flex items-start gap-4 mb-6">
+      <Modal isOpen={isOpen} onClose={onClose} maxWidth="7xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <div className="flex items-start gap-4 mb-2">
               <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
                 <DocumentPlusIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
@@ -64,44 +74,76 @@ export function NewFlashcard({ flashcardId }) {
               </div>
             </div>
           </div>
+          <div ref={errorRef}>
+            {error && (
+              <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+                {error.data?.error}
+              </div>
+            )}
+          </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4 text-red-700">
-              {error.data.error}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div className="space-y-4">
+              <div>
+                <label
+                  onClick={() => questionEditorRef.current?.focus()}
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                >
+                  Question
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 my-2">
+                  This is the "front" of the card that the user will see first.
+                </p>
+                <RichTextEditor
+                  ref={questionEditorRef}
+                  initialContent={question}
+                  onChange={(newContent) => {
+                    setQuestion(newContent);
+                    setIsFlipped(false);
+                  }}
+                  editable={!isLoading}
+                />
+              </div>
+
+              <div>
+                <label
+                  onClick={() => answerEditorRef.current?.focus()}
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                >
+                  Answer
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 my-2">
+                  This is the "back" of the card, revealed as the answer.
+                </p>
+                <RichTextEditor
+                  ref={answerEditorRef}
+                  initialContent={answer}
+                  onChange={(newContent) => {
+                    setAnswer(newContent);
+                    setIsFlipped(true);
+                  }}
+                  editable={!isLoading}
+                />
+              </div>
             </div>
-          )}
-
-          <div>
-            <label
-              onClick={() => questionEditorRef.current?.focus()}
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
-            >
-              Question
-            </label>
-            <RichTextEditor
-              ref={questionEditorRef}
-              initialContent={question}
-              onChange={setQuestion}
-              editable={!isLoading}
-            />
+            <div className="md:col-start-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                Live Preview
+              </label>
+              <div className="mb-2 text-xs text-gray-500 dark:text-gray-300">
+                Click on the card to flip it.
+              </div>
+              <div className="w-full h-full">
+                <Flashcard
+                  currentFlashcard={previewData}
+                  isFlipped={isFlipped}
+                  setIsFlipped={setIsFlipped}
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label
-              onClick={() => answerEditorRef.current?.focus()}
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
-            >
-              Answer
-            </label>
-            <RichTextEditor
-              ref={answerEditorRef}
-              initialContent={answer}
-              onChange={setAnswer}
-              editable={!isLoading}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2 pt-2">
             <button
               type="button"
               onClick={onClose}

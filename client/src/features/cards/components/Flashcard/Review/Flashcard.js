@@ -17,7 +17,7 @@ const Flashcard = ({
     onTouchEnd={handleTouchEnd}
   >
     <div
-      className={`w-full ${getSlideClass()}`}
+      className={`w-full ${getSlideClass?.()}`}
       style={{ perspective: "1200px" }}
     >
       {currentFlashcard ? (
@@ -30,21 +30,21 @@ const Flashcard = ({
           onClick={() => setIsFlipped(!isFlipped)}
         >
           <div
-            className="absolute w-full p-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-xl overflow-y-auto flex items-center justify-center text-white"
+            className="absolute w-full h-full p-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-xl overflow-y-auto flex flex-col items-center justify-center text-white"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <div className="overflow-auto h-84 pr-1">
+            <div className="overflow-auto text-xl h-auto max-h-full max-w-full pr-1">
               <HtmlRenderer htmlContent={currentFlashcard.question} />
             </div>
           </div>
           <div
-            className="absolute w-full h-full p-6 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg shadow-xl overflow-y-auto flex items-center justify-center text-white"
+            className="absolute w-full h-full p-6 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg shadow-xl overflow-y-auto flex flex-col items-center justify-center text-white"
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
             }}
           >
-            <div className="overflow-auto h-84 pr-1">
+            <div className="overflow-auto text-xl h-auto max-h-full max-w-full  pr-1">
               <HtmlRenderer htmlContent={currentFlashcard.answer} />
             </div>
           </div>

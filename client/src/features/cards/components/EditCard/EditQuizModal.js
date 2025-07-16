@@ -69,7 +69,7 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
 
   useEffect(() => {
     if (error && errorRef.current) {
-      errorRef.current.scrollIntoView({ behavior: "smooth" });
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [error]);
 

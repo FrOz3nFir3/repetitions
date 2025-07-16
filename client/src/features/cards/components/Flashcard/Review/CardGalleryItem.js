@@ -1,5 +1,5 @@
-import HtmlRenderer from "../../../../../components/ui/HtmlRenderer";
 import React, { useEffect, useRef } from "react";
+import { getTextFromHtml } from "../../../../../utils/dom";
 
 const CardGalleryItem = ({
   item,
@@ -35,8 +35,10 @@ const CardGalleryItem = ({
               }
             `}
     >
-      <div className="truncate  h-full">
-        <HtmlRenderer htmlContent={item.question} />
+      <div className=" flex justify-center items-center h-full">
+        <div className="text-xs line-clamp-4">
+          {getTextFromHtml(item.question)}
+        </div>
       </div>
     </button>
   );

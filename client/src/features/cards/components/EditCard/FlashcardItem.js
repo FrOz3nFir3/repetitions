@@ -73,6 +73,8 @@ const FlashcardItem = ({ flashcard, cardId }) => {
                 text="question"
                 value={flashcard.question}
                 cardId={flashcard._id}
+                showFlashcardPreview={true}
+                flashcardData={flashcard}
               />
             </div>
           </div>
@@ -91,6 +93,8 @@ const FlashcardItem = ({ flashcard, cardId }) => {
                 text="answer"
                 value={flashcard.answer}
                 cardId={flashcard._id}
+                showFlashcardPreview={true}
+                flashcardData={flashcard}
               />
             </div>
           </div>

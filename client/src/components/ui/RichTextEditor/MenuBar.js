@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BoldIcon,
   ItalicIcon,
@@ -29,6 +29,17 @@ const ToolbarButton = ({ onClick, disabled, isActive, tooltip, children }) => (
 );
 
 export const MenuBar = ({ editor }) => {
+  const [_, setTick] = useState(0);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const update = () => setTick((tick) => tick + 1);
+
+    editor.on("transaction", update);
+    return () => editor.off("transaction", update);
+  }, [editor]);
+
   if (!editor) {
     return null;
   }
@@ -116,32 +127,19 @@ export const MenuBar = ({ editor }) => {
     }
   };
 
-  const fontSizes = [
-    "10px",
-    "12px",
-    "14px",
-    "16px",
-    "18px",
-    "24px",
-    "30px",
-    "36px",
-    "48px",
-  ];
+  const fontSizes = ["12px", "16px", "20px", "24px", "28px", "32px", "36px", "40px", "44px", "48px"];
 
   const buttons = [
     {
       name: "Increase Font",
       action: () => {
-        const currentSize =
-          editor.getAttributes("textStyle").fontSize || "16px";
+        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
         const currentIndex = fontSizes.indexOf(currentSize);
-        const nextSize =
-          fontSizes[Math.min(currentIndex + 1, fontSizes.length - 1)];
+        const nextSize = fontSizes[Math.min(currentIndex + 1, fontSizes.length - 1)];
         editor.chain().focus().setFontSize(nextSize).run();
       },
       can: () => {
-        const currentSize =
-          editor.getAttributes("textStyle").fontSize || "16px";
+        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
         return currentSize !== fontSizes[fontSizes.length - 1];
       },
       icon: <span className="font-bold">A+</span>,
@@ -149,15 +147,13 @@ export const MenuBar = ({ editor }) => {
     {
       name: "Decrease Font",
       action: () => {
-        const currentSize =
-          editor.getAttributes("textStyle").fontSize || "16px";
+        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
         const currentIndex = fontSizes.indexOf(currentSize);
         const prevSize = fontSizes[Math.max(currentIndex - 1, 0)];
         editor.chain().focus().setFontSize(prevSize).run();
       },
       can: () => {
-        const currentSize =
-          editor.getAttributes("textStyle").fontSize || "16px";
+        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
         return currentSize !== fontSizes[0];
       },
       icon: <span className="font-bold">A-</span>,
@@ -215,8 +211,7 @@ export const MenuBar = ({ editor }) => {
           isActive={button.isActive ? editor.isActive(button.isActive) : false}
           tooltip={button.name}
           disabled={
-            (editor.isActive("codeBlock") && button.name !== "Code Block") ||
-            (button.can ? !button.can() : false)
+            (editor.isActive("codeBlock") && button.name !== "Code Block") || (button.can ? !button.can() : false)
           }
         >
           {button.icon}

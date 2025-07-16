@@ -8,17 +8,35 @@ import {
 } from "@heroicons/react/24/outline";
 import RichTextEditor from "../../../components/ui/RichTextEditor";
 import HtmlRenderer from "../../../components/ui/HtmlRenderer";
+import Flashcard from "./Flashcard/Review/Flashcard";
 
-export function CardField({ _id, text, value, cardId, quizId, optionId }) {
+export function CardField({
+  _id,
+  text,
+  value,
+  cardId,
+  quizId,
+  optionId,
+  showFlashcardPreview,
+  flashcardData,
+}) {
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const [previewData, setPreviewData] = useState(flashcardData);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   useEffect(() => {
     setInputValue(value);
   }, [value]);
 
-  const handleRichTextChange = (newContent) => {
+  useEffect(() => {
+    if (showFlashcardPreview) {
+      setPreviewData((prev) => ({ ...prev, [text]: inputValue }));
+    }
+  }, [inputValue, text, showFlashcardPreview]);
+
+  const handleValueChange = (newContent) => {
     setInputValue(newContent);
   };
 
@@ -36,6 +54,15 @@ export function CardField({ _id, text, value, cardId, quizId, optionId }) {
   const handleCancel = () => {
     setInputValue(value);
     setIsEditing(false);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+    if (text === "answer") {
+      setIsFlipped(true);
+    } else {
+      setIsFlipped(false);
+    }
   };
 
   const isUnchanged = inputValue === value;
@@ -62,14 +89,14 @@ export function CardField({ _id, text, value, cardId, quizId, optionId }) {
               {isRichTextField ? (
                 <RichTextEditor
                   initialContent={inputValue}
-                  onChange={handleRichTextChange}
+                  onChange={handleValueChange}
                   editable={!isLoading}
                 />
               ) : (
                 <input
                   type={text === "minimumOptions" ? "number" : "text"}
                   value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
+                  onChange={(e) => handleValueChange(e.target.value)}
                   className="bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10"
                   min={text === "minimumOptions" ? 2 : undefined}
                   max={text === "minimumOptions" ? 4 : undefined}
@@ -77,7 +104,19 @@ export function CardField({ _id, text, value, cardId, quizId, optionId }) {
                   disabled={isLoading}
                 />
               )}
-              <div className="flex gap-2 justify-end">
+              {showFlashcardPreview && (
+                <div className="mt-4 ">
+                  <h4 className="text-md font-bold text-gray-700 dark:text-white mb-2">
+                    Live Preview
+                  </h4>
+                  <Flashcard
+                    currentFlashcard={previewData}
+                    isFlipped={isFlipped}
+                    setIsFlipped={() => {}}
+                  />
+                </div>
+              )}
+              <div className="flex gap-2 justify-end mt-2">
                 <button
                   type="submit"
                   disabled={isUnchanged || isLoading}
@@ -111,7 +150,7 @@ export function CardField({ _id, text, value, cardId, quizId, optionId }) {
                 )}
               </div>
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={handleEditClick}
                 className="absolute top-2 right-0 cursor-pointer opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 dark:text-gray-400 hover:text-indigo-600 p-1"
               >
                 <PencilIcon className="h-5 w-5" />
