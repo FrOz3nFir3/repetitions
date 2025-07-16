@@ -84,26 +84,26 @@ const LandingPage = () => {
         </div>
         <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 flex items-center justify-center p-8 lg:pt-0">
           <div className="relative w-full h-96 max-w-lg sm:h-72 md:h-96">
-            <div className="absolute top-0 left-1/4 w-64 h-40  bg-indigo-500 text-white rounded-lg shadow-lg transform -rotate-6 transition-transform duration-500 hover:rotate-0 hover:scale-105">
+            <div className="absolute top-0 left-1/4 w-64 h-40 text-white  bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-xl   transform -rotate-6 transition-transform duration-500 hover:rotate-0 hover:scale-105">
               <div className="p-4">
                 <h3 className="text-lg font-semibold">
                   What is the Pythagorean theorem?
                 </h3>
               </div>
             </div>
-            <div className="absolute top-1/4 left-1/2 w-64 h-40  bg-green-500 text-white rounded-lg shadow-lg transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105">
+            <div className="absolute top-1/4 left-1/2 w-64 h-40  bg-gradient-to-br text-white from-green-400 to-teal-500 rounded-lg shadow-xl transform rotate-3 transition-transform duration-500 hover:rotate-0 hover:scale-105">
               <div className="p-4">
                 <h3 className="text-lg font-semibold">a² + b² = c²</h3>
               </div>
             </div>
-            <div className="absolute top-1/2 left-1/4 w-64 h-40  bg-indigo-500 text-white rounded-lg shadow-lg transform -rotate-2 transition-transform duration-500 hover:rotate-0 hover:scale-105">
+            <div className="absolute top-1/2 left-1/4 w-64 h-40  text-white  bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-xl transform -rotate-2 transition-transform duration-500 hover:rotate-0 hover:scale-105">
               <div className="p-4">
                 <h3 className="text-lg font-semibold">
                   What does "ubiquitous" mean?
                 </h3>
               </div>
             </div>
-            <div className="absolute top-3/4 left-1/2 w-64 h-40  bg-green-500 text-white rounded-lg shadow-lg transform rotate-5 transition-transform duration-500 hover:rotate-0 hover:scale-105">
+            <div className="absolute top-3/4 left-1/2 w-64 h-40  bg-gradient-to-br text-white from-green-400 to-teal-500 rounded-lg shadow-xl transform rotate-5 transition-transform duration-500 hover:rotate-0 hover:scale-105">
               <div className="p-4">
                 <h3 className="text-lg font-semibold">
                   Present, appearing, or found everywhere.

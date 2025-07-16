@@ -36,8 +36,14 @@ const EditCardView = () => {
     const cardNo = cardNoQuery;
     const outOfBounds = cardNo > filteredFlashcards.length || cardNo <= 0;
     // delete cardNo if no flashcards match the search
+
     if (filteredFlashcards.length === 0) {
       handleSetSearchParams("cardNo", "");
+      return;
+    }
+    if (Number.isNaN(cardNo)) {
+      handleSetSearchParams("cardNo", "1");
+      return;
     }
     if (outOfBounds) {
       const validIndex =

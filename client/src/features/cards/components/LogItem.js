@@ -39,7 +39,7 @@ const LogItem = ({ log }) => {
         onClick={() => hasChanges && setIsOpen(!isOpen)}
       >
         <div className="flex-grow">
-          <p className="line-clamp-2 font-semibold text-gray-800 dark:text-gray-200">
+          <p className="line-clamp-2 break-all font-semibold text-gray-800 dark:text-gray-200">
             {summary}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">

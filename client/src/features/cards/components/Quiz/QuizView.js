@@ -112,7 +112,7 @@ function QuizView() {
           No Quiz to show!
         </h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
-          Add some quizzes from Manage Flaschards to start a quiz.
+          Add some quizzes from Edit Flashcards to start a quiz.
         </p>
       </div>
     );

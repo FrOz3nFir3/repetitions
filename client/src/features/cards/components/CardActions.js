@@ -65,7 +65,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
         baseBg="bg-gray-600"
         hoverBg="hover:bg-gray-700"
       >
-        Manage Flashcards
+        Edit Flashcards
       </ActionLink>
     </div>
   );
