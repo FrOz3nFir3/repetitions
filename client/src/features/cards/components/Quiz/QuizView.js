@@ -6,7 +6,7 @@ import {
   selectCurrentUser,
   modifyUser,
 } from "../../../authentication/state/authSlice";
-import { LightBulbIcon } from "@heroicons/react/24/solid";
+import { LightBulbIcon, SparklesIcon } from "@heroicons/react/24/solid";
 import QuizResults from "./QuizResults";
 import QuizHeader from "./QuizHeader";
 import QuizQuestion from "./QuizQuestion";
@@ -24,6 +24,9 @@ function QuizView() {
   const [isFinished, setIsFinished] = useState(false);
   const [randomFact, setRandomFact] = useState(null);
   const [factLoading, setFactLoading] = useState(false);
+  const defaultShowFacts =
+    (localStorage.getItem("quiz-show-fun-facts") ?? "true") === "true";
+  const [showFacts, setShowFacts] = useState(defaultShowFacts);
 
   const [updateUser] = usePatchUpdateUserProgressMutation();
 
@@ -52,11 +55,18 @@ function QuizView() {
     return options.sort(() => Math.random() - 0.5);
   }, [currentQuestion]);
 
+  const handleRandomFactToggle = () => {
+    setShowFacts((prev) => {
+      localStorage.setItem("quiz-show-fun-facts", !prev);
+      return !prev;
+    });
+  };
+
   const fetchRandomFact = useCallback(async () => {
     setFactLoading(true);
     try {
       const response = await fetch(
-        "https://uselessfacts.jsph.pl/random.json?language=en"
+        "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en"
       );
       const data = await response.json();
       setRandomFact(data.text);
@@ -69,7 +79,10 @@ function QuizView() {
 
   useEffect(() => {
     if (selectedAnswer) {
-      fetchRandomFact();
+      if (showFacts) {
+        fetchRandomFact();
+      }
+      const timerValue = showFacts ? 3500 : 1500;
       const timer = setTimeout(() => {
         if (currentQuestionIndex < review.length - 1) {
           setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -78,10 +91,16 @@ function QuizView() {
         } else {
           setIsFinished(true);
         }
-      }, 3000);
+      }, timerValue);
       return () => clearTimeout(timer);
     }
-  }, [selectedAnswer, currentQuestionIndex, review.length, fetchRandomFact]);
+  }, [
+    selectedAnswer,
+    currentQuestionIndex,
+    review.length,
+    fetchRandomFact,
+    showFacts,
+  ]);
 
   const handleAnswerSelect = (option) => {
     if (selectedAnswer || !currentQuestion) return;
@@ -151,13 +170,37 @@ function QuizView() {
         current={currentQuestionIndex + 1}
         total={review.length}
       />
-      {selectedAnswer ? (
+      {selectedAnswer && showFacts ? (
         <RandomFact fact={randomFact} loading={factLoading} />
       ) : (
-        <div className="text-center text-gray-500 dark:text-gray-400 my-4 text-sm flex items-center justify-center">
-          <LightBulbIcon className="h-5 w-5 mr-2" />
-          <p>Select an option to test your knowledge.</p>
-        </div>
+        <>
+          <div className="mt-6 flex justify-center items-center space-x-3">
+            <SparklesIcon
+              className={`h-6 w-6 ${
+                showFacts ? "text-yellow-400" : "text-gray-400"
+              }`}
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Show Fun Facts
+            </span>
+            <button
+              onClick={handleRandomFactToggle}
+              className={`${
+                showFacts ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
+              } cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+            >
+              <span
+                className={`${
+                  showFacts ? "translate-x-6" : "translate-x-1"
+                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+              />
+            </button>
+          </div>
+          <div className="justify-center text-gray-500 dark:text-gray-400 my-4 text-sm flex items-center ">
+            <LightBulbIcon className="h-5 w-5 mr-2" />
+            <p>Select an option to test your knowledge.</p>
+          </div>
+        </>
       )}
 
       <QuizOptions
