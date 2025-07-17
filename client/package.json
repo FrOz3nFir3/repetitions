@@ -49,6 +49,8 @@
     "@tiptap/extension-underline": "^3.0.1",
     "@tiptap/react": "^3.0.1",
     "@tiptap/starter-kit": "^3.0.1",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "gapi-script": "^1.2.0",
     "jwt-decode": "^4.0.0",
     "lowlight": "^3.3.0",
