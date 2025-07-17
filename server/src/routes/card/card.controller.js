@@ -2,6 +2,7 @@ const {
   getCardById,
   updateCard,
   getCardLogs,
+  getQuizAnswer,
 } = require("../../models/cards/cards.model");
 const { getTextFromHTML, sanitizeHTML } = require("../../utils/dom");
 
@@ -78,13 +79,6 @@ async function httpPatchUpdateCard(req, res) {
     answer = sanitizeHTML(answer);
   }
 
-  if (option) {
-    if (getTextFromHTML(option)?.trim() === "") {
-      return res.status(400).json({ error: "Option cannot be empty" });
-    }
-    option = sanitizeHTML(option);
-  }
-
   if (quizQuestion) {
     if (getTextFromHTML(quizQuestion)?.trim() === "") {
       return res.status(400).json({ error: "Quiz Question cannot be empty" });
@@ -107,6 +101,46 @@ async function httpPatchUpdateCard(req, res) {
       return res.status(400).json({ error: "Options cannot be empty" });
     }
     newOptions = newOptions.map((opt) => sanitizeHTML(opt));
+
+    const textOptions = newOptions.map((opt) => getTextFromHTML(opt));
+    const hasDuplicateOptions =
+      new Set(textOptions).size !== textOptions.length;
+    if (hasDuplicateOptions) {
+      return res
+        .status(400)
+        .json({ error: "Options must not contain duplicate values" });
+    }
+
+    const answerHtml = await getQuizAnswer(
+      otherBody._id,
+      otherBody.cardId,
+      otherBody.quizId
+    );
+    const answerText = getTextFromHTML(answerHtml);
+    if (answerText && textOptions.includes(answerText)) {
+      return res
+        .status(400)
+        .json({ error: "Options must not be the same as the answer" });
+    }
+  }
+
+  if (option) {
+    if (getTextFromHTML(option)?.trim() === "") {
+      return res.status(400).json({ error: "Option cannot be empty" });
+    }
+    option = sanitizeHTML(option);
+    const answerHtml = await getQuizAnswer(
+      otherBody._id,
+      otherBody.cardId,
+      otherBody.quizId
+    );
+    const answerText = getTextFromHTML(answerHtml);
+
+    if (answerText && answerText === option) {
+      return res.status(400).json({
+        error: "Option must not be the same as the quiz answer",
+      });
+    }
   }
 
   if (minimumOptions) {

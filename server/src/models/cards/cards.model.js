@@ -211,19 +211,22 @@ async function updateCard(details) {
 
       if (deleteQuiz) {
         updateQuery.$pull = { [`${reviewPath}.quizzes`]: { _id: quizId } };
-        summary = `Deleted quiz: "${getTextFromHTML(oldQuiz.quizQuestion).slice(
-          0,
-          200
-        )}"`;
+        summary = `Deleted quiz: "${getTextFromHTML(
+          oldQuiz.quizQuestion
+        ).slice(0, 250)}"`;
         changes.push({
           field: `Deleted Quiz Question`,
           oldValue: oldQuiz.quizQuestion,
           newValue: "",
+          cardId,
+          quizId,
         });
         changes.push({
           field: `Deleted Quiz Answer`,
           oldValue: oldQuiz.quizAnswer,
           newValue: "",
+          cardId,
+          quizId,
         });
       } else {
         const changedFields = [];
@@ -239,6 +242,8 @@ async function updateCard(details) {
             field: `Quiz Question`,
             oldValue: oldQuiz.quizQuestion || "",
             newValue: quizQuestion,
+            cardId,
+            quizId,
           });
           changedFields.push("question");
         }
@@ -251,6 +256,8 @@ async function updateCard(details) {
             field: `Quiz Answer`,
             oldValue: oldQuiz.quizAnswer || "",
             newValue: quizAnswer,
+            cardId,
+            quizId,
           });
           changedFields.push("answer");
         }
@@ -258,32 +265,80 @@ async function updateCard(details) {
           minimumOptions !== undefined &&
           oldQuiz.minimumOptions !== Number(minimumOptions)
         ) {
+          const newMinOptions = Number(minimumOptions);
           updateQuery.$set = {
             ...updateQuery.$set,
-            [`${quizPath}.minimumOptions`]: Number(minimumOptions),
+            [`${quizPath}.minimumOptions`]: newMinOptions,
           };
           changes.push({
             field: `Quiz Minimum Options`,
             oldValue: (oldQuiz.minimumOptions || "").toString(),
-            newValue: minimumOptions.toString(),
+            newValue: newMinOptions.toString(),
+            cardId,
+            quizId,
           });
           changedFields.push("minimum options");
+
+          const newOptionsCount = newMinOptions > 0 ? newMinOptions - 1 : 0;
+          if (oldQuiz.options.length > newOptionsCount) {
+            const truncatedOptions = oldQuiz.options.slice(0, newOptionsCount);
+            const deletedOptions = oldQuiz.options.slice(newOptionsCount);
+
+            updateQuery.$set[`${quizPath}.options`] = truncatedOptions;
+
+            deletedOptions.forEach((deletedOption, index) => {
+              changes.push({
+                field: `Deleted Quiz Option ${newOptionsCount + index + 1}`,
+                oldValue: deletedOption.value,
+                newValue: "",
+                cardId,
+                quizId,
+                optionId: deletedOption._id.toString(),
+              });
+            });
+          }
         }
         if (newOptions !== undefined) {
-          const newOptionsWithId = newOptions.map((opt) => ({ value: opt }));
+          const oldOptions = [...oldQuiz.options];
+          const newOptionsData = newOptions.map((opt, index) => ({
+            _id: oldOptions[index]
+              ? oldOptions[index]._id
+              : new mongoose.Types.ObjectId(),
+            value: opt,
+          }));
+
           updateQuery.$set = {
             ...updateQuery.$set,
-            [`${quizPath}.options`]: newOptionsWithId,
+            [`${quizPath}.options`]: newOptionsData,
           };
 
-          const oldOptionsValues = oldQuiz.options.map((o) => o.value);
-          const maxLen = Math.max(oldOptionsValues.length, newOptions.length);
+          const maxLen = Math.max(oldOptions.length, newOptions.length);
           for (let i = 0; i < maxLen; i++) {
-            if (oldOptionsValues[i] !== newOptions[i]) {
+            const oldOpt = oldOptions[i];
+            const newOptValue = newOptions[i];
+
+            if (
+              (oldOpt && !newOptValue) ||
+              (oldOpt && newOptValue && oldOpt.value !== newOptValue)
+            ) {
+              const isDeletion = !newOptValue;
               changes.push({
-                field: `Quiz Option ${i + 1}`,
-                oldValue: oldOptionsValues[i] || "",
-                newValue: newOptions[i] || "",
+                field: isDeletion
+                  ? `Deleted Quiz Option ${i + 1}`
+                  : `Quiz Option ${i + 1}`,
+                oldValue: oldOpt.value,
+                newValue: isDeletion ? "" : newOptValue,
+                cardId,
+                quizId,
+                optionId: oldOpt._id.toString(),
+              });
+            } else if (!oldOpt && newOptValue) {
+              changes.push({
+                field: `New Quiz Option`,
+                oldValue: "",
+                newValue: newOptValue,
+                cardId,
+                quizId,
               });
             }
           }
@@ -306,6 +361,9 @@ async function updateCard(details) {
                 field: `Quiz Option ${optionIndex + 1}`,
                 oldValue: oldQuiz.options[optionIndex].value || "",
                 newValue: option,
+                cardId,
+                quizId,
+                optionId,
               });
               changedFields.push("options");
             }
@@ -318,6 +376,8 @@ async function updateCard(details) {
               field: `New Quiz Option`,
               oldValue: "",
               newValue: option,
+              cardId,
+              quizId,
             });
             changedFields.push("options");
           }
@@ -336,14 +396,19 @@ async function updateCard(details) {
               field: `Deleted Quiz Option ${deletedOptionIndex + 1}`,
               oldValue: deletedOption.value || "",
               newValue: "",
+              cardId,
+              quizId,
+              optionId,
             });
             changedFields.push("options");
           }
         }
         if (changedFields.length > 0) {
+          const newQuizQuestion =
+            quizQuestion !== undefined ? quizQuestion : oldQuiz.quizQuestion;
           summary = `Updated ${changedFields.join(
             ", "
-          )} in quiz: "${getTextFromHTML(oldQuiz.quizQuestion).slice(0, 200)}"`;
+          )} in quiz: "${getTextFromHTML(newQuizQuestion).slice(0, 250)}"`;
         }
       }
     } else if (quizQuestion && quizAnswer) {
@@ -352,18 +417,20 @@ async function updateCard(details) {
         ...updateQuery.$push,
         [`${reviewPath}.quizzes`]: newQuiz,
       };
-      summary = `Added new quiz to flashcard: "${getTextFromHTML(
+      summary = `Added new Quiz to Flashcard: "${getTextFromHTML(
         oldReview.question
-      ).slice(0, 200)}"`;
+      ).slice(0, 250)}"`;
       changes.push({
         field: "New Quiz Question",
         oldValue: "",
         newValue: quizQuestion,
+        cardId,
       });
       changes.push({
         field: "New Quiz Answer",
         oldValue: "",
         newValue: quizAnswer,
+        cardId,
       });
     } else if (
       otherDetails.question !== undefined &&
@@ -377,10 +444,11 @@ async function updateCard(details) {
         field: "Flashcard Question",
         oldValue: oldReview.question || "",
         newValue: otherDetails.question,
+        cardId,
       });
-      summary = `Updated question in flashcard: "${getTextFromHTML(
-        oldReview.question
-      ).slice(0, 200)}"`;
+      summary = `Updated question in Flashcard: "${getTextFromHTML(
+        otherDetails.question
+      ).slice(0, 250)}"`;
     } else if (
       otherDetails.answer !== undefined &&
       oldReview.answer !== otherDetails.answer
@@ -393,26 +461,29 @@ async function updateCard(details) {
         field: "Flashcard Answer",
         oldValue: oldReview.answer || "",
         newValue: otherDetails.answer,
+        cardId,
       });
-      summary = `Updated answer in flashcard: "${getTextFromHTML(
+      summary = `Updated answer in Flashcard: "${getTextFromHTML(
         oldReview.question
-      ).slice(0, 200)}"`;
+      ).slice(0, 250)}"`;
     }
 
     if (deleteCard) {
       updateQuery.$pull = { review: { _id: cardId } };
       summary = `Deleted flashcard: "${getTextFromHTML(
         oldReview.question
-      ).slice(0, 200)}"`;
+      ).slice(0, 250)}"`;
       changes.push({
         field: `Deleted Flashcard Question`,
         oldValue: oldReview.question,
         newValue: "",
+        cardId,
       });
       changes.push({
         field: `Deleted Flashcard Answer`,
         oldValue: oldReview.answer,
         newValue: "",
+        cardId,
       });
     }
   } else if (isAddingNewCard) {
@@ -421,7 +492,9 @@ async function updateCard(details) {
       answer: otherDetails.answer,
     };
     updateQuery.$push = { review: newFlashcard };
-    summary = `Added new flashcard`;
+    summary = `Added new Flashcard: ${getTextFromHTML(
+      otherDetails.question
+    ).slice(0, 250)}`;
     changes.push({
       field: "New Flashcard Question",
       oldValue: "",
@@ -572,6 +645,17 @@ async function getCardLogs(cardId, page = 1, limit = 10) {
   return data;
 }
 
+async function getQuizAnswer(cardId, reviewId, quizId) {
+  const card = await Card.findById(cardId);
+  if (!card) return null;
+
+  const review = card.review.find(r => r._id.toString() === reviewId);
+  if (!review || !review.quizzes) return null;
+
+  const quiz = review.quizzes.find(q => q._id.toString() === quizId);
+  return quiz ? quiz.quizAnswer : null;
+}
+
 module.exports = {
   cardsByCategory,
   createNewCard,
@@ -580,4 +664,5 @@ module.exports = {
   getCardsByIds,
   updateCard,
   getCardLogs,
+  getQuizAnswer,
 };

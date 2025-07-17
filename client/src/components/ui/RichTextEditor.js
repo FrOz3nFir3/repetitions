@@ -62,10 +62,8 @@ const RichTextEditor = forwardRef(
     return (
       <div
         className={`${
-          editable
-            ? ""
-            : "pointer-events-none cursor-not-allowed bg-gray-200 dark:bg-gray-600"
-        }custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white flex flex-col w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 min-h-[250px]`}
+          editable ? "" : " !bg-gray-100 dark:!bg-gray-500"
+        } custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white flex flex-col w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 h-96`}
       >
         <MenuBar editor={editor} />
         <div

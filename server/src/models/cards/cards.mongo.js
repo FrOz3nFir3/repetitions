@@ -4,6 +4,9 @@ const changeSchema = new mongoose.Schema({
   field: { type: String, required: true },
   oldValue: { type: mongoose.Schema.Types.Mixed },
   newValue: { type: mongoose.Schema.Types.Mixed },
+  cardId: { type: String },
+  quizId: { type: String },
+  optionId: { type: String },
 }, { _id: false });
 
 const logEntrySchema = new mongoose.mongoose.Schema({

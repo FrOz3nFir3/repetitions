@@ -7,15 +7,23 @@ import {
   CodeBracketSquareIcon,
   CodeBracketIcon,
 } from "@heroicons/react/24/solid";
-import PasteHtmlModal from "./PasteHtmlModal";
 
-const ToolbarButton = ({ onClick, disabled, isActive, tooltip, children }) => (
+const ToolbarButton = ({
+  editor,
+  onClick,
+  disabled,
+  isActive,
+  tooltip,
+  children,
+}) => (
   <div className="relative flex items-center">
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`peer h-8 p-2 flex items-center justify-center rounded cursor-pointer ${
+      className={`${
+        editor.isEditable ? "" : "pointer-events-none"
+      } peer h-8 p-2 flex items-center justify-center rounded cursor-pointer ${
         isActive
           ? "bg-indigo-500 text-white"
           : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
@@ -219,11 +227,6 @@ export const MenuBar = ({ editor }) => {
       can: () => editor.can().toggleCodeBlock(),
       icon: <CodeBracketSquareIcon className="h-5 w-5" />,
     },
-    {
-      name: "Load HTML",
-      action: () => setIsPasteModalOpen(true),
-      icon: <span className="font-bold">HTML</span>,
-    },
   ];
 
   return (
@@ -231,6 +234,7 @@ export const MenuBar = ({ editor }) => {
       <div className="border-b border-gray-300 dark:border-gray-600 p-2 flex flex-wrap gap-2">
         {buttons.map((button) => (
           <ToolbarButton
+            editor={editor}
             key={button.name}
             onClick={button.action}
             isActive={
@@ -246,11 +250,6 @@ export const MenuBar = ({ editor }) => {
           </ToolbarButton>
         ))}
       </div>
-      <PasteHtmlModal
-        editor={editor}
-        isOpen={isPasteModalOpen}
-        onClose={() => setIsPasteModalOpen(false)}
-      />
     </>
   );
 };
