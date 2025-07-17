@@ -56,11 +56,17 @@ const LogItemChange = ({ change }) => {
         )}
       </div>
       <ReactDiffViewer
+        className="max-w-full "
         oldValue={change.oldValue}
         newValue={change.newValue}
         splitView={false}
         hideLineNumbers
         useDarkTheme={theme === "dark"}
+        styles={{
+          diffContainer: {
+            minWidth: "100%",
+          },
+        }}
       />
     </li>
   );
