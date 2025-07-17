@@ -18,3 +18,8 @@
 .prose p:empty::before {
   content: "\200B"; /* Zero-width space */
 }
+
+/* Custom Inline Code Style */
+span.inline-code {
+  @apply inline-block bg-gray-200 dark:bg-gray-800 text-red-500 dark:text-red-400 font-mono rounded-md px-1.5 py-1;
+}

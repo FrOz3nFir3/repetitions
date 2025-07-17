@@ -7,6 +7,7 @@ import {
   CodeBracketSquareIcon,
   CodeBracketIcon,
 } from "@heroicons/react/24/solid";
+import PasteHtmlModal from "./PasteHtmlModal";
 
 const ToolbarButton = ({ onClick, disabled, isActive, tooltip, children }) => (
   <div className="relative flex items-center">
@@ -14,7 +15,7 @@ const ToolbarButton = ({ onClick, disabled, isActive, tooltip, children }) => (
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`peer h-8 w-8 flex items-center justify-center rounded cursor-pointer ${
+      className={`peer h-8 p-2 flex items-center justify-center rounded cursor-pointer ${
         isActive
           ? "bg-indigo-500 text-white"
           : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
@@ -30,6 +31,7 @@ const ToolbarButton = ({ onClick, disabled, isActive, tooltip, children }) => (
 
 export const MenuBar = ({ editor }) => {
   const [_, setTick] = useState(0);
+  const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
 
   useEffect(() => {
     if (!editor) return;
@@ -124,22 +126,37 @@ export const MenuBar = ({ editor }) => {
         .run();
     } else {
       editor.chain().focus().toggleCodeBlock().run();
+      n;
     }
   };
 
-  const fontSizes = ["12px", "16px", "20px", "24px", "28px", "32px", "36px", "40px", "44px", "48px"];
+  const fontSizes = [
+    "12px",
+    "16px",
+    "20px",
+    "24px",
+    "28px",
+    "32px",
+    "36px",
+    "40px",
+    "44px",
+    "48px",
+  ];
 
   const buttons = [
     {
       name: "Increase Font",
       action: () => {
-        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
+        const currentSize =
+          editor.getAttributes("textStyle").fontSize || "20px";
         const currentIndex = fontSizes.indexOf(currentSize);
-        const nextSize = fontSizes[Math.min(currentIndex + 1, fontSizes.length - 1)];
+        const nextSize =
+          fontSizes[Math.min(currentIndex + 1, fontSizes.length - 1)];
         editor.chain().focus().setFontSize(nextSize).run();
       },
       can: () => {
-        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
+        const currentSize =
+          editor.getAttributes("textStyle").fontSize || "20px";
         return currentSize !== fontSizes[fontSizes.length - 1];
       },
       icon: <span className="font-bold">A+</span>,
@@ -147,13 +164,15 @@ export const MenuBar = ({ editor }) => {
     {
       name: "Decrease Font",
       action: () => {
-        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
+        const currentSize =
+          editor.getAttributes("textStyle").fontSize || "20px";
         const currentIndex = fontSizes.indexOf(currentSize);
         const prevSize = fontSizes[Math.max(currentIndex - 1, 0)];
         editor.chain().focus().setFontSize(prevSize).run();
       },
       can: () => {
-        const currentSize = editor.getAttributes("textStyle").fontSize || "20px";
+        const currentSize =
+          editor.getAttributes("textStyle").fontSize || "20px";
         return currentSize !== fontSizes[0];
       },
       icon: <span className="font-bold">A-</span>,
@@ -186,13 +205,13 @@ export const MenuBar = ({ editor }) => {
       can: () => editor.can().toggleStrike(),
       icon: <StrikethroughIcon className="h-5 w-5" />,
     },
-    // TODO this is not applying the correct style look into this later
-    // {
-    //   name: "Inline Code",
-    //   action: () => applyMarkWithTrim("Code"),
-    //   isActive: "code",
-    //   icon: <CodeBracketIcon className="h-5 w-5" />,
-    // },
+    {
+      name: "Inline Code",
+      action: () => applyMarkWithTrim("InlineCode"),
+      isActive: "inlineCode",
+      can: () => editor.can().toggleInlineCode(),
+      icon: <CodeBracketIcon className="h-5 w-5" />,
+    },
     {
       name: "Code Block",
       action: handleCodeBlock,
@@ -200,23 +219,38 @@ export const MenuBar = ({ editor }) => {
       can: () => editor.can().toggleCodeBlock(),
       icon: <CodeBracketSquareIcon className="h-5 w-5" />,
     },
+    {
+      name: "Load HTML",
+      action: () => setIsPasteModalOpen(true),
+      icon: <span className="font-bold">HTML</span>,
+    },
   ];
 
   return (
-    <div className="border-b border-gray-300 dark:border-gray-600 p-2 flex flex-wrap gap-2">
-      {buttons.map((button) => (
-        <ToolbarButton
-          key={button.name}
-          onClick={button.action}
-          isActive={button.isActive ? editor.isActive(button.isActive) : false}
-          tooltip={button.name}
-          disabled={
-            (editor.isActive("codeBlock") && button.name !== "Code Block") || (button.can ? !button.can() : false)
-          }
-        >
-          {button.icon}
-        </ToolbarButton>
-      ))}
-    </div>
+    <>
+      <div className="border-b border-gray-300 dark:border-gray-600 p-2 flex flex-wrap gap-2">
+        {buttons.map((button) => (
+          <ToolbarButton
+            key={button.name}
+            onClick={button.action}
+            isActive={
+              button.isActive ? editor.isActive(button.isActive) : false
+            }
+            tooltip={button.name}
+            disabled={
+              (editor.isActive("codeBlock") && button.name !== "Code Block") ||
+              (button.can ? !button.can() : false)
+            }
+          >
+            {button.icon}
+          </ToolbarButton>
+        ))}
+      </div>
+      <PasteHtmlModal
+        editor={editor}
+        isOpen={isPasteModalOpen}
+        onClose={() => setIsPasteModalOpen(false)}
+      />
+    </>
   );
 };

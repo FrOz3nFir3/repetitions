@@ -1,25 +1,68 @@
 import React, { useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import {
+  ChevronDownIcon,
+  ClipboardDocumentIcon,
+} from "@heroicons/react/24/solid";
+import ReactDiffViewer from "react-diff-viewer-continued";
+import useDarkMode from "../../../hooks/useDarkMode";
 
-const ValueDisplay = ({ value }) => {
-  if (
-    value === null ||
-    value === undefined ||
-    (typeof value === "string" && value.trim() === "")
-  ) {
-    return (
-      <span className="text-gray-600 dark:text-white italic ">Not set</span>
-    );
-  }
-  if (typeof value === "object") {
-    return (
-      <pre className="overflow-auto !text-left bg-gray-100 dark:bg-gray-900 p-2 rounded text-xs ">
-        {JSON.stringify(value, null, 2)}
-      </pre>
-    );
-  }
+const LogItemChange = ({ change }) => {
+  const [theme] = useDarkMode();
+
+  const [copyStatus, setCopyStatus] = useState({ message: "", type: "" });
+
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus({
+        message: "Copied! Paste in the editor to revert.",
+        type: "success",
+      });
+    } catch (err) {
+      setCopyStatus({ message: "Failed to copy!", type: "error" });
+    } finally {
+      setTimeout(() => setCopyStatus({ message: "", type: "" }), 3000);
+    }
+  };
+
   return (
-    <span className="text-gray-700 dark:text-gray-300 ">{String(value)}</span>
+    <li className="text-sm">
+      <div className="flex flex-wrap justify-between items-center mb-1">
+        <strong className="font-medium text-gray-800 dark:text-gray-200 capitalize">
+          {change.field}:
+        </strong>
+        {change.oldValue && (
+          <div className="flex justify-between items-center gap-2">
+            {copyStatus.message && (
+              <span
+                className={`text-xs font-semibold ${
+                  copyStatus.type === "success"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                {copyStatus.message}
+              </span>
+            )}
+            <button
+              onClick={() => handleCopy(change.oldValue)}
+              className="shrink-0 cursor-pointer flex items-center gap-1 px-2 py-1 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-xs"
+              title="Copy old html to clipboard"
+            >
+              <ClipboardDocumentIcon className="h-4 w-4" />
+              <span>Copy Old</span>
+            </button>
+          </div>
+        )}
+      </div>
+      <ReactDiffViewer
+        oldValue={change.oldValue}
+        newValue={change.newValue}
+        splitView={false}
+        hideLineNumbers
+        useDarkTheme={theme === "dark"}
+      />
+    </li>
   );
 };
 
@@ -71,31 +114,10 @@ const LogItem = ({ log }) => {
           <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-3">
             Details of changes:
           </h4>
+
           <ul className="space-y-3">
             {changes.map((change, index) => (
-              <li key={index} className="text-sm">
-                <strong className="font-medium text-gray-800 dark:text-gray-200 capitalize">
-                  {change.field}:
-                </strong>
-                <div className="mt-1 space-y-1">
-                  <div className="flex items-start">
-                    <span className=" text-red-500 font-bold w-10 flex-shrink-0">
-                      Old:
-                    </span>
-                    <div className="overflow-auto p-1.5 rounded bg-red-200 dark:bg-red-900 text-red-600 dark:text-red-400 w-[1%] flex-grow text-center">
-                      <ValueDisplay value={change.oldValue} />
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <span className="text-green-500 font-bold w-10 flex-shrink-0">
-                      New:
-                    </span>
-                    <div className="overflow-auto p-1.5 mt-1 rounded bg-green-200 dark:bg-green-900 text-green-600 dark:text-green-400 w-[1%] flex-grow text-center">
-                      <ValueDisplay value={change.newValue} />
-                    </div>
-                  </div>
-                </div>
-              </li>
+              <LogItemChange key={index} change={change} />
             ))}
           </ul>
         </div>

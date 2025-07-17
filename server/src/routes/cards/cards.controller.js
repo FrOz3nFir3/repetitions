@@ -4,8 +4,6 @@ const {
   getAllCards,
   getCardsByIds,
 } = require("../../models/cards/cards.model");
-const Card = require("../../models/cards/cards.mongo");
-const mongoose = require("mongoose");
 
 async function httpGetCardsByCategory(req, res) {
   const { category } = req.params;

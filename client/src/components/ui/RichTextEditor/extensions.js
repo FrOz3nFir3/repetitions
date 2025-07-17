@@ -1,8 +1,48 @@
-import { Extension } from "@tiptap/core";
+import { Extension, Mark } from "@tiptap/core";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, all } from "lowlight";
 
 export const lowlight = createLowlight(all);
+
+export const InlineCode = Mark.create({
+  name: "inlineCode",
+
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "span.inline-code",
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "span",
+      {
+        ...this.options.HTMLAttributes,
+        ...HTMLAttributes,
+        class: "inline-code",
+      },
+      0,
+    ];
+  },
+
+  addCommands() {
+    return {
+      toggleInlineCode:
+        () =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name);
+        },
+    };
+  },
+});
 
 export const CustomKeyboardShortcuts = Extension.create({
   name: "customKeyboardShortcuts",

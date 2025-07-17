@@ -11,7 +11,7 @@ function getTextFromHTML(html) {
     RETURN_DOM: true,
   });
 
-  return sanitizedHtml.textContent;
+  return sanitizedHtml.textContent || sanitizedHtml.innerText || "";
 }
 
 function sanitizeHTML(html) {

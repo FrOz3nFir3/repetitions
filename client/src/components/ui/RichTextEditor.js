@@ -1,4 +1,4 @@
-import React, { useImperativeHandle, forwardRef, useEffect } from "react";
+import React, { useImperativeHandle, forwardRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -10,6 +10,7 @@ import {
   CustomKeyboardShortcuts,
   CustomCodeBlock,
   lowlight,
+  InlineCode,
 } from "./RichTextEditor/extensions";
 
 const RichTextEditor = forwardRef(
@@ -17,16 +18,12 @@ const RichTextEditor = forwardRef(
     const editor = useEditor({
       extensions: [
         StarterKit.configure({
-          codeBlock: false, // Disable default to use our custom one
-          paragraph: {
-            HTMLAttributes: {
-              style: "white-space: pre-wrap",
-            },
-          },
+          codeBlock: false,
         }),
         Underline,
         TextStyle,
         FontSize,
+        InlineCode,
         CustomCodeBlock.configure({
           lowlight,
         }),
@@ -42,7 +39,7 @@ const RichTextEditor = forwardRef(
       editorProps: {
         attributes: {
           class:
-            "prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none min-h-[100px]",
+            "space-y-2  prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none ",
         },
       },
     });
@@ -56,16 +53,27 @@ const RichTextEditor = forwardRef(
       },
     }));
 
+    const handleClick = (e) => {
+      if (e.target === e.currentTarget && editor && !editor.isFocused) {
+        editor.commands.focus("end");
+      }
+    };
+
     return (
       <div
         className={`${
           editable
             ? ""
             : "pointer-events-none cursor-not-allowed bg-gray-200 dark:bg-gray-600"
-        } custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white block w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500`}
+        }custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white flex flex-col w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 min-h-[250px]`}
       >
         <MenuBar editor={editor} />
-        <EditorContent editor={editor} />
+        <div
+          className="flex-grow p-5 overflow-y-auto cursor-text"
+          onClick={handleClick}
+        >
+          <EditorContent editor={editor} />
+        </div>
       </div>
     );
   }
