@@ -3,6 +3,8 @@ const {
   updateCard,
   getCardLogs,
   getQuizAnswer,
+  getAuthorOfCard,
+  getQuizById,
 } = require("../../models/cards/cards.model");
 const { getTextFromHTML, sanitizeHTML } = require("../../utils/dom");
 
@@ -41,6 +43,19 @@ async function httpPatchUpdateCard(req, res) {
 
   if (token == null) {
     return res.status(401).json({ error: "Authentication / Login required" });
+  }
+
+  if (req.body.deleteCard || req.body.deleteQuiz || req.body.deleteOption) {
+    const authorObjectId = await getAuthorOfCard(req.body._id);
+    if (!authorObjectId) {
+      return res.status(404).json({ error: "Card not found" });
+    }
+    if (authorObjectId.toString() !== token.id) {
+      return res.status(403).json({
+        error:
+          "You don't have access to delete. Only the author has access for deletion.",
+      });
+    }
   }
 
   let {
@@ -147,6 +162,19 @@ async function httpPatchUpdateCard(req, res) {
     if (typeof minimumOptions !== "number" || minimumOptions < 2) {
       return res.status(400).json({
         error: "Minimum options must be a number greater than or equal to 2",
+      });
+    }
+
+    const quiz = await getQuizById(
+      otherBody._id,
+      otherBody.cardId,
+      otherBody.quizId
+    );
+    if (quiz && quiz.options.length > minimumOptions - 1) {
+      return res.status(400).json({
+        error: `Please remove existing options manually before reducing the minimum options below ${
+          quiz.options.length + 1
+        }.`,
       });
     }
   }

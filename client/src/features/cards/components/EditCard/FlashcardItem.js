@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import { CardField } from "../CardField";
 import {
@@ -12,6 +12,7 @@ import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmatio
 const FlashcardItem = ({ flashcard, cardId }) => {
   const [updateCard, { error, isSuccess }] = usePatchUpdateCardMutation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const errorRef = React.useRef(null);
 
   const handleDeleteFlashcard = () => {
     const updateDetails = {
@@ -23,16 +24,24 @@ const FlashcardItem = ({ flashcard, cardId }) => {
     setIsDeleteModalOpen(false);
   };
 
+  useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
+
   return (
     <>
       <div className="overflow-hidden">
         <div>
-          {error && (
-            <div className="rounded-md bg-red-100 p-4 mb-4 text-sm text-red-800 dark:bg-red-900 dark:text-red-200">
-              <strong>Error:</strong>{" "}
-              {error.data?.error || "An unexpected error occurred."}
-            </div>
-          )}
+          <div ref={errorRef}>
+            {error && (
+              <div className="rounded-md bg-red-100 p-4 mb-4 text-sm text-red-800 dark:bg-red-900 dark:text-red-200">
+                <strong>Error:</strong>{" "}
+                {error.data?.error || "An unexpected error occurred."}
+              </div>
+            )}
+          </div>
           {isSuccess && (
             <div className="rounded-md bg-green-100 p-4 mb-4 text-sm text-green-800 dark:bg-green-900 dark:text-green-200">
               <CheckCircleIcon className="h-5 w-5 inline mr-2" />

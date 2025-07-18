@@ -9,12 +9,13 @@ import EditQuizModal from "./EditQuizModal";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [updateCard] = usePatchUpdateCardMutation();
+  const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const expandedRef = React.useRef(null);
 
   const handleDelete = () => {
@@ -40,6 +41,12 @@ const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
 
   return (
     <>
+      {error && (
+        <div className="rounded-md bg-red-100 dark:bg-red-900 p-4 text-sm text-red-700 dark:text-red-200 border border-red-300 dark:border-red-700">
+          {error.data?.error || "An error occurred while reverting changes."}
+        </div>
+      )}
+
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300">
         <div
           className="flex items-center justify-between p-4 cursor-pointer"
@@ -67,10 +74,15 @@ const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
                 e.stopPropagation();
                 setIsDeleteModalOpen(true);
               }}
+              disabled={isLoading}
               className="cursor-pointer p-2 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/50"
               aria-label="Delete quiz"
             >
-              <TrashIcon className="h-5 w-5" />
+              {isLoading ? (
+                <ArrowPathIcon className="h-5 w-5 animate-spin" />
+              ) : (
+                <TrashIcon className="h-5 w-5" />
+              )}
             </button>
             <button
               className="cursor-pointer p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"

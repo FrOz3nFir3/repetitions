@@ -60,12 +60,6 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
       JSON.stringify(originalSimpleState) !== JSON.stringify(currentState)
     );
   }, [quizQuestion, quizAnswer, options, minimumOptions, originalState]);
-  useEffect(() => {
-    const newOptions = [...options];
-    if (newOptions.length > minimumOptions - 1) {
-      setOptions(newOptions.slice(0, minimumOptions - 1));
-    }
-  }, [minimumOptions]);
 
   useEffect(() => {
     if (error && errorRef.current) {
@@ -85,13 +79,36 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
 
   const handleRemoveOption = () => {
     if (!selectedOptionId) return;
-    setOptions(options.filter((opt) => opt.tempId !== selectedOptionId));
-    closeDeleteModal();
+
+    const payload = {
+      _id: cardId,
+      cardId: flashcardId,
+      quizId: quiz._id,
+      optionId: selectedOptionId,
+      deleteOption: true,
+    };
+
+    updateCard(payload).then((response) => {
+      if (response.data) {
+        const optionToRemove = options.find(
+          (opt) => opt._id === selectedOptionId
+        );
+        if (optionToRemove) {
+          setOptions(options.filter((opt) => opt._id !== selectedOptionId));
+        }
+      }
+    });
   };
 
   const openDeleteModal = (id) => {
-    setSelectedOptionId(id);
-    setIsDeleteModalOpen(true);
+    const option = options.find((opt) => opt.tempId === id);
+    if (option._id) {
+      setSelectedOptionId(option._id);
+      setIsDeleteModalOpen(true);
+    } else {
+      // If it's a new option that hasn't been saved, just remove it from state
+      setOptions(options.filter((opt) => opt.tempId !== id));
+    }
   };
 
   const closeDeleteModal = () => {

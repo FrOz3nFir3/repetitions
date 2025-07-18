@@ -280,25 +280,6 @@ async function updateCard(details) {
             quizId,
           });
           changedFields.push("minimum options");
-
-          const newOptionsCount = newMinOptions > 0 ? newMinOptions - 1 : 0;
-          if (oldQuiz.options.length > newOptionsCount) {
-            const truncatedOptions = oldQuiz.options.slice(0, newOptionsCount);
-            const deletedOptions = oldQuiz.options.slice(newOptionsCount);
-
-            updateQuery.$set[`${quizPath}.options`] = truncatedOptions;
-
-            deletedOptions.forEach((deletedOption, index) => {
-              changes.push({
-                field: `Deleted Quiz Option ${newOptionsCount + index + 1}`,
-                oldValue: deletedOption.value,
-                newValue: "",
-                cardId,
-                quizId,
-                optionId: deletedOption._id.toString(),
-              });
-            });
-          }
         }
         if (newOptions !== undefined) {
           const oldOptions = [...oldQuiz.options];
@@ -664,6 +645,21 @@ async function getQuizAnswer(cardId, reviewId, quizId) {
   return quiz ? quiz.quizAnswer : null;
 }
 
+async function getAuthorOfCard(cardId) {
+  const card = await Card.findOne({ _id: { $eq: cardId } }, "author").lean();
+  return card ? card.author : null;
+}
+
+async function getQuizById(cardId, reviewId, quizId) {
+  const card = await Card.findById(cardId).lean();
+  if (!card) return null;
+
+  const review = card.review.find((r) => r._id.toString() === reviewId);
+  if (!review || !review.quizzes) return null;
+
+  return review.quizzes.find((q) => q._id.toString() === quizId);
+}
+
 module.exports = {
   cardsByCategory,
   createNewCard,
@@ -673,4 +669,6 @@ module.exports = {
   updateCard,
   getCardLogs,
   getQuizAnswer,
+  getAuthorOfCard,
+  getQuizById,
 };
