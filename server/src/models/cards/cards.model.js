@@ -176,6 +176,7 @@ async function updateCard(details) {
     optionId,
     deleteQuiz,
     deleteOption,
+    reverted,
     ...otherDetails
   } = details;
 
@@ -211,9 +212,10 @@ async function updateCard(details) {
 
       if (deleteQuiz) {
         updateQuery.$pull = { [`${reviewPath}.quizzes`]: { _id: quizId } };
-        summary = `Deleted quiz: "${getTextFromHTML(
-          oldQuiz.quizQuestion
-        ).slice(0, 250)}"`;
+        summary = `Deleted quiz: "${getTextFromHTML(oldQuiz.quizQuestion).slice(
+          0,
+          250
+        )}"`;
         changes.push({
           field: `Deleted Quiz Question`,
           oldValue: oldQuiz.quizQuestion,
@@ -556,10 +558,16 @@ async function updateCard(details) {
   }
 
   if (changes.length > 0) {
+    let finalSummary = summary || "Card updated";
+    if (reverted) {
+      finalSummary = `Reverted: ${finalSummary
+        .charAt(0)
+        .toLowerCase()}${finalSummary.slice(1)}`;
+    }
     const logEntry = {
-      eventType: "updated",
+      eventType: reverted ? "reverted" : "updated",
       user: userId,
-      summary: summary || "Card updated",
+      summary: finalSummary,
       changes,
     };
     updateQuery.$push = { ...updateQuery.$push, logs: logEntry };
@@ -649,10 +657,10 @@ async function getQuizAnswer(cardId, reviewId, quizId) {
   const card = await Card.findById(cardId);
   if (!card) return null;
 
-  const review = card.review.find(r => r._id.toString() === reviewId);
+  const review = card.review.find((r) => r._id.toString() === reviewId);
   if (!review || !review.quizzes) return null;
 
-  const quiz = review.quizzes.find(q => q._id.toString() === quizId);
+  const quiz = review.quizzes.find((q) => q._id.toString() === quizId);
   return quiz ? quiz.quizAnswer : null;
 }
 

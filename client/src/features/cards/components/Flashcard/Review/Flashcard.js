@@ -33,9 +33,10 @@ const Flashcard = ({
             className="absolute w-full h-full p-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-xl overflow-y-auto flex flex-col items-center justify-center text-white"
             style={{ backfaceVisibility: "hidden" }}
           >
-            <div className="overflow-auto text-xl h-auto max-h-full max-w-full pr-1">
-              <HtmlRenderer htmlContent={currentFlashcard.question} />
-            </div>
+            <HtmlRenderer
+              className="max-w-full text-xl"
+              htmlContent={currentFlashcard.question}
+            />
           </div>
           <div
             className="absolute w-full h-full p-6 bg-gradient-to-br from-green-400 to-teal-500 rounded-lg shadow-xl overflow-y-auto flex flex-col items-center justify-center text-white"
@@ -44,9 +45,10 @@ const Flashcard = ({
               transform: "rotateY(180deg)",
             }}
           >
-            <div className="overflow-auto text-xl h-auto max-h-full max-w-full  pr-1">
-              <HtmlRenderer htmlContent={currentFlashcard.answer} />
-            </div>
+            <HtmlRenderer
+              className="text-xl "
+              htmlContent={currentFlashcard.answer}
+            />
           </div>
         </div>
       ) : (

@@ -101,7 +101,7 @@ const FlashcardItem = ({ flashcard, cardId }) => {
         </div>
 
         {/* Quizzes Section */}
-        <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="bg-gray-50 dark:bg-gray-800/50 px-3 py-4 border-t border-gray-200 dark:border-gray-700">
           <QuizList
             quizzes={flashcard.quizzes}
             cardId={cardId}

@@ -14,12 +14,10 @@ function CategoryPage() {
     useGetAllCardsQuery();
 
   const handleCategoryClick = (category) => {
-    categoryOutletRef.current.scrollIntoView({ behavior: "smooth" });
     navigate(category);
   };
 
   const handleCreateCategory = (categoryName) => {
-    categoryOutletRef.current.scrollIntoView({ behavior: "smooth" });
     navigate(categoryName);
   };
 
@@ -59,7 +57,7 @@ function CategoryPage() {
 
           <CreateCategoryCard onCreate={handleCreateCategory} />
         </div>
-        <div ref={categoryOutletRef} className="mt-16">
+        <div className="mt-16">
           <Outlet />
         </div>
       </div>

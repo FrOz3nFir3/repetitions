@@ -34,7 +34,7 @@ const QuizResults = ({ score, totalQuestions, onRestart, cardId }) => {
   };
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-2xl text-center max-w-2xl mx-auto">
+    <div className="bg-gray-50 dark:bg-gray-900 p-6 sm:p-8 rounded-2xl shadow-2xl text-center">
       <h2 className="text-4xl font-bold text-gray-800 dark:text-white">
         {getPerformanceMessage()}
       </h2>

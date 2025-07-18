@@ -2,16 +2,18 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+.break-word {
+  word-break: break-word;
+}
+
 /* Tiptap Editor Styles */
 
 /* Code Block Wrapper */
 .custom-rich-text-editor .code-block-wrapper {
-  @apply font-mono my-2 p-4 overflow-auto bg-[#282c34] !text-[#abb2bf];
+  @apply font-mono my-2 p-4 overflow-auto max-w-full bg-[#282c34] !text-[#abb2bf];
 }
-
-/* This ensures the code inside the block doesn't get inline styles */
-.custom-rich-text-editor .code-block-wrapper pre code {
-  @apply bg-transparent p-0 m-0 border-none;
+.custom-rich-text-editor .code-block-wrapper pre {
+  @apply !whitespace-pre;
 }
 
 /* Ensure empty paragraphs in the rendered output have height */

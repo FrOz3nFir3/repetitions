@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   PencilIcon,
   TrashIcon,
@@ -15,6 +15,7 @@ const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [updateCard] = usePatchUpdateCardMutation();
+  const expandedRef = React.useRef(null);
 
   const handleDelete = () => {
     const updateDetails = {
@@ -26,6 +27,14 @@ const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
     updateCard(updateDetails);
     setIsDeleteModalOpen(false);
   };
+
+  useEffect(() => {
+    if (isExpanded && expandedRef.current) {
+      expandedRef.current.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [isExpanded]);
 
   const hasOptions = quiz.options && quiz.options.length > 0;
 
@@ -46,6 +55,7 @@ const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
               onClick={(e) => {
                 e.stopPropagation();
                 setIsEditModalOpen(true);
+                setIsExpanded(true);
               }}
               className="cursor-pointer p-2 rounded-full text-gray-500 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/50"
               aria-label="Edit quiz"
@@ -75,42 +85,44 @@ const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
           </div>
         </div>
 
-        {isExpanded && (
-          <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                Quiz Question
-              </p>
-              <HtmlRenderer htmlContent={quiz.quizQuestion} />
-            </div>
-            <div className="mt-4">
-              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                Correct Answer
-              </p>
-              <div className="p-3 rounded-md bg-green-100 ">
-                <HtmlRenderer htmlContent={quiz.quizAnswer} />
+        <div ref={expandedRef}>
+          {isExpanded && (
+            <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+              <div>
+                <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+                  Quiz Question
+                </p>
+                <HtmlRenderer htmlContent={quiz.quizQuestion} />
               </div>
-            </div>
-
-            {hasOptions && (
               <div className="mt-4">
                 <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                  Incorrect Options ({quiz.options.length})
+                  Correct Answer
                 </p>
-                <ul className="space-y-2">
-                  {quiz.options.map((option, i) => (
-                    <li
-                      key={i}
-                      className="p-3 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                    >
-                      <HtmlRenderer htmlContent={option.value} />
-                    </li>
-                  ))}
-                </ul>
+                <div className="p-3 rounded-md bg-green-100 ">
+                  <HtmlRenderer htmlContent={quiz.quizAnswer} />
+                </div>
               </div>
-            )}
-          </div>
-        )}
+
+              {hasOptions && (
+                <div className="mt-4">
+                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
+                    Incorrect Options ({quiz.options.length})
+                  </p>
+                  <ul className="space-y-2">
+                    {quiz.options.map((option, i) => (
+                      <li
+                        key={i}
+                        className="p-3 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                      >
+                        <HtmlRenderer htmlContent={option.value} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {isEditModalOpen && (

@@ -14,7 +14,7 @@ const QuizHeader = ({ current, total }) => {
             Test your knowledge by selecting the correct answer.
           </p>
         </div>
-        <span className="text-xl font-semibold text-gray-600 dark:text-gray-300 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+        <span className="shrink-0 text-xl font-semibold text-gray-600 dark:text-gray-300 px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-full">
           {current} / {total}
         </span>
       </div>

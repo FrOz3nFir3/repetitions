@@ -243,7 +243,9 @@ export const MenuBar = ({ editor }) => {
             tooltip={button.name}
             disabled={
               (editor.isActive("codeBlock") && button.name !== "Code Block") ||
-              (button.can ? !button.can() : false)
+              button.can
+                ? !button.can()
+                : false
             }
           >
             {button.icon}

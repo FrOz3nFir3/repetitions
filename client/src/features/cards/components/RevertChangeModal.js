@@ -14,7 +14,7 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
 
   const handleRevert = () => {
     const { field, oldValue, cardId, quizId, optionId } = change;
-    let updateDetails = { _id: card._id, cardId };
+    let updateDetails = { _id: card._id, cardId, reverted: true };
 
     switch (field) {
       case "Flashcard Question":

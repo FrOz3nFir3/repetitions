@@ -35,7 +35,7 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect }) => {
       className={`${baseClasses} ${stateClasses}`}
     >
       <div className="flex items-center justify-between">
-        <div className="flex-grow font-semibold">
+        <div className="flex-grow font-semibold max-w-full">
           <HtmlRenderer htmlContent={option} />
         </div>
         {selectedAnswer && (
