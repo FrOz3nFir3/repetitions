@@ -19,12 +19,16 @@ app.use((req, res, next) => {
 });
 
 // needed when developing in development mode
-app.use(
-  cors({
-    origin: "http://localhost",
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  })
-);
+if (!runningInProduction) {
+  app.use(
+    cors({
+      origin: "http://localhost", // Your frontend's origin
+      credentials: true,
+      optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    })
+  );
+}
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 

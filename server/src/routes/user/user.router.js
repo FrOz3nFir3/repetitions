@@ -8,6 +8,7 @@ const {
   httpGetDetailedReport,
   httpGetUserProgress,
   httpUpdateUserProgress,
+  httpRefreshToken,
 } = require("./user.controller");
 const { requireAuthentication } = require("../../middleware/auth.middleware");
 const {
@@ -46,6 +47,8 @@ userRouter.post("/login", authLimiter, httpLoginUser);
 userRouter.post("/google-login", authLimiter, httpLoginGoogleUser);
 
 userRouter.post("/logout", httpLogoutUser);
+userRouter.post("/refresh", authLimiter, httpRefreshToken);
+
 userRouter.patch("/", apiLimiter, requireAuthentication, httpUpdateUser);
 userRouter.patch(
   "/progress",

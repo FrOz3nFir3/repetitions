@@ -1,15 +1,41 @@
-// Import the RTK Query methods from the React-specific entry point
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { initialUser } from "../features/authentication/state/authSlice";
+
+const baseQuery = fetchBaseQuery({
+  baseUrl:
+    process.env.NODE_ENV === "development"
+      ? `http://localhost:3000/api`
+      : "/api",
+  credentials: "include",
+});
+
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  if (result.error && result.error.status === 401) {
+    if (result.error.data?.message === "Authentication token expired.") {
+      const refreshResult = await baseQuery(
+        { url: "/user/refresh", method: "POST" },
+        api,
+        extraOptions
+      );
+
+      if (refreshResult.meta.response.ok) {
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        // Force logout if refresh fails
+        api.dispatch(initialUser({ user: null }));
+      }
+    }
+  }
+
+  return result;
+};
 
 // Define our single API slice object
 export const apiSlice = createApi({
   reducerPath: "cards",
-  baseQuery: fetchBaseQuery({
-    baseUrl:
-      process.env.NODE_ENV === "development"
-        ? `http://localhost:3000/api`
-        : "/api",
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["Card", "IndividualCard", "Report", "User"],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({

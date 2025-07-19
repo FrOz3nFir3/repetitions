@@ -8,25 +8,51 @@ const {
   getUserById,
 } = require("../../models/users/users.model");
 const { getCardsByIds } = require("../../models/cards/cards.model");
-const { sendCookie } = require("./auth.controller");
+const {
+  setTokens,
+  verifyRefreshToken,
+  createAccessToken,
+} = require("./auth.controller");
 const bcrypt = require("bcrypt");
 const User = require("../../models/users/users.mongo");
 const EmailValidator = require("email-deep-validator");
 const emailValidator = new EmailValidator({ timeout: 1000 });
 
-async function httpGetAuthDetails(req, res) {
-  const token = req.token;
+async function httpRefreshToken(req, res) {
+  const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
 
-  if (token == null) {
-    res.status(200).json({ user: null });
-  } else {
-    let user = await User.findOne({ _id: { $eq: token.id } });
-    if (!user) {
-      res.status(200).json({ user: null });
-    }
-    const { _id, password, __v, ...userDetails } = user._doc; // Exclude certain fields from the response
-    res.status(200).json({ user: userDetails });
+  if (!refreshTokenFromCookie) {
+    return res.status(401).json({ error: "User not Logged in" });
   }
+
+  const decoded = verifyRefreshToken(refreshTokenFromCookie);
+  if (!decoded) {
+    return res.status(401).json({ error: "Invalid refresh token." });
+  }
+
+  const newAccessToken = createAccessToken(decoded.id);
+
+  res.cookie("jwt_access", newAccessToken, {
+    httpOnly: true,
+    signed: true,
+    maxAge: 3600 * 1000, // 1 hour
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/api",
+  });
+
+  res.status(200).json({ ok: true });
+}
+
+async function httpGetAuthDetails(req, res) {
+  const token = req.token; // From requireAuthentication middleware
+
+  const user = await getUserById(token.id);
+  if (!user) {
+    return res.status(404).json({ user: null });
+  }
+  const { password, __v, refreshToken, ...userDetails } = user._doc;
+  res.status(200).json({ user: userDetails });
 }
 
 async function httpCreateNewUser(req, res) {
@@ -57,9 +83,11 @@ async function httpCreateNewUser(req, res) {
     }
 
     const user = await createNewUser(newUser);
-    sendCookie(res, user._id);
+    setTokens(res, user);
+    await user.save(); // Save the user with the new refresh token
 
-    res.status(200).json({ user });
+    const { _id, password, __v, refreshToken, ...userDetails } = user._doc;
+    res.status(200).json({ user: userDetails });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
@@ -108,8 +136,7 @@ async function httpUpdateUser(req, res) {
       return res.status(400).json({ error: "No valid fields to update." });
     }
 
-    const updatedUser = await updateUser(id, updateFields);
-    const { _id, password, __v, ...userDetails } = updatedUser._doc;
+    await updateUser(id, updateFields);
     res.status(200).json({ ok: true });
   } catch (error) {
     console.log(error);
@@ -145,9 +172,11 @@ async function httpLoginUser(req, res) {
       return res.status(401).json({ error: "password does not match" });
     }
 
-    sendCookie(res, user._id);
+    setTokens(res, user);
+    await user.save(); // Save the user with the new refresh token
 
-    return res.status(200).json({ user });
+    const { _id, password: p, __v, refreshToken, ...userDetails } = user._doc;
+    return res.status(200).json({ user: userDetails });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -162,15 +191,14 @@ async function httpLoginGoogleUser(req, res) {
 
     let user = await findUserByGoogleId(googleId);
     if (user == null) {
-      // meaning it is first time they are logging in
       user = await createNewUser({ email, name, googleId });
     } else if (!user.googleId) {
-      // User exists but googleId is not set
       user = await updateUser(user._id, { googleId, name });
     }
 
-    sendCookie(res, user._id);
-    const { _id, password, __v, ...userDetails } = user._doc;
+    setTokens(res, user);
+    await user.save();
+    const { _id, password, __v, refreshToken, ...userDetails } = user._doc;
     return res.status(200).json({ user: userDetails });
   } catch (error) {
     console.log(error);
@@ -178,15 +206,24 @@ async function httpLoginGoogleUser(req, res) {
   }
 }
 
-function httpLogoutUser(req, res) {
-  let containsCookies = req.signedCookies.jwt;
-
-  if (containsCookies) {
-    res.clearCookie("jwt");
-    res.status(204).end();
-  } else {
-    res.status(404).json({ error: "no user to logout" });
+async function httpLogoutUser(req, res) {
+  const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
+  if (!refreshTokenFromCookie) {
+    return res.sendStatus(204); // No content
   }
+
+  const decoded = verifyRefreshToken(refreshTokenFromCookie);
+  if (decoded) {
+    const user = await getUserById(decoded.id);
+    if (user) {
+      user.refreshToken = null; // Invalidate the token
+      await user.save();
+    }
+  }
+
+  res.clearCookie("jwt_access");
+  res.clearCookie("jwt_refresh");
+  return res.sendStatus(204);
 }
 
 async function httpGetUserProgress(req, res) {
@@ -243,4 +280,5 @@ module.exports = {
   httpGetUserProgress,
   httpGetDetailedReport,
   httpUpdateUserProgress,
+  httpRefreshToken,
 };
