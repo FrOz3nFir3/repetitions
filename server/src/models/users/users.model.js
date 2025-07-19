@@ -1,19 +1,19 @@
 const Users = require("./users.mongo");
 const mongoose = require("mongoose");
 
-async function findUserByEmail(email) {
-  return Users.findOne({ email: { $eq: email } });
+async function findUserByEmail(email, projection = {}) {
+  return Users.findOne({ email: { $eq: email } }, projection);
 }
 
-async function findUserByGoogleId(googleId) {
-  return Users.findOne({ googleId: { $eq: googleId } });
+async function findUserByGoogleId(googleId, projection = {}) {
+  return Users.findOne({ googleId: { $eq: googleId } }, projection);
 }
 
-async function getUserById(userId) {
+async function getUserById(userId, projection = {}) {
   if (userId === "null" || userId === "undefined") {
     return null;
   }
-  return Users.findOne({ _id: { $eq: userId } });
+  return Users.findOne({ _id: { $eq: userId } }, projection);
 }
 
 async function createNewUser(user) {

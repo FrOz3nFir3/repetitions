@@ -15,9 +15,9 @@ const {
   ACCESS_TOKEN_MAX_AGE_MS,
 } = require("./auth.controller");
 const bcrypt = require("bcrypt");
-const User = require("../../models/users/users.mongo");
 const EmailValidator = require("email-deep-validator");
-const emailValidator = new EmailValidator({ timeout: 1000 });
+const emailValidator = new EmailValidator({ timeout: 10000 });
+const { userDetailsProjection } = require("../../utils/constants");
 
 async function httpRefreshToken(req, res) {
   const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
@@ -48,12 +48,11 @@ async function httpRefreshToken(req, res) {
 async function httpPostAuthDetails(req, res) {
   const token = req.token; // From requireAuthentication middleware
 
-  const user = await getUserById(token.id);
+  const user = await getUserById(token.id, userDetailsProjection);
   if (!user) {
     return res.status(404).json({ user: null });
   }
-  const { password, __v, _id, ...userDetails } = user._doc;
-  res.status(200).json({ user: userDetails });
+  res.status(200).json({ user });
 }
 
 async function httpCreateNewUser(req, res) {
@@ -63,7 +62,7 @@ async function httpCreateNewUser(req, res) {
       return res.status(400).json({ error: "Name is required" });
     }
     if (newUser.password != newUser.confirmPassword) {
-      return res.status(409).json({ error: "confirm password does not match" });
+      return res.status(409).json({ error: "Confirm Password does not match" });
     }
     if (newUser.password.length < 5) {
       return res
@@ -71,23 +70,34 @@ async function httpCreateNewUser(req, res) {
         .json({ error: "Password should be minimum 5 characters" });
     }
 
-    const userExists = await findUserByEmail(newUser.email);
+    const userExists = await findUserByEmail(
+      newUser.email,
+      userDetailsProjection
+    );
     if (userExists != null) {
-      return res.status(409).json({ error: "email already exist" });
+      return res.status(409).json({ error: "Email already exist" });
     }
 
     const { validDomain, validMailbox } = await emailValidator.verify(
       newUser.email
     );
     if (validDomain == false || validMailbox == false) {
-      return res.status(409).json({ error: "Invalid Email" });
+      if (!validDomain) {
+        return res.status(409).json({ error: "Invalid Email Domain" });
+      }
+      if (!validMailbox) {
+        return res
+          .status(409)
+          .json({ error: "Invalid Email it cannot take mails" });
+      }
+      return res
+        .status(409)
+        .json({ error: "Invalid Email please try with different email" });
     }
 
     const user = await createNewUser(newUser);
     setTokens(res, user);
-    await user.save(); // Save the user with the new refresh token
-
-    const { _id, password, __v, refreshToken, ...userDetails } = user._doc;
+    const { _id, password, __v, ...userDetails } = user._doc;
     res.status(200).json({ user: userDetails });
   } catch (error) {
     console.log(error);
@@ -112,15 +122,18 @@ async function httpUpdateUser(req, res) {
       return res.status(400).json({ error: "Email cannot be empty" });
     }
     if (email) {
-      const { validDomain, validMailbox } = await emailValidator.verify(email);
-      if (!validDomain || !validMailbox) {
-        return res.status(400).json({ error: "Invalid Email" });
+      const { validDomain, validMailbox } = await emailValidator.verify(
+        newUser.email
+      );
+      if (validDomain == false || validMailbox == false) {
+        return res.status(409).json({ error: "Invalid Email" });
       }
-      const existingUser = await findUserByEmail(email.trim());
+
+      const existingUser = await findUserByEmail(email.trim(), { _id: 1 });
       if (existingUser && existingUser._id.toString() !== id) {
         return res.status(409).json({ error: "Email already in use" });
       }
-      updateFields.email = email;
+      updateFields.email = email.trim();
     }
 
     if (googleId) {
@@ -160,7 +173,10 @@ async function httpUpdateUserProgress(req, res) {
 async function httpLoginUser(req, res) {
   const { email, password } = req.body;
   try {
-    const user = await findUserByEmail(email);
+    const user = await findUserByEmail(email, {
+      __v: 0,
+      "studying.quizAttempts": 0,
+    });
     if (user == null) {
       return res.status(401).json({ error: "email does not exist" });
     }
@@ -174,9 +190,8 @@ async function httpLoginUser(req, res) {
     }
 
     setTokens(res, user);
-    await user.save(); // Save the user with the new refresh token
 
-    const { _id, password: p, __v, refreshToken, ...userDetails } = user._doc;
+    const { _id, password: p, ...userDetails } = user._doc;
     return res.status(200).json({ user: userDetails });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -190,7 +205,7 @@ async function httpLoginGoogleUser(req, res) {
       return res.status(400).json({ error: "Google login failed no email" });
     }
 
-    let user = await findUserByGoogleId(googleId);
+    let user = await findUserByGoogleId(googleId, userDetailsProjection);
     if (user == null) {
       user = await createNewUser({ email, name, googleId });
     } else if (!user.googleId) {
@@ -198,8 +213,7 @@ async function httpLoginGoogleUser(req, res) {
     }
 
     setTokens(res, user);
-    await user.save();
-    const { _id, password, __v, refreshToken, ...userDetails } = user._doc;
+    const { ...userDetails } = user._doc;
     return res.status(200).json({ user: userDetails });
   } catch (error) {
     console.log(error);
@@ -240,7 +254,7 @@ async function httpGetDetailedReport(req, res) {
   const { id: userId } = req.token;
 
   try {
-    const user = await getUserById(userId);
+    const user = await getUserById(userId, { studying: 1 });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }

@@ -100,9 +100,9 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
                           key={item.quiz_id}
                           className="p-5 bg-gray-50 dark:bg-gray-900/50 rounded-lg shadow-md"
                         >
-                          <p>
+                          <div>
                             <HtmlRenderer htmlContent={item.question} />
-                          </p>
+                          </div>
                           <div className="mt-4 space-y-2">
                             {item.options.map((option, i) => (
                               <div

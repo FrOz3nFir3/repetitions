@@ -8,7 +8,7 @@ const CategoryPageSkeleton = () => {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto !px-4 !py-8">
-        {user && <PreviouslyStudiedSkeleton />}
+        {!!user?.studying?.length && <PreviouslyStudiedSkeleton />}
         <div className="my-8">
           <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-4"></div>
           <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
