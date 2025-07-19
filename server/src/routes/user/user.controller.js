@@ -12,6 +12,7 @@ const {
   setTokens,
   verifyRefreshToken,
   createAccessToken,
+  ACCESS_TOKEN_MAX_AGE_MS,
 } = require("./auth.controller");
 const bcrypt = require("bcrypt");
 const User = require("../../models/users/users.mongo");
@@ -35,7 +36,7 @@ async function httpRefreshToken(req, res) {
   res.cookie("jwt_access", newAccessToken, {
     httpOnly: true,
     signed: true,
-    maxAge: 3600 * 1000, // 1 hour
+    maxAge: ACCESS_TOKEN_MAX_AGE_MS, // 1 hour
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/api",
@@ -51,7 +52,7 @@ async function httpGetAuthDetails(req, res) {
   if (!user) {
     return res.status(404).json({ user: null });
   }
-  const { password, __v, refreshToken, ...userDetails } = user._doc;
+  const { password, __v, _id, ...userDetails } = user._doc;
   res.status(200).json({ user: userDetails });
 }
 
@@ -211,19 +212,9 @@ async function httpLogoutUser(req, res) {
   if (!refreshTokenFromCookie) {
     return res.sendStatus(204); // No content
   }
-
-  const decoded = verifyRefreshToken(refreshTokenFromCookie);
-  if (decoded) {
-    const user = await getUserById(decoded.id);
-    if (user) {
-      user.refreshToken = null; // Invalidate the token
-      await user.save();
-    }
-  }
-
-  res.clearCookie("jwt_access");
-  res.clearCookie("jwt_refresh");
-  return res.sendStatus(204);
+  res.clearCookie("jwt_access", { path: "/api" });
+  res.clearCookie("jwt_refresh", { path: "/api/user" });
+  return res.status(200).json({ ok: true });
 }
 
 async function httpGetUserProgress(req, res) {

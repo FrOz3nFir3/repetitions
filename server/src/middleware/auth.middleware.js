@@ -1,20 +1,15 @@
 const jwt = require("jsonwebtoken");
+const { checkFetchSiteHeaders } = require("./csrf.middleware");
 require("dotenv").config({ path: "../.env" });
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 function requireAuthentication(req, res, next) {
-  const token = req.signedCookies.jwt_access;
-
-  // to limit csrf attacks
-  const secFetchSite = req.headers["sec-fetch-site"];
-  if (
-    secFetchSite !== "same-origin" &&
-    secFetchSite !== "same-site" &&
-    secFetchSite !== "none"
-  ) {
-    return res.status(401).json({ error: "Unauthorized" });
+  checkFetchSiteHeaders(req, res);
+  if (res.headersSent) {
+    return;
   }
 
+  const token = req.signedCookies.jwt_access;
   // cookie can also be deleted
   if (!token) {
     return res.status(401).json({ message: "Authentication token expired." });

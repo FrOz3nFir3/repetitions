@@ -49,16 +49,6 @@ export const apiSlice = createApi({
       providesTags: ["Card"],
     }),
 
-    postCardsByIds: builder.mutation({
-      query: (card) => ({
-        url: "/cards/ids",
-        method: "POST",
-        body: card,
-      }),
-      providesTags: ["Report"],
-      // invalidatesTags: (result, error, arg) => (!error ? ["Card"] : null),
-    }),
-
     getIndividualCard: builder.query({
       query: (id) => `/card/${id}`,
       providesTags: ["IndividualCard"],
@@ -187,8 +177,6 @@ export const {
   usePatchUpdateUserProgressMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
-  // no longer used now
-  // usePostCardsByIdsMutation
   useGetUserProgressQuery,
   useGetDetailedReportQuery,
   useGetCardLogsQuery,

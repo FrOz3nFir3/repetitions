@@ -17,6 +17,7 @@ const {
 } = require("../../middleware/rateLimiter.middleware");
 
 const express = require("express");
+const { checkFetchSiteHeaders } = require("../../middleware/csrf.middleware");
 const userRouter = express.Router();
 
 // Apply the API limiter to the authenticated user details endpoint
@@ -46,8 +47,13 @@ userRouter.post("/register", authLimiter, httpCreateNewUser);
 userRouter.post("/login", authLimiter, httpLoginUser);
 userRouter.post("/google-login", authLimiter, httpLoginGoogleUser);
 
-userRouter.post("/logout", authLimiter, httpLogoutUser);
-userRouter.post("/refresh", apiLimiter, httpRefreshToken);
+userRouter.post("/logout", authLimiter, checkFetchSiteHeaders, httpLogoutUser);
+userRouter.post(
+  "/refresh",
+  apiLimiter,
+  checkFetchSiteHeaders,
+  httpRefreshToken
+);
 
 userRouter.patch("/", apiLimiter, requireAuthentication, httpUpdateUser);
 userRouter.patch(
