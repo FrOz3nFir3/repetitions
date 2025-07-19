@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { useGetAuthDetailsQuery } from "../../../api/apiSlice";
+import { usePostAuthDetailsQuery } from "../../../api/apiSlice";
 import {
   selectCurrentUser,
   initialUser,
@@ -8,12 +8,13 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import ThemeToggler from "./ThemeToggler";
+import ProfileMenuSkeleton from "./ProfileMenuSkeleton";
 
 const ProfileMenu = React.lazy(() => import("./ProfileMenu"));
 const MobileMenu = React.lazy(() => import("./MobileMenu"));
 
 function Header() {
-  const { data: existingUser } = useGetAuthDetailsQuery();
+  const { data: existingUser, isLoading } = usePostAuthDetailsQuery();
   const dispatch = useDispatch();
   const user = useSelector(selectCurrentUser);
   const [isOpen, setIsOpen] = useState(false);
@@ -85,17 +86,21 @@ function Header() {
           </div>
           <div className="ml-auto mr-4 flex items-center">
             <ThemeToggler />
-            <ProfileMenu
-              user={user}
-              isProfileOpen={isProfileOpen}
-              setIsProfileOpen={setIsProfileOpen}
-              profileMenuRef={profileMenuRef}
-            />
+            {isLoading ? (
+              <ProfileMenuSkeleton />
+            ) : (
+              <ProfileMenu
+                user={user}
+                isProfileOpen={isProfileOpen}
+                setIsProfileOpen={setIsProfileOpen}
+                profileMenuRef={profileMenuRef}
+              />
+            )}
           </div>
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700 p-2 text-gray-400 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none"
+              className="cursor-pointer inline-flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700 p-2 text-gray-400 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none"
             >
               <span className="sr-only">Open main menu</span>
               {isOpen ? (

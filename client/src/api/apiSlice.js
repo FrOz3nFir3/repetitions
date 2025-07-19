@@ -90,8 +90,11 @@ export const apiSlice = createApi({
       }),
     }),
 
-    getAuthDetails: builder.query({
-      query: () => `/user/authed`,
+    postAuthDetails: builder.query({
+      query: () => ({
+        url: `/user/authed`,
+        method: "POST",
+      }),
       providesTags: ["User"],
     }),
 
@@ -172,7 +175,7 @@ export const {
   usePatchUpdateCardMutation,
   usePostRegisterUserMutation,
   usePostLoginUserMutation,
-  useGetAuthDetailsQuery,
+  usePostAuthDetailsQuery,
   usePatchUpdateUserProfileMutation,
   usePatchUpdateUserProgressMutation,
   usePostLogoutUserMutation,

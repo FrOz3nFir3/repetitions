@@ -45,7 +45,7 @@ async function httpRefreshToken(req, res) {
   res.status(200).json({ ok: true });
 }
 
-async function httpGetAuthDetails(req, res) {
+async function httpPostAuthDetails(req, res) {
   const token = req.token; // From requireAuthentication middleware
 
   const user = await getUserById(token.id);
@@ -266,7 +266,7 @@ module.exports = {
   httpLoginUser,
   httpLoginGoogleUser,
   httpLogoutUser,
-  httpGetAuthDetails,
+  httpPostAuthDetails,
   httpUpdateUser,
   httpGetUserProgress,
   httpGetDetailedReport,

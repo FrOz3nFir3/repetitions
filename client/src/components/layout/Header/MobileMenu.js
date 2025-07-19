@@ -44,7 +44,7 @@ const MobileMenu = ({
             to={item.href}
             onClick={() => setIsOpen(false)}
             style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}
-            className="block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-white"
+            className="cursor-pointer block rounded-md px-3 py-2 text-base font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-white"
           >
             {item.name}
           </NavLink>
