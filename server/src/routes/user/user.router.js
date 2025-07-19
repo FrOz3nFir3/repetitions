@@ -46,8 +46,8 @@ userRouter.post("/register", authLimiter, httpCreateNewUser);
 userRouter.post("/login", authLimiter, httpLoginUser);
 userRouter.post("/google-login", authLimiter, httpLoginGoogleUser);
 
-userRouter.post("/logout", httpLogoutUser);
-userRouter.post("/refresh", authLimiter, httpRefreshToken);
+userRouter.post("/logout", authLimiter, httpLogoutUser);
+userRouter.post("/refresh", apiLimiter, httpRefreshToken);
 
 userRouter.patch("/", apiLimiter, requireAuthentication, httpUpdateUser);
 userRouter.patch(

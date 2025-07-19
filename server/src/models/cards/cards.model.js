@@ -635,7 +635,7 @@ async function getCardLogs(cardId, page = 1, limit = 10) {
 }
 
 async function getQuizAnswer(cardId, reviewId, quizId) {
-  const card = await Card.findById(cardId);
+  const card = await Card.findOne({ _id: { $eq: cardId } });
   if (!card) return null;
 
   const review = card.review.find((r) => r._id.toString() === reviewId);
@@ -651,7 +651,7 @@ async function getAuthorOfCard(cardId) {
 }
 
 async function getQuizById(cardId, reviewId, quizId) {
-  const card = await Card.findById(cardId).lean();
+  const card = await Card.findOne({ _id: { $eq: cardId } }).lean();
   if (!card) return null;
 
   const review = card.review.find((r) => r._id.toString() === reviewId);
