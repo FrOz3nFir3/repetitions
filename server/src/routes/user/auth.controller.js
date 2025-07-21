@@ -38,7 +38,7 @@ function verifyRefreshToken(token = "") {
 
 function setTokens(res, user) {
   const accessToken = createAccessToken(user._id);
-  const refreshToken = createRefreshToken(user.email);
+  const refreshToken = createRefreshToken(user._id);
 
   const isProduction = process.env.NODE_ENV === "production";
 

@@ -22,7 +22,8 @@ function csrfProtectionMiddleware(req, res, next) {
   }
 
   console.warn(
-    `CSRF_BLOCKED: A cross-site request to ${req.path} was blocked. Details:`,
+    "CSRF_BLOCKED: A cross-site request to %s was blocked. Details:",
+    req.path,
     {
       method: req.method,
       secFetchSite,

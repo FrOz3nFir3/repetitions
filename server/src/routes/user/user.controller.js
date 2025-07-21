@@ -47,6 +47,7 @@ async function httpRefreshToken(req, res) {
 
 async function httpPostAuthDetails(req, res) {
   const token = req.token; // From requireAuthentication middleware
+  console.log(token, req.signedCookies);
 
   const user = await getUserById(token.id, userDetailsProjection);
   if (!user) {
