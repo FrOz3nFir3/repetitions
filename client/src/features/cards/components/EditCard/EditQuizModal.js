@@ -10,10 +10,19 @@ import {
 import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
 import { PencilIcon } from "@heroicons/react/24/solid";
+import SearchableDropdown from "../../components/ui/SearchableDropdown";
+import { getTextFromHtml } from "../../../../utils/dom";
 
 let tempIdCounter = 0;
 
-const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
+const EditQuizModal = ({
+  isOpen,
+  onClose,
+  cardId,
+  flashcardId,
+  quiz,
+  flashcards,
+}) => {
   const [updateCard, { error, isLoading }] = usePatchUpdateCardMutation();
   const errorRef = useRef(null);
 
@@ -23,8 +32,9 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
       quizAnswer: quiz.quizAnswer,
       options: quiz.options || [],
       minimumOptions: quiz.minimumOptions,
+      flashcardId: flashcardId,
     }),
-    [quiz]
+    [quiz, flashcardId]
   );
 
   const [quizQuestion, setQuizQuestion] = useState(originalState.quizQuestion);
@@ -38,10 +48,29 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
   const [minimumOptions, setMinimumOptions] = useState(
     originalState.minimumOptions
   );
+  const [selectedFlashcardId, setSelectedFlashcardId] = useState(
+    originalState.flashcardId
+  );
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
 
   const [isChanged, setIsChanged] = useState(false);
+
+  const flashcardOptions = useMemo(
+    () =>
+      flashcards.map((fc, index) => {
+        const plainText = getTextFromHtml(fc.question);
+        const truncatedText =
+          plainText.length > 40
+            ? `${plainText.substring(0, 40)}...`
+            : plainText;
+        return {
+          value: fc._id,
+          label: `${index + 1}. ${truncatedText}`,
+        };
+      }),
+    [flashcards]
+  );
 
   useEffect(() => {
     const currentState = {
@@ -49,17 +78,26 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
       quizAnswer,
       options: options.map(({ value }) => ({ value })),
       minimumOptions,
+      flashcardId: selectedFlashcardId,
     };
     const originalSimpleState = {
       quizQuestion: originalState.quizQuestion,
       quizAnswer: originalState.quizAnswer,
       options: originalState.options.map(({ value }) => ({ value })),
       minimumOptions: originalState.minimumOptions,
+      flashcardId: originalState.flashcardId,
     };
     setIsChanged(
       JSON.stringify(originalSimpleState) !== JSON.stringify(currentState)
     );
-  }, [quizQuestion, quizAnswer, options, minimumOptions, originalState]);
+  }, [
+    quizQuestion,
+    quizAnswer,
+    options,
+    minimumOptions,
+    selectedFlashcardId,
+    originalState,
+  ]);
 
   useEffect(() => {
     if (error && errorRef.current) {
@@ -82,7 +120,6 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
 
     const payload = {
       _id: cardId,
-      cardId: flashcardId,
       quizId: quiz._id,
       optionId: selectedOptionId,
       deleteOption: true,
@@ -106,7 +143,6 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
       setSelectedOptionId(option._id);
       setIsDeleteModalOpen(true);
     } else {
-      // If it's a new option that hasn't been saved, just remove it from state
       setOptions(options.filter((opt) => opt.tempId !== id));
     }
   };
@@ -122,8 +158,8 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
 
     const payload = {
       _id: cardId,
-      cardId: flashcardId,
       quizId: quiz._id,
+      cardId: selectedFlashcardId,
     };
 
     if (originalState.quizQuestion !== quizQuestion) {
@@ -196,6 +232,18 @@ const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
               initialContent={quizAnswer}
               onChange={setQuizAnswer}
               editable={!isLoading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+              Associate with Flashcard (Optional)
+            </label>
+            <SearchableDropdown
+              options={flashcardOptions}
+              value={selectedFlashcardId}
+              onChange={setSelectedFlashcardId}
+              placeholder="Search for a flashcard..."
             />
           </div>
 

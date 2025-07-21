@@ -1,15 +1,21 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   BookOpenIcon,
-  PencilSquareIcon,
   CogIcon,
   InformationCircleIcon,
+  Cog8ToothIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/solid";
 
 export const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
   const location = useLocation();
-  const isActive = location.pathname.includes(to);
+  const [searchParams] = useSearchParams();
+  const view = searchParams.get("view");
+
+  const isActive =
+    location.pathname.includes(to) ||
+    (to.startsWith("edit") && to.includes(view));
 
   const baseClasses =
     "w-full rounded-lg px-5 py-4 text-lg font-semibold shadow-lg flex items-center transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl cursor-pointer";
@@ -57,19 +63,27 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
       </ActionLink>
       <ActionLink
         to="quiz"
-        icon={PencilSquareIcon}
+        icon={QuestionMarkCircleIcon}
         baseBg="bg-gradient-to-r from-purple-500 to-pink-600"
         hoverBg="hover:from-purple-600 hover:to-pink-700"
       >
         Quiz
       </ActionLink>
       <ActionLink
-        to="edit"
+        to="edit?view=flashcards"
         icon={CogIcon}
         baseBg="bg-gradient-to-r from-gray-600 to-gray-800"
         hoverBg="hover:from-gray-700 hover:to-gray-900"
       >
         Edit Flashcards
+      </ActionLink>
+      <ActionLink
+        to="edit?view=quizzes"
+        icon={Cog8ToothIcon} // You might want to change this icon
+        baseBg="bg-gradient-to-r from-teal-500 to-cyan-600"
+        hoverBg="hover:from-teal-600 hover:to-cyan-700"
+      >
+        Edit Quizzes
       </ActionLink>
     </div>
   );

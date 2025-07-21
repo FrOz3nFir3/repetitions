@@ -39,12 +39,12 @@ const quizSchema = new mongoose.Schema({
   quizAnswer: { type: String, required: true },
   options: { type: [optionSchema], default: [] },
   minimumOptions: { type: Number, default: 2 },
+  flashcardId: { type: mongoose.Schema.Types.ObjectId, required: false },
 });
 
 const reviewSchema = new mongoose.Schema({
   question: { type: String, required: true },
   answer: { type: String, required: true },
-  quizzes: { type: [quizSchema], default: [] },
 });
 
 const cardsSchema = new mongoose.Schema({
@@ -62,6 +62,10 @@ const cardsSchema = new mongoose.Schema({
   },
   "review":{
     type:[reviewSchema],
+    default:[]
+  },
+  "quizzes":{
+    type:[quizSchema],
     default:[]
   },
   "description":{

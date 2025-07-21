@@ -27,7 +27,7 @@ const AddNewOption = ({ cardId, flashcardId, quiz }) => {
     };
     updateCard(updateDetails).then((res) => {
       if (res.data) {
-        // dispatch(modifyCard(updateDetails));
+        
         handleCancel();
       }
     });

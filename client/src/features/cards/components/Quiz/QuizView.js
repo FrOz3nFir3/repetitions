@@ -30,14 +30,7 @@ function QuizView() {
 
   const [updateUser] = usePatchUpdateUserProgressMutation();
 
-  const review = useMemo(
-    () =>
-      card?.review.reduce((acc, current) => {
-        const quizzes = current.quizzes || [];
-        return acc.concat(quizzes);
-      }, []) || [],
-    [card]
-  );
+  const review = useMemo(() => card?.quizzes || [], [card]);
 
   const currentQuestion = useMemo(
     () => review[currentQuestionIndex],

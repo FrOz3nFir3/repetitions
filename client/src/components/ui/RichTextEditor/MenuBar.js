@@ -39,7 +39,6 @@ const ToolbarButton = ({
 
 export const MenuBar = ({ editor }) => {
   const [_, setTick] = useState(0);
-  const [isPasteModalOpen, setIsPasteModalOpen] = useState(false);
 
   useEffect(() => {
     if (!editor) return;

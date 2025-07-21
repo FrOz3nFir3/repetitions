@@ -2,20 +2,20 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { selectCurrentCard } from "../../state/cardSlice";
-import FlashcardList from "./FlashcardList";
 import EditCardHeader from "./EditCardHeader";
-import FlashcardControls from "./FlashcardControls";
-import FlashcardNavigation from "./FlashcardNavigation";
+import QuizManagementView from "./QuizManagementView";
+import FlashcardManagementView from "./FlashcardManagementView";
+import ViewSwitcher from "./ViewSwitcher";
 
 const EditCardView = () => {
   const card = useSelector(selectCurrentCard);
-  const { _id, review = [] } = card || {};
-
+  const { _id, review = [], quizzes = [] } = card || {};
+  
   const [searchParams, setSearchParams] = useSearchParams();
+  const view = searchParams.get("view") || "flashcards";
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
-  const [jumpToIndex, setJumpToIndex] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [animationDirection, setAnimationDirection] = useState("");
 
@@ -27,33 +27,63 @@ const EditCardView = () => {
         flashcard.answer.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [review, searchTerm]);
+
+  const filteredQuizzes = useMemo(() => {
+    if (!quizzes) return [];
+    return quizzes.filter(
+      (quiz) =>
+        (quiz.quizQuestion &&
+          quiz.quizQuestion.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (quiz.options &&
+          quiz.options.some(
+            (option) =>
+              option.value &&
+              option.value.toLowerCase().includes(searchTerm.toLowerCase())
+          ))
+    );
+  }, [quizzes, searchTerm]);
+
   const cardNoQuery = useMemo(
     () => parseInt(searchParams.get("cardNo"), 10),
     [searchParams]
   );
 
+  const quizNoQuery = useMemo(
+    () => parseInt(searchParams.get("quizNo"), 10),
+    [searchParams]
+  );
+
   useEffect(() => {
-    const cardNo = cardNoQuery;
-    const outOfBounds = cardNo > filteredFlashcards.length || cardNo <= 0;
-    // delete cardNo if no flashcards match the search
+    const isFlashcardView = view === "flashcards";
+    const items = isFlashcardView ? filteredFlashcards : filteredQuizzes;
+    const paramName = isFlashcardView ? "cardNo" : "quizNo";
+    const itemNo = isFlashcardView ? cardNoQuery : quizNoQuery;
 
-    if (filteredFlashcards.length === 0) {
-      handleSetSearchParams("cardNo", "");
-      return;
-    }
-    if (Number.isNaN(cardNo)) {
-      handleSetSearchParams("cardNo", "1");
-      return;
-    }
-    if (outOfBounds) {
-      const validIndex =
-        (cardNo - 1 + filteredFlashcards.length) % filteredFlashcards.length;
-      handleSetSearchParams("cardNo", (validIndex + 1).toString());
+    if (items.length === 0) {
+      handleSetSearchParams(paramName, "");
+      setCurrentIndex(0);
       return;
     }
 
-    handleIndexChange(cardNo - 1);
-  }, [cardNoQuery, filteredFlashcards.length]);
+    let targetIndex = itemNo ? itemNo - 1 : 0;
+
+    if (
+      Number.isNaN(targetIndex) ||
+      targetIndex < 0 ||
+      targetIndex >= items.length
+    ) {
+      targetIndex = 0;
+      handleSetSearchParams(paramName, "1");
+    }
+
+    handleIndexChange(targetIndex);
+  }, [
+    cardNoQuery,
+    quizNoQuery,
+    filteredFlashcards.length,
+    filteredQuizzes.length,
+    view,
+  ]);
 
   const handleSetSearchParams = (key, value) => {
     setSearchParams((prev) => {
@@ -67,32 +97,30 @@ const EditCardView = () => {
   };
 
   const handleIndexChange = (newIndex, direction) => {
-    if (newIndex >= 0 && newIndex < filteredFlashcards.length) {
+    const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
+    if (newIndex >= 0 && newIndex < items.length) {
       setAnimationDirection(direction);
       setCurrentIndex(newIndex);
-      handleSetSearchParams("cardNo", (newIndex + 1).toString());
+      const paramName = view === "flashcards" ? "cardNo" : "quizNo";
+      handleSetSearchParams(paramName, (newIndex + 1).toString());
+    } else if (items.length === 0) {
+      setCurrentIndex(0);
+      const paramName = view === "flashcards" ? "cardNo" : "quizNo";
+      handleSetSearchParams(paramName, "");
     }
   };
 
   const handleNext = () => {
-    handleIndexChange((currentIndex + 1) % filteredFlashcards.length, "left");
+    const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
+    handleIndexChange((currentIndex + 1) % items.length, "left");
   };
 
   const handlePrev = () => {
+    const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
     handleIndexChange(
-      (currentIndex - 1 + filteredFlashcards.length) %
-        filteredFlashcards.length,
+      (currentIndex - 1 + items.length) % items.length,
       "right"
     );
-  };
-
-  const handleJump = (e) => {
-    e.preventDefault();
-    const index = parseInt(jumpToIndex, 10) - 1;
-    if (!isNaN(index)) {
-      handleIndexChange(index, index > currentIndex ? "left" : "right");
-      setJumpToIndex("");
-    }
   };
 
   const handleSearchChange = (e) => {
@@ -108,7 +136,10 @@ const EditCardView = () => {
     handleIndexChange(0, "right");
   };
 
-  const currentFlashcard = filteredFlashcards[currentIndex];
+  const currentItem =
+    view === "flashcards"
+      ? filteredFlashcards[currentIndex]
+      : filteredQuizzes[currentIndex];
 
   if (!card) {
     return null; // Or a loading state
@@ -116,34 +147,48 @@ const EditCardView = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-      <EditCardHeader totalFlashcards={review.length} flashcardId={_id} />
-      <FlashcardControls
-        searchTerm={searchTerm}
-        onSearchChange={handleSearchChange}
-        onReset={handleReset}
+      <EditCardHeader
+        flashcardId={_id}
+        view={view}
+        setSearchParams={setSearchParams}
+        card={card}
+      />
+      <ViewSwitcher
+        view={view}
+        setSearchParams={setSearchParams}
+        totalFlashcards={review.length}
+        totalQuizzes={quizzes.length}
       />
 
-      {filteredFlashcards.length > 0 && (
-        <FlashcardNavigation
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onJump={handleJump}
+      {view === "flashcards" ? (
+        <FlashcardManagementView
+          searchTerm={searchTerm}
+          handleSearchChange={handleSearchChange}
+          handleReset={handleReset}
+          handlePrev={handlePrev}
+          handleNext={handleNext}
           currentIndex={currentIndex}
           totalCount={filteredFlashcards.length}
-          jumpToIndex={jumpToIndex}
-          onJumpInputChange={(e) => setJumpToIndex(e.target.value)}
-          disabled={filteredFlashcards.length <= 1}
+          currentFlashcard={currentItem}
+          cardId={_id}
+          animationDirection={animationDirection}
+          handleIndexChange={handleIndexChange}
+        />
+      ) : (
+        <QuizManagementView
+          quizzes={quizzes}
+          cardId={_id}
+          searchTerm={searchTerm}
+          handleSearchChange={handleSearchChange}
+          handleReset={handleReset}
+          currentIndex={currentIndex}
+          handleIndexChange={handleIndexChange}
+          initialFilteredQuizzes={filteredQuizzes}
+          handleNext={handleNext}
+          handlePrev={handlePrev}
+          review={review}
         />
       )}
-
-      <div className="relative overflow-hidden">
-        <FlashcardList
-          flashcard={currentFlashcard}
-          cardId={_id}
-          direction={animationDirection}
-          key={currentIndex}
-        />
-      </div>
     </div>
   );
 };

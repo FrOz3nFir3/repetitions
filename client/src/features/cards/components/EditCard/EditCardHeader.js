@@ -1,17 +1,24 @@
 import React from "react";
 import { NewFlashcard } from "./NewFlashCardForm";
+import AddQuizModal from "./AddQuizModal";
 
-const EditCardHeader = ({ totalFlashcards, flashcardId }) => (
-  <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+const EditCardHeader = ({ flashcardId, view, card }) => (
+  <div className="flex gap-2 flex-wrap justify-between items-center mb-4">
     <div>
       <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
-        Edit Flashcards
+        Edit {view}
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        Total flashcards in this deck: {totalFlashcards}
+        {card?.["main-topic"]} / {card?.["sub-topic"]} / {card?.category}
       </p>
     </div>
-    <NewFlashcard flashcardId={flashcardId} />
+    <div className="flex items-center">
+      {view === "flashcards" ? (
+        <NewFlashcard flashcardId={flashcardId} />
+      ) : (
+        <AddQuizModal cardId={flashcardId} flashcards={card.review} />
+      )}
+    </div>
   </div>
 );
 

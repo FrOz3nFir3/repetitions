@@ -25,17 +25,10 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
   const isError = isErrorReport || isErrorCard;
 
   const mergedReport = React.useMemo(() => {
-    if (!reportData || !cardData || !cardData.review) return [];
+    if (!reportData || !cardData || !cardData.quizzes) return [];
 
     const quizMap = new Map(
-      cardData.review
-        .reduce((acc, flashcard) => {
-          flashcard.quizzes.forEach((quiz) => {
-            acc.push([quiz._id, quiz]);
-          });
-          return acc;
-        }, [])
-        .map((quiz) => [quiz[0], quiz[1]])
+      cardData.quizzes.map((quiz) => [quiz._id, quiz])
     );
 
     return reportData

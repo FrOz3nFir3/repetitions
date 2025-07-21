@@ -6,7 +6,7 @@ import {
   CheckCircleIcon,
   DocumentIcon,
 } from "@heroicons/react/24/outline";
-import QuizList from "./QuizList";
+
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
 
 const FlashcardItem = ({ flashcard, cardId }) => {
@@ -109,14 +109,7 @@ const FlashcardItem = ({ flashcard, cardId }) => {
           </div>
         </div>
 
-        {/* Quizzes Section */}
-        <div className="bg-gray-50 dark:bg-gray-800/50 px-3 py-4 border-t border-gray-200 dark:border-gray-700">
-          <QuizList
-            quizzes={flashcard.quizzes}
-            cardId={cardId}
-            flashcardId={flashcard._id}
-          />
-        </div>
+        
       </div>
 
       <DeleteConfirmationModal

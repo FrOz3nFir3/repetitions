@@ -35,6 +35,10 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
         updateDetails.quizId = quizId;
         updateDetails.minimumOptions = Number(oldValue);
         break;
+      case "Quiz Flashcard Association":
+        updateDetails.quizId = quizId;
+        updateDetails.cardId = change.cardId; // Reverting to the old flashcard ID from the stored cardId field
+        break;
       case "Category":
         updateDetails.category = oldValue;
         break;
