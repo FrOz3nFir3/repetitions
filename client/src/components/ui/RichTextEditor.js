@@ -14,7 +14,7 @@ import {
 } from "./RichTextEditor/extensions";
 
 const RichTextEditor = forwardRef(
-  ({ initialContent, onChange, editable }, ref) => {
+  ({ initialContent, onChange, editable, className = "" }, ref) => {
     const editor = useEditor({
       extensions: [
         StarterKit.configure({
@@ -63,7 +63,7 @@ const RichTextEditor = forwardRef(
       <div
         className={`${
           editable ? "" : " !bg-gray-100 dark:!bg-gray-500"
-        } break-word custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white flex flex-col w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 max-h-96`}
+        } break-word custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white flex flex-col w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 max-h-96 ${className}`}
       >
         <MenuBar editor={editor} />
         <div className=" p-5 overflow-y-auto cursor-text" onClick={handleClick}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { NewFlashcard } from "./NewFlashCardForm";
+import { NewFlashcardModal } from "./NewFlashCardModal";
 import AddQuizModal from "./AddQuizModal";
 
 const EditCardHeader = ({ flashcardId, view, card }) => (
@@ -14,7 +14,7 @@ const EditCardHeader = ({ flashcardId, view, card }) => (
     </div>
     <div className="flex items-center">
       {view === "flashcards" ? (
-        <NewFlashcard flashcardId={flashcardId} />
+        <NewFlashcardModal flashcardId={flashcardId} />
       ) : (
         <AddQuizModal cardId={flashcardId} flashcards={card.review} />
       )}

@@ -10,7 +10,7 @@ import ViewSwitcher from "./ViewSwitcher";
 const EditCardView = () => {
   const card = useSelector(selectCurrentCard);
   const { _id, review = [], quizzes = [] } = card || {};
-  
+
   const [searchParams, setSearchParams] = useSearchParams();
   const view = searchParams.get("view") || "flashcards";
   const [searchTerm, setSearchTerm] = useState(
@@ -136,10 +136,31 @@ const EditCardView = () => {
     handleIndexChange(0, "right");
   };
 
+  const handleJump = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const jumpValue = formData.get("jumpToIndex");
+    const jumpIndex = parseInt(jumpValue, 10) - 1;
+    const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
+
+    if (jumpIndex >= 0 && jumpIndex < items.length) {
+      handleIndexChange(jumpIndex, "");
+      e.target.reset(); // Clear the form
+    }
+  };
+
   const currentItem =
     view === "flashcards"
       ? filteredFlashcards[currentIndex]
       : filteredQuizzes[currentIndex];
+
+  // Calculate original index for flashcards
+  const originalFlashcardIndex = useMemo(() => {
+    if (view !== "flashcards" || !currentItem || !review) return null;
+    return (
+      review.findIndex((flashcard) => flashcard._id === currentItem._id) + 1
+    );
+  }, [currentItem, review, view]);
 
   if (!card) {
     return null; // Or a loading state
@@ -167,12 +188,13 @@ const EditCardView = () => {
           handleReset={handleReset}
           handlePrev={handlePrev}
           handleNext={handleNext}
+          handleJump={handleJump}
           currentIndex={currentIndex}
           totalCount={filteredFlashcards.length}
           currentFlashcard={currentItem}
           cardId={_id}
           animationDirection={animationDirection}
-          handleIndexChange={handleIndexChange}
+          originalFlashcardIndex={originalFlashcardIndex}
         />
       ) : (
         <QuizManagementView

@@ -159,7 +159,7 @@ export function CardField({
           </>
           <button
             onClick={handleEditClick}
-            className="absolute top-2 right-0 cursor-pointer opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 dark:text-gray-400 hover:text-indigo-600 p-1"
+            className="absolute top-2 right-0 cursor-pointer opacity-100   text-gray-500 dark:text-gray-400 hover:text-indigo-600 p-1"
           >
             <PencilIcon className="h-5 w-5" />
           </button>
