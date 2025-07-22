@@ -34,6 +34,8 @@ const EditCardView = () => {
       (quiz) =>
         (quiz.quizQuestion &&
           quiz.quizQuestion.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (quiz.quizAnswer &&
+          quiz.quizAnswer.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (quiz.options &&
           quiz.options.some(
             (option) =>

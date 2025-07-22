@@ -1,160 +1,167 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
-  PencilIcon,
-  TrashIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/24/outline";
-import EditQuizModal from "./EditQuizModal";
-import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
+  QuestionMarkCircleIcon,
+  LightBulbIcon,
+  ListBulletIcon,
+  HashtagIcon,
+} from "@heroicons/react/24/solid";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
-import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
-const QuizItem = ({ index, quiz, cardId, flashcardId }) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
-  const expandedRef = React.useRef(null);
+const QuizItem = ({ quiz }) => {
+  if (!quiz) return null;
 
-  const handleDelete = () => {
-    const updateDetails = {
-      _id: cardId,
-      cardId: flashcardId,
-      quizId: quiz._id,
-      deleteQuiz: true,
-    };
-    updateCard(updateDetails);
-    setIsDeleteModalOpen(false);
-  };
+  const { quizQuestion, quizAnswer, options, minimumOptions } = quiz;
 
-  useEffect(() => {
-    if (isExpanded && expandedRef.current) {
-      expandedRef.current.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-  }, [isExpanded]);
+  // Combine incorrect options with the correct answer
+  const otherOptions = (options || []).filter(
+    (opt) => opt.value !== quizAnswer
+  );
+  const correctAnswerOption = { value: quizAnswer, isCorrect: true };
 
-  const hasOptions = quiz.options && quiz.options.length > 0;
+  // The final list of options with the correct answer always first
+  const finalOptions = [correctAnswerOption, ...otherOptions];
 
   return (
-    <>
-      {error && (
-        <div className="rounded-md bg-red-100 dark:bg-red-900 p-4 text-sm text-red-700 dark:text-red-200 border border-red-300 dark:border-red-700">
-          {error.data?.error || "An error occurred while reverting changes."}
-        </div>
-      )}
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm transition-all duration-300">
-        <div
-          className="flex items-center justify-between p-4 cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
-              Quiz {index + 1}
+    <div className="space-y-8">
+      {/* Question Section */}
+      <div className="group space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+            <QuestionMarkCircleIcon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <label className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Question
+            </label>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              What will be asked in the quiz
             </p>
           </div>
-          <div className="flex items-center gap-3 ml-4">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsEditModalOpen(true);
-                setIsExpanded(true);
-              }}
-              className="cursor-pointer p-2 rounded-full text-gray-500 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/50"
-              aria-label="Edit quiz"
-            >
-              <PencilIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsDeleteModalOpen(true);
-              }}
-              disabled={isLoading}
-              className="cursor-pointer p-2 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/50"
-              aria-label="Delete quiz"
-            >
-              {isLoading ? (
-                <ArrowPathIcon className="h-5 w-5 animate-spin" />
-              ) : (
-                <TrashIcon className="h-5 w-5" />
-              )}
-            </button>
-            <button
-              className="cursor-pointer p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-              aria-label="Expand quiz details"
-            >
-              {isExpanded ? (
-                <ChevronUpIcon className="h-5 w-5" />
-              ) : (
-                <ChevronDownIcon className="h-5 w-5" />
-              )}
-            </button>
-          </div>
         </div>
 
-        <div ref={expandedRef}>
-          {isExpanded && (
-            <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-              <div>
-                <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                  Quiz Question
-                </p>
-                <HtmlRenderer htmlContent={quiz.quizQuestion} />
-              </div>
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                  Correct Answer
-                </p>
-                <div className="p-3 rounded-md bg-green-100 ">
-                  <HtmlRenderer htmlContent={quiz.quizAnswer} />
-                </div>
-              </div>
-
-              {hasOptions && (
-                <div className="mt-4">
-                  <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">
-                    Incorrect Options ({quiz.options.length})
-                  </p>
-                  <ul className="space-y-2">
-                    {quiz.options.map((option, i) => (
-                      <li
-                        key={i}
-                        className="p-3 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                      >
-                        <HtmlRenderer htmlContent={option.value} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="p-6 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-blue-200 dark:border-blue-700 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <HtmlRenderer htmlContent={quizQuestion} />
+          </div>
         </div>
       </div>
 
-      {isEditModalOpen && (
-        <EditQuizModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          cardId={cardId}
-          flashcardId={flashcardId}
-          quiz={quiz}
-        />
-      )}
+      {/* Answer Section */}
+      <div className="group space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
+            <LightBulbIcon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <label className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              Correct Answer
+            </label>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              The right answer to the question
+            </p>
+          </div>
+        </div>
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        title="Delete Quiz"
-        description="Are you sure you want to permanently delete this quiz? This action cannot be undone."
-      />
-    </>
+        <div className="p-6 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-emerald-200 dark:border-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <HtmlRenderer htmlContent={quizAnswer} />
+          </div>
+        </div>
+      </div>
+
+      {/* Minimum Options Section */}
+      <div className="group space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
+            <HashtagIcon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <label className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              Minimum Options
+            </label>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Required number of answer choices
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-amber-200 dark:border-amber-700 shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {minimumOptions || 2}
+            </span>
+            <span className="text-gray-600 dark:text-gray-400">
+              options minimum
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Options Section */}
+      <div className="group space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+            <ListBulletIcon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <label className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Answer Options
+            </label>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              All possible choices ({finalOptions.length} total)
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {finalOptions.map((option, index) => {
+            const isCorrect = option.value === quizAnswer;
+            return (
+              <div
+                key={index}
+                className={`relative p-4 rounded-xl border-2 shadow-md hover:shadow-lg transition-all duration-300 ${
+                  isCorrect
+                    ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-300 dark:border-green-500/30"
+                    : "bg-white/90 dark:bg-gray-800/90 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
+                }`}
+              >
+                <div className="flex items-start gap-4">
+                  {isCorrect && (
+                    <div className="flex-shrink-0 mt-1">
+                      <div className="p-1 bg-green-100 dark:bg-green-900/50 rounded-lg">
+                        <CheckCircleIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    {isCorrect && (
+                      <div className="mb-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
+                          Correct Answer
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`prose prose-sm dark:prose-invert max-w-none ${
+                        isCorrect
+                          ? "text-green-800 dark:text-green-200"
+                          : "text-gray-700 dark:text-gray-300"
+                      }`}
+                    >
+                      <HtmlRenderer
+                        className="!mt-0"
+                        htmlContent={option.value}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 };
 

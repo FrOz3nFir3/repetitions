@@ -7,7 +7,7 @@ const FlashcardControls = ({ searchTerm, onSearchChange, onReset }) => (
     <div className="mb-6">
       <div className="flex items-center gap-3 mb-2">
         <h2 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-indigo-600 dark:from-white dark:to-indigo-300 bg-clip-text text-transparent">
-          Find Your Cards
+          Flashcard Explorer
         </h2>
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-400">

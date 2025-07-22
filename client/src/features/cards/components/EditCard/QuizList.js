@@ -1,70 +1,41 @@
 import React from "react";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
-import EmptyState from "../../../../components/ui/EmptyState";
+import QuizDetail from "./QuizDetail";
+import { AcademicCapIcon } from "@heroicons/react/24/outline";
 
 const QuizList = ({
-  quizzes,
-  handleQuizSelect,
-  handleEdit,
-  handleDelete,
-  searchTerm,
+  quiz,
+  onEdit,
+  onDelete,
+  originalQuizIndex,
+  currentIndex,
 }) => {
-  if (!quizzes || quizzes?.length === 0) {
+  if (!quiz) {
     return (
-      <EmptyState
-        message={searchTerm ? "No Results Found" : "No Quizzes Available"}
-        details={
-          searchTerm
-            ? "No quizzes match your search criteria."
-            : "This card does not have any quizzes yet."
-        }
-      />
+      <div className="text-center py-20 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-2xl">
+            <AcademicCapIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+            No quiz found
+          </h3>
+          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-md">
+            Try a different search term, or create a new quiz to get started.
+          </p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-3 mt-4">
-      {quizzes.map((quiz, index) => (
-        <div
-          key={quiz._id}
-          className="group bg-white dark:bg-gray-800 p-4 rounded-lg border dark:border-gray-700 flex justify-between items-center hover:shadow-md transition-shadow duration-200"
-        >
-          <div
-            className="flex-grow cursor-pointer"
-            onClick={() => handleQuizSelect(index)}
-          >
-            <p className="font-semibold text-gray-900 dark:text-white">
-              <HtmlRenderer htmlContent={quiz.quizQuestion} />
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {quiz.options.length} options
-            </p>
-          </div>
-          <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit(quiz);
-              }}
-              className="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
-              aria-label="Edit quiz"
-            >
-              <PencilIcon className="h-5 w-5" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(quiz);
-              }}
-              className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400"
-              aria-label="Delete quiz"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-      ))}
+    <div className="mt-4">
+      <QuizDetail
+        quiz={quiz}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        originalQuizIndex={originalQuizIndex}
+        currentIndex={currentIndex}
+      />
     </div>
   );
 };

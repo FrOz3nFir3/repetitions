@@ -1,18 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import {
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import QuizDetail from "./QuizDetail";
+import QuizControls from "./QuizControls";
+import QuizNavigation from "./QuizNavigation";
+import QuizList from "./QuizList";
 import EditQuizModal from "./EditQuizModal";
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import { getTextFromHtml } from "../../../../utils/dom";
-import SearchableDropdown from "../../components/ui/SearchableDropdown";
-import EmptyState from "../../../../components/ui/EmptyState";
+import { AcademicCapIcon } from "@heroicons/react/24/outline";
 
 const QuizManagementView = ({
   quizzes,
@@ -34,9 +29,8 @@ const QuizManagementView = ({
   const [selectedFlashcardId, setSelectedFlashcardId] = useState(
     searchParams.get("flashcardFilter") || null
   );
-  const [jumpToIndex, setJumpToIndex] = useState("");
 
-  const [updateCard, { isLoading: isDeleting }] = usePatchUpdateCardMutation();
+  const [updateCard] = usePatchUpdateCardMutation();
 
   const filteredQuizzes = useMemo(() => {
     if (!selectedFlashcardId) {
@@ -103,10 +97,10 @@ const QuizManagementView = ({
 
   const handleJump = (e) => {
     e.preventDefault();
-    const index = parseInt(jumpToIndex, 10) - 1;
+    const index = parseInt(e.target.jumpToIndex.value, 10) - 1;
     if (!isNaN(index) && index >= 0 && index < filteredQuizzes.length) {
       handleIndexChange(index);
-      setJumpToIndex("");
+      e.target.reset();
     }
   };
 
@@ -118,102 +112,62 @@ const QuizManagementView = ({
   }, [currentQuiz, quizzes]);
 
   return (
-    <div className="mt-4">
-      {/* Search and Filter Controls */}
+    <div className="relative z-10 max-w-7xl mx-auto">
+      {/* Controls Section */}
+      <div className="space-y-4">
+        <QuizControls
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          onReset={handleReset}
+          selectedFlashcardId={selectedFlashcardId}
+          onFlashcardSelect={handleFlashcardSelect}
+          flashcardOptions={flashcardDropdownOptions}
+          filteredCount={filteredQuizzes.length}
+        />
 
-      <div className="flex  flex-col sm:flex-row gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <div className="relative flex-grow">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute top-1/2 left-3 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search quiz questions or answers..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-full bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {/* Navigation Section - Only show if we have quizzes */}
+        {filteredQuizzes.length > 0 && (
+          <QuizNavigation
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onJump={handleJump}
+            currentIndex={currentIndex}
+            totalCount={filteredQuizzes.length}
+            disabled={filteredQuizzes.length <= 1}
+            searchTerm={searchTerm}
+            selectedFlashcardId={selectedFlashcardId}
           />
-          {searchTerm && (
-            <button
-              onClick={handleReset}
-              className="cursor-pointer absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          )}
-        </div>
-        <div className="w-full sm:w-50">
-          <SearchableDropdown
-            options={flashcardDropdownOptions}
-            value={selectedFlashcardId}
-            onChange={handleFlashcardSelect}
-            placeholder="Filter by flashcard..."
-          />
-        </div>
+        )}
       </div>
 
-      {/* Navigation Controls */}
-      {filteredQuizzes.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between my-6 gap-4">
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handlePrev}
-              disabled={filteredQuizzes.length <= 1}
-              className="cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeftIcon className="h-5 w-5" />
-            </button>
-            <span className="font-semibold text-gray-700 dark:text-gray-200">
-              Quiz {currentIndex + 1} of {filteredQuizzes.length}
-            </span>
-            <button
-              onClick={handleNext}
-              disabled={filteredQuizzes.length <= 1}
-              className="cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRightIcon className="h-5 w-5" />
-            </button>
-          </div>
-          <form onSubmit={handleJump} className="flex items-center space-x-2">
-            <input
-              type="number"
-              value={jumpToIndex}
-              onChange={(e) => setJumpToIndex(e.target.value)}
-              className="w-24 p-2 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder={`1-${filteredQuizzes.length}`}
-              min="1"
-              max={filteredQuizzes.length}
-            />
-            <button
-              type="submit"
-              className="cursor-pointer px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-            >
-              Go
-            </button>
-          </form>
-        </div>
-      )}
-
+      {/* Quiz Content */}
       {filteredQuizzes.length > 0 ? (
-        <QuizDetail
+        <QuizList
           quiz={currentQuiz}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
           originalQuizIndex={originalQuizIndex}
+          currentIndex={currentIndex}
         />
       ) : (
-        <EmptyState
-          message={
-            searchTerm || selectedFlashcardId
-              ? "No Results Found"
-              : "No Quizzes Available"
-          }
-          details={
-            searchTerm || selectedFlashcardId
-              ? "No quizzes match your search or filter criteria."
-              : "This card does not have any quizzes yet."
-          }
-        />
+        <div className="text-center py-12">
+          <div className="p-4 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl inline-block mb-4">
+            <AcademicCapIcon className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-600 dark:text-gray-400 mb-2">
+            {searchTerm || selectedFlashcardId
+              ? "No quizzes found"
+              : "No quizzes available"}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-500 text-sm max-w-md mx-auto">
+            {searchTerm || selectedFlashcardId
+              ? "Try different search terms or clear the filters to see all quizzes."
+              : "Create your first quiz to get started with testing your knowledge!"}
+          </p>
+        </div>
       )}
 
+      {/* Modals */}
       {isEditModalOpen && selectedQuiz && (
         <EditQuizModal
           isOpen={isEditModalOpen}
@@ -230,7 +184,7 @@ const QuizManagementView = ({
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={confirmDelete}
           title="Delete Quiz"
-          description={`Are you sure you want to delete the quiz? This action is irreversible.`}
+          description={`Are you sure you want to delete this quiz? This action cannot be undone.`}
         />
       )}
     </div>
