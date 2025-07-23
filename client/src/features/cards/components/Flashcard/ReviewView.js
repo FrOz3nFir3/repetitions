@@ -9,12 +9,14 @@ import { useSelector } from "react-redux";
 import { selectCurrentCard } from "../../state/cardSlice";
 import {
   ArrowsRightLeftIcon,
+  BookOpenIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/solid";
 import SearchBar from "./Review/SearchBar";
 import Flashcard from "./Review/Flashcard";
 import Navigation from "./Review/Navigation";
 import CardGallery from "./Review/CardGallery";
+import ReviewTips from "./Review/ReviewTips";
 import { useSearchParams } from "react-router-dom";
 
 function Review() {
@@ -180,13 +182,28 @@ function Review() {
 
   if (review.length === 0) {
     return (
-      <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-          No Flashcards to Review
-        </h3>
-        <p className="mt-2 text-md text-gray-500 dark:text-gray-300">
-          Add some flashcards to get started.
-        </p>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 shadow-2xl">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative z-10 text-center py-16 px-8">
+          <div className="p-4 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg inline-block mb-6">
+            <InformationCircleIcon className="h-12 w-12 text-white" />
+          </div>
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-600 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent mb-4">
+            No Flashcards to Review
+          </h3>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            Add some flashcards to get started with your learning journey.
+          </p>
+        </div>
+
+        <div className="m-4 mt-8">
+          <ReviewTips />
+        </div>
       </div>
     );
   }
@@ -198,57 +215,87 @@ function Review() {
       : 0;
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 rounded-xl shadow-2xl overflow-hidden">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-          Review Session
-        </h2>
-        <p className="text-md text-gray-600 dark:text-gray-300">
-          Click the card to flip it and reveal the answer.
-        </p>
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 shadow-2xl">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
-      <SearchBar
-        searchTerm={searchTerm}
-        handleSearchChange={handleSearchChange}
-        handleSearchReset={handleSearchReset}
-      />
-      <Flashcard
-        currentFlashcard={currentFlashcard}
-        isFlipped={isFlipped}
-        setIsFlipped={setIsFlipped}
-        getSlideClass={getSlideClass}
-        handleTouchStart={handleTouchStart}
-        handleTouchMove={handleTouchMove}
-        handleTouchEnd={handleTouchEnd}
-      />
 
-      {!!filteredReview.length && (
-        <>
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-4 text-sm hidden md:flex items-center justify-center">
-            <ArrowsRightLeftIcon className="h-5 w-5 mr-2" />
-            Use Left/Right arrow keys to navigate
+      <div className="relative z-10 p-6 sm:p-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
+              <BookOpenIcon className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-600 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent">
+                Review Session
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Go through the Flashcards and learn them one by one.
+              </p>
+            </div>
           </div>
-          <div className="text-center text-gray-500 dark:text-gray-400 mt-2 text-sm md:hidden flex items-center justify-center">
-            <InformationCircleIcon className="h-5 w-5 mr-2" />
-            Swipe left or right to navigate on mobile / tablet
-          </div>
+        </div>
+        <SearchBar
+          searchTerm={searchTerm}
+          handleSearchChange={handleSearchChange}
+          handleSearchReset={handleSearchReset}
+        />
+        <Flashcard
+          currentFlashcard={currentFlashcard}
+          isFlipped={isFlipped}
+          setIsFlipped={setIsFlipped}
+          getSlideClass={getSlideClass}
+          handleTouchStart={handleTouchStart}
+          handleTouchMove={handleTouchMove}
+          handleTouchEnd={handleTouchEnd}
+          currentIndex={
+            currentFlashcard
+              ? review.findIndex(
+                  (card) => card.question === currentFlashcard.question
+                )
+              : 0
+          }
+          totalCards={review.length}
+        />
 
-          <Navigation
-            handlePrev={handlePrev}
-            handleNext={handleNext}
-            currentIndex={currentIndex}
-            filteredReviewLength={filteredReview.length}
-            progressPercentage={progressPercentage}
-          />
-          <CardGallery
-            review={review}
-            filteredReview={filteredReview}
-            currentFlashcard={currentFlashcard}
-            handleCardSelect={handleCardSelect}
-            searchTerm={searchTerm}
-          />
-        </>
-      )}
+        {!!filteredReview.length && (
+          <>
+            <div className="text-center mt-6 mb-4">
+              <div className="hidden md:flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl px-4 py-2">
+                <ArrowsRightLeftIcon className="h-4 w-4" />
+                Use Left/Right arrow keys to navigate
+              </div>
+              {/* disabled left / right swipe due to overflow bug */}
+              {/* <div className="md:hidden flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl px-4 py-2">
+                <InformationCircleIcon className="h-4 w-4" />
+                Swipe left or right to navigate
+              </div> */}
+            </div>
+
+            <Navigation
+              handlePrev={handlePrev}
+              handleNext={handleNext}
+              currentIndex={currentIndex}
+              filteredReviewLength={filteredReview.length}
+              progressPercentage={progressPercentage}
+            />
+            <CardGallery
+              review={review}
+              filteredReview={filteredReview}
+              currentFlashcard={currentFlashcard}
+              handleCardSelect={handleCardSelect}
+              searchTerm={searchTerm}
+            />
+          </>
+        )}
+        {/* Review Tips Section */}
+        <div className="mt-8">
+          <ReviewTips />
+        </div>
+      </div>
     </div>
   );
 }

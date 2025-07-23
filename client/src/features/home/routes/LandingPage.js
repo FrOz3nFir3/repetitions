@@ -82,6 +82,7 @@ const LandingPage = () => {
             </main>
           </div>
         </div>
+        {/* flashards section */}
         <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 flex items-center justify-center p-8 lg:pt-0">
           <div className="relative w-full h-96 max-w-lg sm:h-72 md:h-96">
             <div className="absolute top-0 left-1/4 w-64 h-40 text-white  bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-xl   transform -rotate-6 transition-transform duration-500 hover:rotate-0 hover:scale-105">

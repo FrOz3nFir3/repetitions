@@ -121,6 +121,7 @@ export function CardField({
                 currentFlashcard={previewData}
                 isFlipped={isFlipped}
                 setIsFlipped={() => {}}
+                viewOnly
               />
             </div>
           )}
