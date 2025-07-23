@@ -5,7 +5,7 @@ import {
   CogIcon,
   InformationCircleIcon,
   Cog8ToothIcon,
-  QuestionMarkCircleIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/solid";
 
 export const ActionLink = ({ to, icon: Icon, children, baseBg, hoverBg }) => {
@@ -63,7 +63,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
       </ActionLink>
       <ActionLink
         to="quiz"
-        icon={QuestionMarkCircleIcon}
+        icon={AcademicCapIcon}
         baseBg="bg-gradient-to-r from-purple-500 to-pink-600"
         hoverBg="hover:from-purple-600 hover:to-pink-700"
       >

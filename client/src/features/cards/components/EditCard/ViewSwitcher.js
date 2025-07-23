@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  BookOpenIcon,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/24/outline";
+import { BookOpenIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
 
 const ViewSwitcher = ({
   view,
@@ -20,7 +17,7 @@ const ViewSwitcher = ({
     {
       name: "Quizzes",
       view: "quizzes",
-      icon: QuestionMarkCircleIcon,
+      icon: AcademicCapIcon,
       count: totalQuizzes,
     },
   ];

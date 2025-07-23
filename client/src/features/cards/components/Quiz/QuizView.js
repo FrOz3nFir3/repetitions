@@ -12,6 +12,7 @@ import QuizHeader from "./QuizHeader";
 import QuizQuestion from "./QuizQuestion";
 import QuizOptions from "./QuizOptions";
 import RandomFact from "./RandomFact";
+import QuizTips from "./QuizTips";
 
 function QuizView() {
   const dispatch = useDispatch();
@@ -133,13 +134,24 @@ function QuizView() {
 
   if (!card || review.length === 0) {
     return (
-      <div className="text-center py-10 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-          No Quiz Questions Available
-        </h3>
-        <p className="mt-2 text-md text-gray-500 dark:text-gray-300">
-          Add some quizzes from the edit page to start.
-        </p>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-100/50 dark:from-gray-900 dark:via-slate-900 dark:to-purple-950 shadow-2xl">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-purple-400/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative z-10 text-center py-16 px-8">
+          <div className="p-4 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg inline-block mb-6">
+            <SparklesIcon className="h-12 w-12 text-white" />
+          </div>
+          <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-purple-800 to-pink-600 dark:from-white dark:via-purple-200 dark:to-pink-300 bg-clip-text text-transparent mb-4">
+            No Quiz Questions Available
+          </h3>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+            Add some quizzes from the edit page to start your learning journey.
+          </p>
+        </div>
       </div>
     );
   }
@@ -156,52 +168,71 @@ function QuizView() {
   }
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 rounded-2xl shadow-2xl">
-      <QuizHeader current={currentQuestionIndex + 1} total={review.length} />
-      <QuizQuestion
-        questionText={currentQuestion.quizQuestion}
-        current={currentQuestionIndex + 1}
-        total={review.length}
-      />
-      {selectedAnswer && showFacts ? (
-        <RandomFact fact={randomFact} loading={factLoading} />
-      ) : (
-        <>
-          <div className="mt-6 flex justify-center items-center space-x-3">
-            <SparklesIcon
-              className={`h-6 w-6 ${
-                showFacts ? "text-yellow-400" : "text-gray-400"
-              }`}
-            />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Show Fun Facts
-            </span>
-            <button
-              onClick={handleRandomFactToggle}
-              className={`${
-                showFacts ? "bg-blue-600" : "bg-gray-200 dark:bg-gray-700"
-              } cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-            >
-              <span
-                className={`${
-                  showFacts ? "translate-x-6" : "translate-x-1"
-                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-              />
-            </button>
-          </div>
-          <div className="justify-center text-gray-500 dark:text-gray-400 my-4 text-sm flex items-center ">
-            <LightBulbIcon className="h-5 w-5 mr-2" />
-            <p>Select an option to test your knowledge.</p>
-          </div>
-        </>
-      )}
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-100/50 dark:from-gray-900 dark:via-slate-900 dark:to-purple-950 shadow-2xl">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-purple-400/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
 
-      <QuizOptions
-        options={shuffledOptions}
-        answer={currentQuestion.quizAnswer}
-        selectedAnswer={selectedAnswer}
-        onSelect={handleAnswerSelect}
-      />
+      <div className="relative z-10 p-6 sm:p-8">
+        <QuizHeader current={currentQuestionIndex + 1} total={review.length} />
+        {currentQuestionIndex === 0 && !selectedAnswer && (
+          <QuizTips className="mb-6" />
+        )}
+        <QuizQuestion
+          questionText={currentQuestion.quizQuestion}
+          current={currentQuestionIndex + 1}
+          total={review.length}
+        />
+        {selectedAnswer && showFacts && (
+          <RandomFact fact={randomFact} loading={factLoading} />
+        )}
+
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl px-4 py-2">
+            <LightBulbIcon className="h-5 w-5" />
+            <p className="text-sm font-medium">
+              Select an option to test your knowledge
+            </p>
+          </div>
+        </div>
+        <QuizOptions
+          options={shuffledOptions}
+          answer={currentQuestion.quizAnswer}
+          selectedAnswer={selectedAnswer}
+          onSelect={handleAnswerSelect}
+        />
+
+        <div className="mt-8 mb-6 flex justify-center items-center">
+          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-purple-200/50 dark:border-purple-700/50">
+            <div className="flex items-center space-x-4">
+              <SparklesIcon
+                className={`h-6 w-6 transition-colors duration-300 ${
+                  showFacts ? "text-yellow-500" : "text-gray-400"
+                }`}
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Show Fun Facts
+              </span>
+              <button
+                onClick={handleRandomFactToggle}
+                className={`${
+                  showFacts
+                    ? "bg-gradient-to-r from-purple-500 to-pink-600"
+                    : "bg-gray-300 dark:bg-gray-600"
+                } cursor-pointer relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 shadow-lg hover:shadow-xl`}
+              >
+                <span
+                  className={`${
+                    showFacts ? "translate-x-6" : "translate-x-1"
+                  } inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
