@@ -80,10 +80,8 @@ export function CardField({
     text === "description";
 
   return (
-    <div className="card-field group relative py-2">
-      <p className="font-semibold text-gray-500 dark:text-gray-300 text-sm capitalize">
-        {text.replace("-", " ")}
-      </p>
+    <div className="card-field group relative">
+      {/* Field label is now handled by parent FieldCard component */}
       {isEditing ? (
         <form onSubmit={handleSubmit} className="space-y-2">
           <div ref={errorRef}>
@@ -148,21 +146,27 @@ export function CardField({
           </div>
         </form>
       ) : (
-        <div className="flex items-center justify-between mt-2">
-          <>
+        <div className="flex items-start justify-between group">
+          <div className="flex-1 min-w-0 pr-4">
             {isRichTextField ? (
-              <HtmlRenderer htmlContent={value} />
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <HtmlRenderer htmlContent={value} />
+              </div>
             ) : (
-              <p className="text-gray-900 dark:text-white whitespace-pre-wrap pr-8">
-                {value}
-              </p>
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                <p className="text-gray-900 dark:text-white whitespace-pre-wrap text-sm leading-relaxed">
+                  {value || (
+                    <span className="text-gray-400 italic">No value set</span>
+                  )}
+                </p>
+              </div>
             )}
-          </>
+          </div>
           <button
             onClick={handleEditClick}
-            className="absolute top-2 right-0 cursor-pointer opacity-100   text-gray-500 dark:text-gray-400 hover:text-indigo-600 p-1"
+            className="flex-shrink-0 cursor-pointer opacity-100 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
           >
-            <PencilIcon className="h-5 w-5" />
+            <PencilIcon className="h-4 w-4" />
           </button>
         </div>
       )}

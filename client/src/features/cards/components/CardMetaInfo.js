@@ -6,14 +6,18 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline";
 
-const InfoLine = ({ icon, label, value }) => (
-  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-    <div className="w-6 h-6 mr-3 text-gray-400 dark:text-gray-500">{icon}</div>
-    <div>
-      <span className="font-semibold text-gray-800 dark:text-gray-200">
-        {label}:
-      </span>{" "}
-      {value}
+const InfoItem = ({ icon, label, value }) => (
+  <div className="flex items-center gap-3 py-2">
+    <div className="flex-shrink-0 w-6 h-6 text-gray-500 dark:text-gray-400">
+      {icon}
+    </div>
+    <div className="min-w-0 flex-1">
+      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        {label}
+      </span>
+      <p className="text-sm text-gray-900 dark:text-white font-medium break-words">
+        {value}
+      </p>
     </div>
   </div>
 );
@@ -24,42 +28,32 @@ const CardMetaInfo = ({ card }) => {
   return (
     <div className="space-y-4">
       {author && (
-        <div>
-          <h4 className="text-md font-semibold text-indigo-600 dark:text-indigo-400 mb-2">
-            Author
-          </h4>
-          <div className="space-y-2">
-            <InfoLine
-              icon={<UserCircleIcon />}
-              label="Name"
-              value={`${author.name} <${author.email}>`}
-            />
-            <InfoLine
-              icon={<CalendarIcon />}
-              label="Created"
-              value={new Date(createdAt).toLocaleDateString()}
-            />
-          </div>
+        <div className="space-y-2">
+          <InfoItem
+            icon={<UserCircleIcon />}
+            label="Created by"
+            value={`${author.name} <${author.email}>`}
+          />
+          <InfoItem
+            icon={<CalendarIcon />}
+            label="Created on"
+            value={new Date(createdAt).toLocaleDateString()}
+          />
         </div>
       )}
 
       {lastUpdatedBy?.name && (
-        <div>
-          <h4 className="text-md font-semibold text-indigo-600 dark:text-indigo-400 mb-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-            Last Update
-          </h4>
-          <div className="space-y-2">
-            <InfoLine
-              icon={<PencilIcon />}
-              label="By"
-              value={`${lastUpdatedBy.name} <${lastUpdatedBy.email}>`}
-            />
-            <InfoLine
-              icon={<ClockIcon />}
-              label="On"
-              value={new Date(updatedAt).toLocaleString()}
-            />
-          </div>
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-600 space-y-2">
+          <InfoItem
+            icon={<PencilIcon />}
+            label="Updated by"
+            value={`${lastUpdatedBy.name} <${lastUpdatedBy.email}>`}
+          />
+          <InfoItem
+            icon={<ClockIcon />}
+            label="Updated on"
+            value={new Date(updatedAt).toLocaleString()}
+          />
         </div>
       )}
     </div>
