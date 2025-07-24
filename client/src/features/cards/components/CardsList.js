@@ -4,19 +4,23 @@ import { useGetCardsByCategoryQuery } from "../../../api/apiSlice";
 import { NewCardForm } from "./NewCardForm";
 import CardSkeleton from "../../../components/ui/skeletons/CardSkeleton";
 import SearchableCardGrid from "./SearchableCardGrid";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../authentication/state/authSlice";
 
 const CardList = () => {
   const { name: category } = useParams();
   const { data = [], isFetching } = useGetCardsByCategoryQuery(category);
   const cardListRef = React.useRef(null);
   const params = useParams();
+  const user = useSelector(selectCurrentUser);
 
   useEffect(() => {
+    if (user?.studying.length) return;
     cardListRef.current.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
-  }, [params]);
+  }, [params, user]);
 
   return (
     <div ref={cardListRef} className="bg-gray-50 dark:bg-gray-900 py-12">
