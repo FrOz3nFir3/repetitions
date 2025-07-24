@@ -1,0 +1,25 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "jsc": {
+    "parser": {
+      "syntax": "ecmascript",
+      "jsx": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic"
+      }
+    },
+    "target": "es2016"
+  },
+  "module": {
+    "type": "es6",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false,
+    "ignoreDynamic": false
+  },
+  "minify": true
+}
