@@ -29,6 +29,7 @@ export const ActionCard = ({
   layout = "vertical",
   stats,
   color,
+  scrollToTop = false,
 }) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -38,9 +39,21 @@ export const ActionCard = ({
     location.pathname.includes(to) ||
     (to.startsWith("edit") && to.includes(view));
 
+  const handleClick = () => {
+    if (scrollToTop) {
+      // Small delay to ensure navigation happens first
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }, 100);
+    }
+  };
+
   if (layout === "horizontal") {
     return (
-      <Link to={to} className="group block">
+      <Link to={to} onClick={handleClick} className="group block">
         <div
           className={`
           relative overflow-hidden rounded-2xl p-6 h-full
@@ -161,7 +174,7 @@ export const ActionCard = ({
 
   // Vertical layout - Big, Bold, Beautiful
   return (
-    <Link to={to} className="group block">
+    <Link to={to} onClick={handleClick} className="group block">
       <div
         className={`
         relative overflow-hidden rounded-3xl p-8 text-center h-full min-h-[280px]
@@ -331,6 +344,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           color="blue"
           layout={layout}
           stats={getActionStats()}
+          scrollToTop={true}
         />
 
         <ActionCard
@@ -345,6 +359,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           color="purple"
           layout={layout}
           stats={getActionStats()}
+          scrollToTop={true}
         />
 
         <ActionCard
@@ -359,6 +374,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           color="emerald"
           layout={layout}
           stats={getActionStats()}
+          scrollToTop={true}
         />
 
         <ActionCard
@@ -373,6 +389,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           color="amber"
           layout={layout}
           stats={getActionStats()}
+          scrollToTop={true}
         />
       </div>
     </div>

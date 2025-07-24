@@ -11,10 +11,23 @@ const CardDetails = (data) => {
     reviewLength = 0,
     showCategory,
     showContinue,
+    scrollToTop = true,
   } = data;
 
+  const handleClick = () => {
+    if (scrollToTop) {
+      // Small delay to ensure navigation happens first
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }, 100);
+    }
+  };
+
   return (
-    <Link to={`/card/${_id}`} className="block">
+    <Link to={`/card/${_id}`} onClick={handleClick} className="block">
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 transition-transform transform hover:scale-105 hover:shadow-lg h-full flex flex-col">
         <div className="flex-grow">
           {showCategory && (

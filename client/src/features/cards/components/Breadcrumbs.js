@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   FolderIcon,
   DocumentTextIcon,
@@ -12,9 +12,7 @@ import {
 const Breadcrumbs = ({ card, cardData }) => {
   const location = useLocation();
   const pathname = location.pathname;
-  const [searchParams] = useSearchParams();
-  const breadcrumbRef = useRef(null);
-  const activeItemRef = useRef(null);
+  const containerRef = React.useRef(null);
 
   // Get current activity for breadcrumb with icon and better naming
   const getCurrentActivity = () => {
@@ -45,49 +43,18 @@ const Breadcrumbs = ({ card, cardData }) => {
     location.pathname === `/card/${card?._id}` ||
     location.pathname === `/card/${card?._id}/`;
 
-  // Create a unique key that includes both path and important view parameter
-  const getNavigationKey = () => {
-    const basePath = pathname.split("?")[0];
-    const viewParam = searchParams.get("view");
-
-    // For edit routes, include the view parameter to distinguish between flashcards/quizzes
-    if (basePath.includes("/edit") && viewParam) {
-      return `${basePath}?view=${viewParam}`;
+  React.useEffect(() => {
+    if (containerRef.current) {
+      // scroll into active item (on mobile where there is overflow)
+      const container = containerRef.current;
+      container.scrollBy({
+        left: container.scrollWidth,
+        behavior: "smooth",
+      });
     }
+  }, [location]);
 
-    // For other routes, just use the base path
-    return basePath;
-  };
-
-  const navigationKey = getNavigationKey();
-  const previousNavigationKey = useRef(navigationKey);
-
-  // Auto-scroll when navigation key changes (path or important view param)
-  useEffect(() => {
-    // Only scroll if the navigation key actually changed
-    if (navigationKey !== previousNavigationKey.current || isDefaultView) {
-      if (breadcrumbRef.current) {
-        const container = breadcrumbRef.current;
-        // Smooth scroll to the breadcrumb
-        container.scrollIntoView({
-          behavior: "smooth",
-        });
-      }
-
-      if (activeItemRef.current) {
-        // scroll into active item (on mobile where there is overflow)
-        const container = activeItemRef.current;
-        container.scrollIntoView({
-          behavior: "smooth",
-        });
-      }
-
-      // Update the previous navigation key
-      previousNavigationKey.current = navigationKey;
-    }
-  }, [navigationKey, isDefaultView]);
-
-  // don't render breadcrumb
+  // Don't render breadcrumb if no data
   if (!card || !cardData) {
     return null;
   }
@@ -95,12 +62,12 @@ const Breadcrumbs = ({ card, cardData }) => {
   return (
     <nav className="mb-6 overflow-hidden" aria-label="Breadcrumb">
       <div
-        ref={breadcrumbRef}
         className="overflow-x-auto scrollbar-hide"
         style={{
           scrollbarWidth: "none", // Firefox
           msOverflowStyle: "none", // IE/Edge
         }}
+        ref={containerRef}
       >
         <ol className="flex items-center space-x-1 sm:space-x-2 text-sm min-w-max pb-2">
           {/* Category Level */}
@@ -153,11 +120,7 @@ const Breadcrumbs = ({ card, cardData }) => {
               <li className="flex-shrink-0">
                 <ChevronRightIcon className="w-4 h-4 text-gray-400" />
               </li>
-              <li
-                aria-current="page"
-                className="flex-shrink-0"
-                ref={activeItemRef}
-              >
+              <li aria-current="page" className="flex-shrink-0">
                 <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                   <currentActivity.icon className="w-4 h-4 flex-shrink-0" />
                   <span className="font-medium whitespace-nowrap">
