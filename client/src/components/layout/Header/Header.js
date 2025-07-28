@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { usePostAuthDetailsQuery } from "../../../api/apiSlice";
 import {
   selectCurrentUser,
@@ -17,9 +17,17 @@ function Header() {
   const { data: existingUser, isLoading } = usePostAuthDetailsQuery();
   const dispatch = useDispatch();
   const user = useSelector(selectCurrentUser);
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const profileMenuRef = useRef(null);
+
+  // Check if current route is a focused session (review/quiz/edit)
+  const isFocusedSession =
+    location.pathname.includes("/review") ||
+    location.pathname.includes("/quiz") ||
+    location.pathname.includes("/edit");
 
   useEffect(() => {
     if (existingUser) {
@@ -42,10 +50,18 @@ function Header() {
     };
   }, [profileMenuRef]);
 
-  const activeLinkStyle = {
-    fontWeight: "bold",
-    color: "#4f46e5",
-  };
+  // Only add scroll listener when NOT in focused session
+  useEffect(() => {
+    if (!isFocusedSession) {
+      const handleScroll = () => {
+        setIsScrolled(window.scrollY > 10);
+      };
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
+    } else {
+      setIsScrolled(false); // Reset scroll state in focused sessions
+    }
+  }, [isFocusedSession]);
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -53,73 +69,108 @@ function Header() {
   ];
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md">
+    <nav
+      className={`${
+        isFocusedSession ? "static" : "sticky"
+      } top-0 z-50 transition-all duration-300 ${
+        isFocusedSession
+          ? "bg-white dark:bg-gray-900 shadow-md border-b border-gray-200 dark:border-gray-700"
+          : isScrolled
+          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20"
+          : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm"
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 sm:h-18 items-center justify-between">
+          {/* Logo Section */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <img
-                className="h-12 w-auto"
-                src="/images/logo.png"
-                alt="Repetitions Logo"
-              />
-              <span className="ml-3 text-xl font-bold text-gray-800 dark:text-white">
+            <Link to="/" className="flex-shrink-0 flex items-center group">
+              <div className="relative">
+                <img
+                  className="h-10 w-auto group-hover:scale-105 transition-transform duration-300"
+                  src="/images/logo.png"
+                  alt="Repetitions Logo"
+                />
+              </div>
+              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 dark:from-white dark:via-indigo-100 dark:to-purple-100 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
                 Repetitions
               </span>
             </Link>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:block ml-10">
+              <div className="flex items-center space-x-1">
                 {navigation.map((item) => (
                   <NavLink
                     key={item.name}
                     to={item.href}
-                    style={({ isActive }) =>
-                      isActive ? activeLinkStyle : undefined
+                    className={({ isActive }) =>
+                      `relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                        isActive
+                          ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30"
+                          : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                      }`
                     }
-                    className="text-gray-500 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
-                    {item.name}
+                    {({ isActive }) => (
+                      <>
+                        {item.name}
+                        {isActive && (
+                          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
+                        )}
+                      </>
+                    )}
                   </NavLink>
                 ))}
               </div>
             </div>
           </div>
-          <div className="ml-auto mr-4 flex items-center">
+
+          {/* Right Section */}
+          <div className="flex items-center space-x-3">
             <ThemeToggler />
             {isLoading ? (
-              <ProfileMenuSkeleton />
+              <Suspense fallback={<ProfileMenuSkeleton />}>
+                <ProfileMenuSkeleton />
+              </Suspense>
             ) : (
-              <ProfileMenu
-                user={user}
-                isProfileOpen={isProfileOpen}
-                setIsProfileOpen={setIsProfileOpen}
-                profileMenuRef={profileMenuRef}
-              />
+              <Suspense fallback={<ProfileMenuSkeleton />}>
+                <ProfileMenu
+                  user={user}
+                  isProfileOpen={isProfileOpen}
+                  setIsProfileOpen={setIsProfileOpen}
+                  profileMenuRef={profileMenuRef}
+                />
+              </Suspense>
             )}
-          </div>
-          <div className="-mr-2 flex md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="cursor-pointer inline-flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-700 p-2 text-gray-400 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none"
-            >
-              <span className="sr-only">Open main menu</span>
-              {isOpen ? (
-                <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span className="sr-only">Open main menu</span>
+                {isOpen ? (
+                  <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <MobileMenu
-        isOpen={isOpen}
-        navigation={navigation}
-        activeLinkStyle={activeLinkStyle}
-        user={user}
-        setIsOpen={setIsOpen}
-      />
+      {/* Mobile Menu */}
+      <Suspense fallback={null}>
+        <MobileMenu
+          isOpen={isOpen}
+          navigation={navigation}
+          user={user}
+          setIsOpen={setIsOpen}
+        />
+      </Suspense>
     </nav>
   );
 }
