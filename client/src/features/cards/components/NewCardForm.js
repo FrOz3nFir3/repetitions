@@ -3,12 +3,12 @@ import { usePostCreateNewCardMutation } from "../../../api/apiSlice";
 import {
   PlusIcon,
   ArrowPathIcon,
-  AcademicCapIcon,
   TagIcon,
   FolderIcon,
   DocumentPlusIcon,
   ExclamationTriangleIcon,
   XMarkIcon,
+  HashtagIcon,
 } from "@heroicons/react/24/solid";
 import Modal from "../../../components/ui/Modal";
 
@@ -68,10 +68,10 @@ export function NewCardForm({ category, newCard }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="shrink-0 cursor-pointer inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-2 sm:px-4 py-2 text-xs sm:text-sm  font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        className="cursor-pointer inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
       >
         <PlusIcon className="-ml-0.5 h-5 w-5" />
-        Create Card
+        New Card
       </button>
 
       <Modal
@@ -124,7 +124,7 @@ export function NewCardForm({ category, newCard }) {
               </div>
             </FormField>
 
-            <FormField icon={AcademicCapIcon} title="Main Topic" color="blue">
+            <FormField icon={HashtagIcon} title="Main Topic" color="blue">
               <input
                 type="text"
                 id="topic"
