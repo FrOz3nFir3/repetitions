@@ -205,7 +205,9 @@ async function httpLoginGoogleUser(req, res) {
       return res.status(400).json({ error: "Google login failed no email" });
     }
 
-    let user = await findUserByGoogleId(googleId, userDetailsProjection);
+    const userProjectionCopy = { ...userDetailsProjection };
+    delete userProjectionCopy._id;
+    let user = await findUserByGoogleId(googleId, userProjectionCopy);
     if (user == null) {
       user = await createNewUser({ email, name, googleId });
     } else if (!user.googleId) {
@@ -213,7 +215,7 @@ async function httpLoginGoogleUser(req, res) {
     }
 
     setTokens(res, user);
-    const { ...userDetails } = user._doc;
+    const { _id, ...userDetails } = user._doc;
     return res.status(200).json({ user: userDetails });
   } catch (error) {
     console.log(error);

@@ -95,8 +95,7 @@ const CtaSection = () => {
                   to="/authenticate"
                   className="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-indigo-900 bg-white rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 min-w-[200px]"
                 >
-                  <RocketLaunchIcon className="w-5 h-5 mr-2" />
-                  Sign Up / Sign in
+                  Register / Login
                   <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
                 <Link

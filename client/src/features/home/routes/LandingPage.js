@@ -152,7 +152,7 @@ const LandingPage = () => {
 
                 <button
                   onClick={handleLearnMoreClick}
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-indigo-700 dark:text-indigo-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-700 rounded-2xl hover:bg-indigo-50 dark:hover:bg-gray-700 transition-all duration-300"
+                  className="cursor-pointer inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-indigo-700 dark:text-indigo-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-indigo-200 dark:border-indigo-700 rounded-2xl hover:bg-indigo-50 dark:hover:bg-gray-700 transition-all duration-300"
                 >
                   <LightBulbIcon className="w-5 h-5 mr-2" />
                   See How It Works

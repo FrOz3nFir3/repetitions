@@ -1,25 +1,48 @@
 import React from "react";
 import {
   BookOpenIcon,
-  QuestionMarkCircleIcon,
-  CheckCircleIcon,
+  TrophyIcon,
+  SparklesIcon,
   ChartBarIcon,
+  PlayCircleIcon,
 } from "@heroicons/react/24/outline";
 
-const StatCard = ({ name, stat, icon: Icon }) => (
-  <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-lg p-6 flex items-center">
-    <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-      <Icon className="h-6 w-6 text-white" aria-hidden="true" />
-    </div>
-    <div className="ml-5 w-0 flex-1">
-      <dl>
-        <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-          {name}
-        </dt>
-        <dd className="text-3xl font-semibold text-gray-900 dark:text-white">
-          {stat}
-        </dd>
-      </dl>
+const StatCard = ({ name, stat, icon: Icon, gradient, description, trend }) => (
+  <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm overflow-hidden shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full">
+    <div className="p-6 h-full flex flex-col">
+      {/* Header with icon and title */}
+      <div className="flex items-center mb-4">
+        <div
+          className={`flex-shrink-0 ${gradient} rounded-xl p-3 shadow-lg mr-4`}
+        >
+          <Icon className="h-6 w-6 text-white" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+            {name}
+          </dt>
+          <dd className="text-3xl font-bold text-gray-900 dark:text-white">
+            {stat}
+          </dd>
+        </div>
+      </div>
+
+      {/* Description */}
+      {description && (
+        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 flex-1">
+          {description}
+        </p>
+      )}
+
+      {/* Trend badge at bottom */}
+      {trend && (
+        <div className="mt-auto">
+          <div className="inline-flex items-center text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full">
+            <SparklesIcon className="w-3 h-3 mr-1.5" />
+            <span>{trend}</span>
+          </div>
+        </div>
+      )}
     </div>
   </div>
 );
@@ -27,7 +50,7 @@ const StatCard = ({ name, stat, icon: Icon }) => (
 const OverallStats = ({ user }) => {
   if (!user || !user.studying) return null;
 
-  // --- All calculation logic is now contained within this component ---
+  // Calculate comprehensive stats
   const totalDecksStudied = user.studying.length;
   const totalQuizzesTaken = user.studying.reduce(
     (acc, deck) => acc + (deck["times-started"] || 0),
@@ -54,29 +77,111 @@ const OverallStats = ({ user }) => {
       : 0;
 
   const stats = [
-    { name: "Decks Studied", stat: totalDecksStudied, icon: BookOpenIcon },
     {
-      name: "Quizzes Taken",
-      stat: totalQuizzesTaken,
-      icon: QuestionMarkCircleIcon,
+      name: "Learning Decks",
+      stat: totalDecksStudied,
+      icon: BookOpenIcon,
+      gradient: "bg-gradient-to-r from-blue-500 to-cyan-500",
+      description: "Active study collections you're working on",
+      trend: totalDecksStudied > 3 ? "Great variety!" : null,
     },
     {
-      name: "Overall Accuracy",
+      name: "Accuracy Rate",
       stat: `${overallAccuracy}%`,
-      icon: CheckCircleIcon,
+      icon: TrophyIcon,
+      gradient: "bg-gradient-to-r from-yellow-500 to-orange-500",
+      description: `${totalCorrect} correct answers from ${totalAnswers} total attempts`,
+      trend:
+        overallAccuracy > 75
+          ? "Excellent!"
+          : overallAccuracy > 50
+          ? "Good progress"
+          : null,
     },
     {
-      name: "Overall Completion",
+      name: "Quiz Sessions",
+      stat: totalQuizzesTaken,
+      icon: PlayCircleIcon,
+      gradient: "bg-gradient-to-r from-purple-500 to-pink-500",
+      description: "Total practice sessions started",
+      trend:
+        totalQuizzesTaken > 10
+          ? "Very active!"
+          : totalQuizzesTaken > 5
+          ? "Good practice"
+          : null,
+    },
+    {
+      name: "Completion Rate",
       stat: `${completionRate}%`,
       icon: ChartBarIcon,
+      gradient: "bg-gradient-to-r from-green-500 to-emerald-500",
+      description: `${totalQuizzesFinished} sessions finished out of ${totalQuizzesTaken} started`,
+      trend:
+        completionRate > 80
+          ? "Consistent!"
+          : completionRate > 60
+          ? "Good follow-through"
+          : null,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
-      {stats.map((item) => (
-        <StatCard key={item.name} {...item} />
-      ))}
+    <div className="mb-12">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Your Learning Analytics
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          Detailed insights into your study patterns and progress
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+        {stats.map((item) => (
+          <StatCard key={item.name} {...item} />
+        ))}
+      </div>
+
+      {/* Progress Summary */}
+      <div className="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-2xl p-6 border border-indigo-200 dark:border-indigo-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Learning Progress Summary
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              You've studied{" "}
+              <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                {totalDecksStudied}
+              </span>{" "}
+              decks with an average accuracy of{" "}
+              <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                {overallAccuracy}%
+              </span>
+              . Keep up the great work!
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center space-x-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                {totalQuizzesTaken}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Quizzes
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {totalCorrect}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Correct
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
