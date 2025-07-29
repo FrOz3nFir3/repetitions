@@ -4,6 +4,7 @@ const BundleAnalyzerPlugin =
   require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const webpack = require("webpack");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = (env, argv) => {
   const mode = argv.mode || "development";
@@ -14,6 +15,10 @@ module.exports = (env, argv) => {
     new HtmlWebpackPlugin({ template: "./src/index.html" }),
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(mode),
+    }),
+    new MiniCssExtractPlugin({
+      filename: "css/[name].bundle.css",
+      chunkFilename: "css/[name].bundle.css",
     }),
   ];
 
@@ -68,12 +73,15 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.css$/,
-          use: ["style-loader", "css-loader", "postcss-loader"],
+          use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         },
       ],
     },
     resolve: {
       extensions: [".js", ".jsx", ".json"],
+      alias: {
+        "highlight.js": path.resolve(__dirname, "node_modules/highlight.js"),
+      },
     },
     mode,
     devtool: isDevelopment ? "eval-source-map" : false,

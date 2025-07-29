@@ -2,4 +2,5 @@ node_modules/
 .env
 server/public/*.html
 server/public/js
+server/public/css
 .vercel
