@@ -12,7 +12,7 @@ module.exports = (env, argv) => {
   const isDevelopment = mode === "development";
 
   const plugins = [
-    new HtmlWebpackPlugin({ template: "./src/index.html" }),
+    new HtmlWebpackPlugin({ template: "./src/index.html", inject: "body" }),
     new webpack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(mode),
     }),
