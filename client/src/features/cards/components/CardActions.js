@@ -35,9 +35,16 @@ export const ActionCard = ({
   const [searchParams] = useSearchParams();
   const view = searchParams.get("view");
 
+  let toName = to;
+  // is relative route
+  if (to.includes("..")) {
+    const [, routeName] = to.split("/");
+    toName = routeName;
+  }
+
   const isActive =
-    location.pathname.includes(to) ||
-    (to.startsWith("edit") && to.includes(view));
+    location.pathname.includes(toName) ||
+    (toName?.startsWith("edit") && toName?.includes(view));
 
   const handleClick = () => {
     if (scrollToTop) {
@@ -300,16 +307,18 @@ export const ActionCard = ({
   );
 };
 
-const CardActions = ({ layout = "vertical", showInfo = false }) => {
+const CardActions = ({
+  layout = "vertical",
+  showInfo = false,
+  isRelative = false,
+}) => {
   const containerClasses = {
     vertical: "grid grid-cols-1 sm:grid-cols-2 gap-8",
     horizontal: "grid grid-cols-1 lg:grid-cols-2 gap-6",
   };
 
-  // Remove stats since we don't have real data yet - cleaner look!
-  const getActionStats = () => {
-    return null; // No stats for now - keeps it clean and focused
-  };
+  // Create relative paths that navigate to sibling routes
+  const getActionPath = (action) => (isRelative ? action : `../${action}`);
 
   return (
     <div className="space-y-8">
@@ -333,7 +342,7 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
 
       <div className={containerClasses[layout]}>
         <ActionCard
-          to="review"
+          to={getActionPath("review")}
           icon={BookOpenIcon}
           solidIcon={BookOpenSolid}
           title="Review"
@@ -343,12 +352,11 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           hoverGradient="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30"
           color="blue"
           layout={layout}
-          stats={getActionStats()}
           scrollToTop={true}
         />
 
         <ActionCard
-          to="quiz"
+          to={getActionPath("quiz")}
           icon={AcademicCapIcon}
           solidIcon={AcademicCapSolid}
           title="Quiz"
@@ -358,12 +366,11 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           hoverGradient="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/30"
           color="purple"
           layout={layout}
-          stats={getActionStats()}
           scrollToTop={true}
         />
 
         <ActionCard
-          to="edit?view=flashcards"
+          to={getActionPath("edit?view=flashcards")}
           icon={PencilSquareIcon}
           solidIcon={PencilSquareSolid}
           title="Edit Flashcards"
@@ -373,12 +380,11 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           hoverGradient="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/30"
           color="emerald"
           layout={layout}
-          stats={getActionStats()}
           scrollToTop={true}
         />
 
         <ActionCard
-          to="edit?view=quizzes"
+          to={getActionPath("edit?view=quizzes")}
           icon={WrenchScrewdriverIcon}
           solidIcon={WrenchScrewdriverSolid}
           title="Edit Quizzes"
@@ -388,7 +394,6 @@ const CardActions = ({ layout = "vertical", showInfo = false }) => {
           hoverGradient="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/30"
           color="amber"
           layout={layout}
-          stats={getActionStats()}
           scrollToTop={true}
         />
       </div>

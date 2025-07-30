@@ -24,7 +24,12 @@ function CategoryPage() {
     useGetAllCardsQuery();
 
   const handleCategoryClick = (category) => {
-    navigate(category);
+    // Use relative navigation - if we're already in a category, go up one level first
+    if (categoryName) {
+      navigate(`../${category}`);
+    } else {
+      navigate(category);
+    }
     // Auto-scroll to CardsList section after navigation
     setTimeout(() => {
       const cardListElement = document.querySelector("[data-cardlist]");
@@ -37,8 +42,13 @@ function CategoryPage() {
     }, 100);
   };
 
-  const handleCreateCategory = (categoryName) => {
-    navigate(categoryName);
+  const handleCreateCategory = (newCategoryName) => {
+    // Use relative navigation - if we're already in a category, go up one level first
+    if (categoryName) {
+      navigate(`../${newCategoryName}`);
+    } else {
+      navigate(newCategoryName);
+    }
     setShowCreateForm(false);
   };
 

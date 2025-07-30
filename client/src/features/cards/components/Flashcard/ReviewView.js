@@ -23,7 +23,7 @@ function Review() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const card = useSelector(selectCurrentCard);
-  const { review = [] } = card;
+  const { review = [] } = card ?? {};
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [slideDirection, setSlideDirection] = useState("");
@@ -35,10 +35,12 @@ function Review() {
 
   const filteredReview = useMemo(() => {
     if (!searchTerm) return review;
-    return review.filter(
-      (item) =>
-        item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.answer.toLowerCase().includes(searchTerm.toLowerCase())
+    return (
+      review?.filter(
+        (item) =>
+          item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.answer.toLowerCase().includes(searchTerm.toLowerCase())
+      ) ?? []
     );
   }, [review, searchTerm]);
 
@@ -180,7 +182,7 @@ function Review() {
     }
   };
 
-  if (review.length === 0) {
+  if (!review || review?.length === 0) {
     return (
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 shadow-2xl">
         {/* Background decorative elements */}
@@ -210,7 +212,7 @@ function Review() {
 
   const currentFlashcard = filteredReview[currentIndex];
   const progressPercentage =
-    filteredReview.length > 0
+    filteredReview?.length > 0
       ? ((currentIndex + 1) / filteredReview.length) * 100
       : 0;
 
