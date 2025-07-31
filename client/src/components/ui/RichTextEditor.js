@@ -2,14 +2,12 @@ import React, { useImperativeHandle, forwardRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import "highlight.js/styles/atom-one-dark.css";
 import { FontSize, TextStyle } from "@tiptap/extension-text-style";
 
 import { MenuBar } from "./RichTextEditor/MenuBar";
 import {
   CustomKeyboardShortcuts,
   CustomCodeBlock,
-  lowlight,
   InlineCode,
 } from "./RichTextEditor/extensions";
 
@@ -24,9 +22,7 @@ const RichTextEditor = forwardRef(
         TextStyle,
         FontSize,
         InlineCode,
-        CustomCodeBlock.configure({
-          lowlight,
-        }),
+        CustomCodeBlock,
         CustomKeyboardShortcuts,
       ],
       content: initialContent || "",

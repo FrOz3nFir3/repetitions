@@ -7,6 +7,7 @@ import {
   CodeBracketSquareIcon,
   CodeBracketIcon,
 } from "@heroicons/react/24/solid";
+import LanguageSelector from "./LanguageSelector";
 
 const ToolbarButton = ({
   editor,
@@ -122,6 +123,12 @@ export const MenuBar = ({ editor }) => {
     const text = editor.state.doc.textBetween(from, to, "\n");
 
     if (text) {
+      // TODO: causes text to be on one line Preserve line breaks and basic formatting when converting to code block
+      // const formattedText = text
+      //   .split("\n")
+      //   .map((line) => line.replace(/\t/g, "  ")) // Convert tabs to 2 spaces
+      //   .join("\n");
+
       editor
         .chain()
         .focus()
@@ -133,7 +140,6 @@ export const MenuBar = ({ editor }) => {
         .run();
     } else {
       editor.chain().focus().toggleCodeBlock().run();
-      n;
     }
   };
 
@@ -228,9 +234,22 @@ export const MenuBar = ({ editor }) => {
     },
   ];
 
+  const getCurrentCodeBlockLanguage = () => {
+    if (!editor.isActive("codeBlock")) return null;
+
+    const { $from } = editor.state.selection;
+    for (let d = $from.depth; d > 0; d--) {
+      const node = $from.node(d);
+      if (node.type.name === "codeBlock") {
+        return node.attrs.language || "plaintext";
+      }
+    }
+    return "plaintext";
+  };
+
   return (
     <>
-      <div className="border-b border-gray-300 dark:border-gray-600 p-2 flex flex-wrap gap-2">
+      <div className="border-b border-gray-300 dark:border-gray-600 p-2 flex flex-wrap gap-2 items-center">
         {buttons.map((button) => (
           <ToolbarButton
             editor={editor}
@@ -250,6 +269,18 @@ export const MenuBar = ({ editor }) => {
             {button.icon}
           </ToolbarButton>
         ))}
+
+        {editor.isActive("codeBlock") && (
+          <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-300 dark:border-gray-600">
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium hidden sm:inline">
+              Language:
+            </span>
+            <LanguageSelector
+              editor={editor}
+              currentLanguage={getCurrentCodeBlockLanguage()}
+            />
+          </div>
+        )}
       </div>
     </>
   );

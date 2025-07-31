@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import hljs from "highlight.js";
+import hljs from "highlight.js/lib/common";
 import "highlight.js/styles/atom-one-dark.css";
 
 const HtmlRenderer = ({ htmlContent, className = "" }) => {
@@ -7,8 +7,25 @@ const HtmlRenderer = ({ htmlContent, className = "" }) => {
 
   useEffect(() => {
     if (contentRef.current) {
-      contentRef.current.querySelectorAll("pre code").forEach((block) => {
-        hljs.highlightElement(block);
+      contentRef.current.querySelectorAll("pre code").forEach(async (block) => {
+        let language = block.parentElement.dataset.language ?? "plaintext";
+        // lowlight has this in common while hightlight doesn't
+        if (language === "arduino") {
+          const arduino = await import(
+            "highlight.js/lib/languages/arduino"
+          ).then((_) => _.default);
+          hljs.registerLanguage(language, arduino);
+        }
+
+        // TODO: add this functionality later to support more languages
+        // const languageFunc = await import(
+        //   `highlight.js/lib/languages/${language}`
+        // ).then((v) => v.default);
+
+        const result = hljs.highlight(block.innerText, {
+          language,
+        });
+        block.innerHTML = result.value;
       });
     }
   }, [htmlContent]);
