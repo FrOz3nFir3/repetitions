@@ -5,6 +5,7 @@ const {
   getQuizAnswer,
   getAuthorOfCard,
   getQuizById,
+  findExistingCard,
 } = require("../../models/cards/cards.model");
 const { getTextFromHTML, sanitizeHTML } = require("../../utils/dom");
 
@@ -179,6 +180,53 @@ async function httpPatchUpdateCard(req, res) {
     }
   }
   // --- End Validation ---
+
+  // Check for duplicate cards when updating main fields
+  const isUpdatingMainFields =
+    otherBody["main-topic"] !== undefined ||
+    otherBody["sub-topic"] !== undefined ||
+    otherBody.category !== undefined;
+
+  if (isUpdatingMainFields) {
+    try {
+      // Get the current card to compare with
+      const currentCard = await getCardById(otherBody._id);
+      if (!currentCard) {
+        return res.status(404).json({ error: "Card not found" });
+      }
+
+      // Use current values if not being updated
+      const finalMainTopic =
+        otherBody["main-topic"] !== undefined
+          ? otherBody["main-topic"]
+          : currentCard["main-topic"];
+      const finalSubTopic =
+        otherBody["sub-topic"] !== undefined
+          ? otherBody["sub-topic"]
+          : currentCard["sub-topic"];
+      const finalCategory =
+        otherBody.category !== undefined
+          ? otherBody.category
+          : currentCard.category;
+
+      // Check if this combination would create a duplicate (excluding the current card)
+      const existingCard = await findExistingCard(
+        finalMainTopic,
+        finalSubTopic,
+        finalCategory
+      );
+      if (existingCard && existingCard._id.toString() !== otherBody._id) {
+        return res.status(409).json({
+          error: `A card with the same Main Topic "${finalMainTopic}", Sub Topic "${finalSubTopic}", and Category "${finalCategory}" already exists. Please use different values to avoid confusion.`,
+        });
+      }
+    } catch (error) {
+      console.log("Error checking for duplicates:", error);
+      return res
+        .status(500)
+        .json({ error: "Error validating card uniqueness" });
+    }
+  }
 
   try {
     const updatedCard = await updateCard({

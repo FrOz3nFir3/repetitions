@@ -72,12 +72,12 @@ const LogItem = ({ log }) => {
         <div className="animate-pulse flex-shrink-0 w-3 h-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full mt-2 shadow-lg"></div>
 
         <div className="flex-grow min-w-0">
-          <p className="font-medium text-gray-800 dark:text-gray-200 mb-3 line-clamp-2">
+          <p className="font-medium text-gray-800 dark:text-gray-200 mb-3 break-word line-clamp-3">
             {summary}
           </p>
 
           {/* User Information */}
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <svg
               className="h-4 w-4 text-blue-500 dark:text-blue-400"
               fill="none"
@@ -91,11 +91,11 @@ const LogItem = ({ log }) => {
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300  break-all line-clamp-2 ">
               {user ? user.name : "System"}
             </span>
             {user && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md">
+              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md break-all line-clamp-2">
                 {user.email}
               </span>
             )}

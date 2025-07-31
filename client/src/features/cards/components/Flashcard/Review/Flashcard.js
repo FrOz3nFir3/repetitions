@@ -41,7 +41,10 @@ const Flashcard = ({
           {/* Front Side - Question */}
           <div
             className="absolute w-full h-full max-h-130 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 rounded-3xl shadow-2xl text-white border-4 border-blue-300/40 flex flex-col"
-            style={{ backfaceVisibility: "hidden" }}
+            style={{
+              backfaceVisibility: "hidden",
+              pointerEvents: isFlipped ? "none" : "auto",
+            }}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 pb-2 flex-shrink-0">
@@ -84,6 +87,7 @@ const Flashcard = ({
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
+              pointerEvents: isFlipped ? "auto" : "none",
             }}
           >
             {/* Header */}

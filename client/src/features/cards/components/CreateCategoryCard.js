@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { PlusIcon, FolderPlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
+// re using backend function or can create in frontend that would be redundant
+import { normalizeCategory } from "../../../../../server/src/utils/textNormalization";
 
 const CreateCategoryCard = ({ onCreate, onCancel }) => {
   const [newCategory, setNewCategory] = useState("");
@@ -7,7 +9,7 @@ const CreateCategoryCard = ({ onCreate, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newCategory.trim()) {
-      onCreate(newCategory.trim());
+      onCreate(normalizeCategory(newCategory));
       setNewCategory("");
     }
   };

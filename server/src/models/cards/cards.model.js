@@ -1,4 +1,10 @@
 const { getTextFromHTML } = require("../../utils/dom");
+const {
+  normalizeWhitespace,
+  normalizeTextForComparison,
+  normalizeCategory,
+  escapeRegex,
+} = require("../../utils/textNormalization");
 const Card = require("./cards.mongo");
 
 const mongoose = require("mongoose");
@@ -11,9 +17,35 @@ async function getAllCards() {
   return Card.distinct("category");
 }
 
+async function findExistingCard(mainTopic, subTopic, category) {
+  const normalizedCategory = normalizeCategory(category);
+
+  // Normalize all fields for comparison
+  const normalizedMainTopic = normalizeTextForComparison(mainTopic);
+  const normalizedSubTopic = normalizeTextForComparison(subTopic);
+
+  return Card.findOne({
+    "main-topic": {
+      $regex: new RegExp(`^${escapeRegex(normalizedMainTopic)}$`, "i"),
+    },
+    "sub-topic": {
+      $regex: new RegExp(`^${escapeRegex(normalizedSubTopic)}$`, "i"),
+    },
+    category: normalizedCategory,
+  });
+}
+
 async function createNewCard(card, userId) {
-  const newCard = new Card({
+  // Normalize fields before saving
+  const normalizedCard = {
     ...card,
+    "main-topic": normalizeWhitespace(card["main-topic"]),
+    "sub-topic": normalizeWhitespace(card["sub-topic"]),
+    category: normalizeCategory(card.category),
+  };
+
+  const newCard = new Card({
+    ...normalizedCard,
     author: userId,
     logs: [{ eventType: "created", user: userId, summary: "Card created" }],
   });
@@ -304,7 +336,7 @@ async function updateCard(details) {
           oldValue: oldFlashcardText,
           newValue: newFlashcardText,
           quizId,
-          cardId: oldQuiz.flashcardId?.toString() || null, // Storing the ID to revert to
+          cardId: oldQuiz.flashcardId?.toString() || null,
         });
         changedFields.push("flashcard association");
       }
@@ -466,7 +498,7 @@ async function updateCard(details) {
     const reviewIndex = card.review.findIndex(
       (r) => r._id.toString() === cardId
     );
-    if (reviewIndex === -1) return card; // Exit if flashcard not found
+    if (reviewIndex === -1) return card;
 
     const reviewPath = `review.${reviewIndex}`;
     const oldReview = card.review[reviewIndex];
@@ -537,30 +569,42 @@ async function updateCard(details) {
     } = otherDetails;
     const changedFields = [];
 
-    if (category !== undefined && card.category !== category) {
-      updateQuery.$set = { ...updateQuery.$set, category };
+    const normalizedCategory = category && normalizeCategory(category);
+    if (category !== undefined && card.category !== normalizedCategory) {
+      // Normalize category when updating
+      updateQuery.$set = { ...updateQuery.$set, category: normalizedCategory };
       changes.push({
         field: "Category",
         oldValue: card.category || "",
-        newValue: category,
+        newValue: normalizedCategory,
       });
       changedFields.push("Category");
     }
-    if (mainTopic !== undefined && card["main-topic"] !== mainTopic) {
-      updateQuery.$set = { ...updateQuery.$set, "main-topic": mainTopic };
+
+    const normalizedMainTopic = mainTopic && normalizeWhitespace(mainTopic);
+    if (mainTopic !== undefined && card["main-topic"] !== normalizedMainTopic) {
+      updateQuery.$set = {
+        ...updateQuery.$set,
+        "main-topic": normalizedMainTopic,
+      };
       changes.push({
         field: "Main Topic",
         oldValue: card["main-topic"] || "",
-        newValue: mainTopic,
+        newValue: normalizedMainTopic,
       });
       changedFields.push("Main Topic");
     }
-    if (subTopic !== undefined && card["sub-topic"] !== subTopic) {
-      updateQuery.$set = { ...updateQuery.$set, "sub-topic": subTopic };
+
+    const normalizedSubTopic = subTopic && normalizeWhitespace(subTopic);
+    if (subTopic !== undefined && card["sub-topic"] !== normalizedSubTopic) {
+      updateQuery.$set = {
+        ...updateQuery.$set,
+        "sub-topic": normalizedSubTopic,
+      };
       changes.push({
         field: "Sub Topic",
         oldValue: card["sub-topic"] || "",
-        newValue: subTopic,
+        newValue: normalizedSubTopic,
       });
       changedFields.push("Sub Topic");
     }
@@ -697,6 +741,7 @@ async function getQuizById(cardId, quizId) {
 module.exports = {
   cardsByCategory,
   createNewCard,
+  findExistingCard,
   getAllCards,
   getCardById,
   getCardsByIds,
