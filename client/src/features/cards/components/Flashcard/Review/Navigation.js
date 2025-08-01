@@ -13,6 +13,7 @@ const Navigation = ({
   currentIndex,
   filteredReviewLength,
   progressPercentage,
+  showEditIcon = true,
 }) => {
   const params = useParams();
   const navigate = useNavigate();
@@ -39,25 +40,27 @@ const Navigation = ({
               </p>
             </div>
           </div>
-          <button
-            className="cursor-pointer group p-3 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-lg hover:shadow-xl transition-all duration-200"
-            onClick={handleEdit}
-          >
-            <PencilSquareIcon className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
-          </button>
+          {showEditIcon && (
+            <button
+              className="cursor-pointer group p-3 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-700 shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={handleEdit}
+            >
+              <PencilSquareIcon className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handlePrev}
-            disabled={filteredReviewLength === 0}
+            disabled={currentIndex <= 0}
             className="cursor-pointer group p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
             onClick={handleNext}
-            disabled={filteredReviewLength === 0}
+            disabled={currentIndex >= filteredReviewLength - 1}
             className="cursor-pointer group p-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             <ChevronRightIcon className="h-5 w-5" />
