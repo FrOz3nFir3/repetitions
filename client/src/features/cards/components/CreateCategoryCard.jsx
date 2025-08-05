@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { PlusIcon, FolderPlusIcon, XMarkIcon } from "@heroicons/react/24/solid";
-// re using backend function or can create in frontend that would be redundant
-import { normalizeCategory } from "../../../../../server/src/utils/textNormalization";
+import { normalizeCategory } from "../../../utils/textNormalization";
 
 const CreateCategoryCard = ({ onCreate, onCancel }) => {
   const [newCategory, setNewCategory] = useState("");

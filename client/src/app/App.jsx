@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
-import Header from "../components/layout/Header/Header";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LandingPageSkeleton from "../components/ui/skeletons/LandingPageSkeleton";
+
+import Header from "../components/layout/Header/Header";
 
 // Lazy-loaded route wrappers
 const LandingPageRoute = lazy(() =>

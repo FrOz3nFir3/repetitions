@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import ThemeToggler from "./ThemeToggler";
 import ProfileMenuSkeleton from "./ProfileMenuSkeleton";
+import RepetitionsLogo from "../../svg/RepetitionsLogo";
 
 const ProfileMenu = React.lazy(() => import("./ProfileMenu"));
 const MobileMenu = React.lazy(() => import("./MobileMenu"));
@@ -86,11 +87,7 @@ function Header() {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
               <div className="relative">
-                <img
-                  className="h-10 w-auto group-hover:scale-105 transition-transform duration-300"
-                  src="/images/logo.png"
-                  alt="Repetitions Logo"
-                />
+                <RepetitionsLogo />
               </div>
               <span className="ml-3 text-xl font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-purple-900 dark:from-white dark:via-indigo-100 dark:to-purple-100 bg-clip-text text-transparent group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
                 Repetitions

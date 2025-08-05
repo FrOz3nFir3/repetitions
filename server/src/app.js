@@ -30,8 +30,15 @@ if (!runningInProduction) {
   );
 }
 
-app.use(compression());
+app.use(
+  compression({
+    // best compression 9
+    level: 9,
+  })
+);
+
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // cookie parser (sending jwt tokens)
