@@ -1,12 +1,15 @@
-const compression = require("compression");
-const apiRouter = require("./routes/api.router");
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
+import compression from "compression";
+import apiRouter from "./routes/api.router.js";
+import express from "express";
+import path from "node:path";
+import cors from "cors";
 const app = express();
-const cookieParser = require("cookie-parser");
-const { accessLimiter } = require("./middleware/rateLimiter.middleware");
-require("dotenv").config({ path: "../" });
+import cookieParser from "cookie-parser";
+import { accessLimiter } from "./middleware/rateLimiter.middleware.js";
+import dotenv from "dotenv";
+dotenv.config({ path: "../.env" });
+
+const __dirname = import.meta.dirname;
 const cookieSecret = process.env.COOKIE_SECRET;
 
 // redirecting to https
@@ -53,4 +56,4 @@ app.get("/*allRoutes", accessLimiter, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
-module.exports = app;
+export default app;

@@ -1,27 +1,30 @@
-const mongoose = require('mongoose');
+import { Schema, model } from "mongoose";
 
-const changeSchema = new mongoose.Schema({
-  field: { type: String, required: true },
-  oldValue: { type: mongoose.Schema.Types.Mixed },
-  newValue: { type: mongoose.Schema.Types.Mixed },
-  cardId: { type: String },
-  quizId: { type: String },
-  optionId: { type: String },
-}, { _id: false });
+const changeSchema = new Schema(
+  {
+    field: { type: String, required: true },
+    oldValue: { type: Schema.Types.Mixed },
+    newValue: { type: Schema.Types.Mixed },
+    cardId: { type: String },
+    quizId: { type: String },
+    optionId: { type: String },
+  },
+  { _id: false }
+);
 
-const logEntrySchema = new mongoose.mongoose.Schema({
+const logEntrySchema = new Schema({
   eventType: {
     type: String,
     required: true,
-    enum: ['created', 'updated', 'deleted'],
+    enum: ["created", "updated", "deleted"],
   },
   timestamp: {
     type: Date,
     default: Date.now,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: Schema.Types.ObjectId,
+    ref: "User",
   },
   summary: {
     type: String,
@@ -30,59 +33,62 @@ const logEntrySchema = new mongoose.mongoose.Schema({
   changes: [changeSchema],
 });
 
-const optionSchema = new mongoose.Schema({
+const optionSchema = new Schema({
   value: { type: String, required: true },
 });
 
-const quizSchema = new mongoose.Schema({
+const quizSchema = new Schema({
   quizQuestion: { type: String, required: true },
   quizAnswer: { type: String, required: true },
   options: { type: [optionSchema], default: [] },
   minimumOptions: { type: Number, default: 2 },
-  flashcardId: { type: mongoose.Schema.Types.ObjectId, required: false },
+  flashcardId: { type: Schema.Types.ObjectId, required: false },
 });
 
-const reviewSchema = new mongoose.Schema({
+const reviewSchema = new Schema({
   question: { type: String, required: true },
   answer: { type: String, required: true },
 });
 
-const cardsSchema = new mongoose.Schema({
-  "main-topic": {
-    type: String,
-    required: true,
+const cardsSchema = new Schema(
+  {
+    "main-topic": {
+      type: String,
+      required: true,
+    },
+    "sub-topic": {
+      type: String,
+      required: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    review: {
+      type: [reviewSchema],
+      default: [],
+    },
+    quizzes: {
+      type: [quizSchema],
+      default: [],
+    },
+    description: {
+      type: String,
+      default: "",
+    },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    lastUpdatedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    logs: [logEntrySchema],
   },
-  "sub-topic": {
-    type: String,
-    required: true,
-  },
-  "category": {
-    type: String,
-    required: true,
-  },
-  "review":{
-    type:[reviewSchema],
-    default:[]
-  },
-  "quizzes":{
-    type:[quizSchema],
-    default:[]
-  },
-  "description":{
-    type:String,
-    default:""
-  },
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  lastUpdatedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  logs: [logEntrySchema],
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 // Connects planetSchema with the "planets" collection
-module.exports = mongoose.model('Card', cardsSchema);
+export default model("Card", cardsSchema);

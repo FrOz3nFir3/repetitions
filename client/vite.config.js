@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { analyzer } from "vite-bundle-analyzer";
+import compression from "compression";
 
 // TODO: check this out later
 // import { bundleStats } from "rollup-plugin-bundle-stats";
@@ -14,8 +15,6 @@ export default defineConfig(() => {
       name: "dev-compression",
       configureServer(server) {
         console.log("🔧 Configuring compression middleware...");
-
-        const compression = require("compression");
 
         server.middlewares.use(
           compression({

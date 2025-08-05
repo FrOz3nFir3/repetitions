@@ -1,27 +1,27 @@
-const Users = require("./users.mongo");
-const mongoose = require("mongoose");
+import Users from "../users/users.mongo.js";
+import mongoose from "mongoose";
 
-async function findUserByEmail(email, projection = {}) {
+export async function findUserByEmail(email, projection = {}) {
   return Users.findOne({ email: { $eq: email } }, projection);
 }
 
-async function findUserByGoogleId(googleId, projection = {}) {
+export async function findUserByGoogleId(googleId, projection = {}) {
   return Users.findOne({ googleId: { $eq: googleId } }, projection);
 }
 
-async function getUserById(userId, projection = {}) {
+export async function getUserById(userId, projection = {}) {
   if (userId === "null" || userId === "undefined") {
     return null;
   }
   return Users.findOne({ _id: { $eq: userId } }, projection);
 }
 
-async function createNewUser(user) {
+export async function createNewUser(user) {
   const newUser = new Users(user);
   return newUser.save();
 }
 
-async function getUserProgress(userId) {
+export async function getUserProgress(userId) {
   if (
     !userId ||
     userId === "null" ||
@@ -45,13 +45,13 @@ async function getUserProgress(userId) {
   ]).exec();
 }
 
-async function updateUser(userId, userDetails) {
+export async function updateUser(userId, userDetails) {
   return Users.findOneAndUpdate({ _id: { $eq: userId } }, userDetails, {
     new: true,
   });
 }
 
-async function updateUserDetails(userId, details) {
+export async function updateUserDetails(userId, details) {
   const { card_id, quiz_id, correct, isFirstQuestion, isLastQuestion } =
     details;
   const options = { new: true, upsert: true };
@@ -129,13 +129,3 @@ async function updateUserDetails(userId, details) {
     );
   }
 }
-
-module.exports = {
-  findUserByEmail,
-  findUserByGoogleId,
-  createNewUser,
-  getUserProgress,
-  updateUserDetails,
-  getUserById,
-  updateUser,
-};

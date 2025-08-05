@@ -1,23 +1,22 @@
-const { getTextFromHTML } = require("../../utils/dom");
-const {
+import { getTextFromHTML } from "../../utils/dom.js";
+import {
   normalizeWhitespace,
   normalizeTextForComparison,
   normalizeCategory,
   escapeRegex,
-} = require("../../utils/textNormalization");
-const Card = require("./cards.mongo");
+} from "../../utils/textNormalization.js";
+import Card from "./cards.mongo.js";
+import { Types } from "mongoose";
 
-const mongoose = require("mongoose");
-
-async function cardsByCategory(category) {
+export async function cardsByCategory(category) {
   return Card.find({ category: { $eq: category } });
 }
 
-async function getAllCards() {
+export async function getAllCards() {
   return Card.distinct("category");
 }
 
-async function findExistingCard(mainTopic, subTopic, category) {
+export async function findExistingCard(mainTopic, subTopic, category) {
   const normalizedCategory = normalizeCategory(category);
 
   // Normalize all fields for comparison
@@ -35,7 +34,7 @@ async function findExistingCard(mainTopic, subTopic, category) {
   });
 }
 
-async function createNewCard(card, userId) {
+export async function createNewCard(card, userId) {
   // Normalize fields before saving
   const normalizedCard = {
     ...card,
@@ -52,9 +51,9 @@ async function createNewCard(card, userId) {
   return newCard.save();
 }
 
-async function getCardById(id) {
-  if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  const cardId = new mongoose.Types.ObjectId(id);
+export async function getCardById(id) {
+  if (!Types.ObjectId.isValid(id)) return null;
+  const cardId = new Types.ObjectId(id);
 
   const result = await Card.aggregate([
     { $match: { _id: cardId } },
@@ -184,7 +183,7 @@ async function getCardById(id) {
   return card;
 }
 
-async function getCardsByIds(ids) {
+export async function getCardsByIds(ids) {
   if (!ids || ids.length === 0 || !Array.isArray(ids)) return [];
   return Card.find(
     { _id: { $in: ids } },
@@ -197,7 +196,7 @@ async function getCardsByIds(ids) {
   );
 }
 
-async function updateCard(details) {
+export async function updateCard(details) {
   const {
     _id,
     cardId,
@@ -307,9 +306,7 @@ async function updateCard(details) {
     } else {
       const changedFields = [];
       if (cardId !== undefined && oldQuiz.flashcardId?.toString() !== cardId) {
-        const newFlashcardId = cardId
-          ? new mongoose.Types.ObjectId(cardId)
-          : null;
+        const newFlashcardId = cardId ? new Types.ObjectId(cardId) : null;
         updateQuery.$set = {
           ...updateQuery.$set,
           [`${quizPath}.flashcardId`]: newFlashcardId,
@@ -387,9 +384,7 @@ async function updateCard(details) {
       if (newOptions !== undefined) {
         const oldOptions = [...oldQuiz.options];
         const newOptionsData = newOptions.map((opt, index) => ({
-          _id: oldOptions[index]
-            ? oldOptions[index]._id
-            : new mongoose.Types.ObjectId(),
+          _id: oldOptions[index] ? oldOptions[index]._id : new Types.ObjectId(),
           value: opt,
         }));
 
@@ -645,10 +640,9 @@ async function updateCard(details) {
   return card;
 }
 
-async function getCardLogs(cardId, page = 1, limit = 10) {
-  if (!mongoose.Types.ObjectId.isValid(cardId))
-    return { logs: [], hasMore: false };
-  const id = new mongoose.Types.ObjectId(cardId);
+export async function getCardLogs(cardId, page = 1, limit = 10) {
+  if (!Types.ObjectId.isValid(cardId)) return { logs: [], hasMore: false };
+  const id = new Types.ObjectId(cardId);
   const skip = (page - 1) * limit;
 
   const result = await Card.aggregate([
@@ -718,7 +712,7 @@ async function getCardLogs(cardId, page = 1, limit = 10) {
   return data;
 }
 
-async function getQuizAnswer(cardId, quizId) {
+export async function getQuizAnswer(cardId, quizId) {
   const card = await Card.findOne({ _id: { $eq: cardId } });
   if (!card) return null;
 
@@ -726,28 +720,14 @@ async function getQuizAnswer(cardId, quizId) {
   return quiz ? quiz.quizAnswer : null;
 }
 
-async function getAuthorOfCard(cardId) {
+export async function getAuthorOfCard(cardId) {
   const card = await Card.findOne({ _id: { $eq: cardId } }, "author").lean();
   return card ? card.author : null;
 }
 
-async function getQuizById(cardId, quizId) {
+export async function getQuizById(cardId, quizId) {
   const card = await Card.findOne({ _id: { $eq: cardId } }).lean();
   if (!card) return null;
 
   return card.quizzes.find((q) => q._id.toString() === quizId);
 }
-
-module.exports = {
-  cardsByCategory,
-  createNewCard,
-  findExistingCard,
-  getAllCards,
-  getCardById,
-  getCardsByIds,
-  updateCard,
-  getCardLogs,
-  getQuizAnswer,
-  getAuthorOfCard,
-  getQuizById,
-};

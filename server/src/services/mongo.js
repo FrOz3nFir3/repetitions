@@ -1,9 +1,10 @@
-const mongoose = require("mongoose");
-const dns = require("node:dns/promises");
+import mongoose from "mongoose";
+import { setServers } from "node:dns/promises";
 // used to solve the mongodb connection issue with DNS
-dns.setServers(["1.1.1.1"]);
+setServers(["1.1.1.1"]);
 
-require("dotenv").config({ path: "../.env" });
+import dotenv from "dotenv";
+dotenv.config({ path: "../.env" });
 
 // Update below to match your own MongoDB connection string.
 const MONGO_URI = process.env.MONGO_URI;
@@ -16,15 +17,10 @@ mongoose.connection.on("error", (err) => {
   console.error(err);
 });
 
-async function mongoConnect() {
+export async function mongoConnect() {
   await mongoose.connect(MONGO_URI);
 }
 
-async function mongoDisconnect() {
+export async function mongoDisconnect() {
   await mongoose.disconnect();
 }
-
-module.exports = {
-  mongoConnect,
-  mongoDisconnect,
-};

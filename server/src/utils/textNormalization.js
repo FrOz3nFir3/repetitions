@@ -1,11 +1,11 @@
-function normalizeWhitespace(text) {
+export function normalizeWhitespace(text) {
   // Only normalize whitespace, preserve case:
   // 1. Trim leading/trailing spaces
   // 2. Replace multiple spaces with single space
   return text.trim().replace(/\s+/g, " ");
 }
 
-function normalizeTextForComparison(text) {
+export function normalizeTextForComparison(text) {
   // Normalize whitespace and case for comparison only:
   // 1. Trim leading/trailing spaces
   // 2. Replace multiple spaces with single space
@@ -13,7 +13,7 @@ function normalizeTextForComparison(text) {
   return text.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-function normalizeCategory(category) {
+export function normalizeCategory(category) {
   // Convert to title case: "programming" -> "Programming", "react hooks" -> "React Hooks"
   return category
     .trim()
@@ -24,14 +24,7 @@ function normalizeCategory(category) {
     .join(" ");
 }
 
-function escapeRegex(string) {
+export function escapeRegex(string) {
   // Escape special regex characters
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-
-module.exports = {
-  normalizeWhitespace,
-  normalizeTextForComparison,
-  normalizeCategory,
-  escapeRegex,
-};

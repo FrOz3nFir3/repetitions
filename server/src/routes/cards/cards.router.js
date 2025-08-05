@@ -1,12 +1,12 @@
-const express = require("express");
-const cardsRouter = express.Router();
-const {
+import { Router } from "express";
+const cardsRouter = Router();
+import {
   httpGetCardsByCategory,
   httpPostCreateNewCard,
   httpGetAllCards,
-} = require("./cards.controller");
-const { requireAuthentication } = require("../../middleware/auth.middleware");
-const { apiLimiter } = require("../../middleware/rateLimiter.middleware");
+} from "./cards.controller.js";
+import { requireAuthentication } from "../../middleware/auth.middleware.js";
+import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
 
 // Apply the API rate limiter to all routes in this router
 cardsRouter.use(apiLimiter);
@@ -15,4 +15,4 @@ cardsRouter.get("/all", httpGetAllCards);
 cardsRouter.get("/:category", httpGetCardsByCategory);
 cardsRouter.post("/", requireAuthentication, httpPostCreateNewCard);
 
-module.exports = cardsRouter;
+export default cardsRouter;

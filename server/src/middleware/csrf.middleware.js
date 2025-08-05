@@ -1,6 +1,6 @@
 // implemented from https://web.dev/articles/fetch-metadata
 
-function csrfProtectionMiddleware(req, res, next) {
+export function csrfProtectionMiddleware(req, res, next) {
   const secFetchSite = req.headers["sec-fetch-site"];
   const secFetchMode = req.headers["sec-fetch-mode"];
   const secFetchDest = req.headers["sec-fetch-dest"];
@@ -38,7 +38,3 @@ function csrfProtectionMiddleware(req, res, next) {
     error: "Forbidden: Cross-site request blocked.",
   });
 }
-
-module.exports = {
-  csrfProtectionMiddleware,
-};

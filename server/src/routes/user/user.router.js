@@ -1,4 +1,4 @@
-const {
+import {
   httpPostAuthDetails,
   httpCreateNewUser,
   httpLoginUser,
@@ -9,15 +9,15 @@ const {
   httpGetUserProgress,
   httpUpdateUserProgress,
   httpRefreshToken,
-} = require("./user.controller");
-const { requireAuthentication } = require("../../middleware/auth.middleware");
-const {
+} from "./user.controller.js";
+import { requireAuthentication } from "../../middleware/auth.middleware.js";
+import {
   authLimiter,
   apiLimiter,
-} = require("../../middleware/rateLimiter.middleware");
+} from "../../middleware/rateLimiter.middleware.js";
 
-const express = require("express");
-const userRouter = express.Router();
+import { Router } from "express";
+const userRouter = Router();
 
 // Apply the API limiter to the authenticated user details endpoint
 userRouter.post(
@@ -62,4 +62,4 @@ userRouter.patch(
   httpUpdateUserProgress
 );
 
-module.exports = userRouter;
+export default userRouter;

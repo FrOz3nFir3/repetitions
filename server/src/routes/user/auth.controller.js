@@ -1,5 +1,6 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config({ path: "../.env" });
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config({ path: "../.env" });
 
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
@@ -12,23 +13,24 @@ const ACCESS_TOKEN_EXPIRY_JWT = `${ACCESS_TOKEN_EXPIRY_HOURS}h`;
 const REFRESH_TOKEN_EXPIRY_JWT = `${REFRESH_TOKEN_EXPIRY_DAYS}d`;
 
 // Cookie `maxAge` in milliseconds
-const ACCESS_TOKEN_MAX_AGE_MS = ACCESS_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000;
+export const ACCESS_TOKEN_MAX_AGE_MS =
+  ACCESS_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000;
 const REFRESH_TOKEN_MAX_AGE_MS =
   REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
 
-function createAccessToken(id) {
+export function createAccessToken(id) {
   return jwt.sign({ id }, ACCESS_TOKEN_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRY_JWT,
   });
 }
 
-function createRefreshToken(id) {
+export function createRefreshToken(id) {
   return jwt.sign({ id }, REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRY_JWT,
   });
 }
 
-function verifyRefreshToken(token = "") {
+export function verifyRefreshToken(token = "") {
   try {
     return jwt.verify(token, REFRESH_TOKEN_SECRET);
   } catch (e) {
@@ -36,7 +38,7 @@ function verifyRefreshToken(token = "") {
   }
 }
 
-function setTokens(res, user) {
+export function setTokens(res, user) {
   const accessToken = createAccessToken(user._id);
   const refreshToken = createRefreshToken(user._id);
 
@@ -60,10 +62,3 @@ function setTokens(res, user) {
     path: "/api/user",
   });
 }
-
-module.exports = {
-  createAccessToken,
-  setTokens,
-  verifyRefreshToken,
-  ACCESS_TOKEN_MAX_AGE_MS,
-};

@@ -1,16 +1,16 @@
-const {
+import {
   cardsByCategory,
   createNewCard,
   findExistingCard,
   getAllCards,
   getCardsByIds,
-} = require("../../models/cards/cards.model");
-const {
+} from "../../models/cards/cards.model.js";
+import {
   normalizeWhitespace,
   normalizeCategory,
-} = require("../../utils/textNormalization");
+} from "../../utils/textNormalization.js";
 
-async function httpGetCardsByCategory(req, res) {
+export async function httpGetCardsByCategory(req, res) {
   const { category } = req.params;
   try {
     const cards = await cardsByCategory(category);
@@ -20,7 +20,7 @@ async function httpGetCardsByCategory(req, res) {
     res.status(500).json({ error });
   }
 }
-async function httpPostCardsByIds(req, res) {
+export async function httpPostCardsByIds(req, res) {
   var { cardsIds } = req.body;
   try {
     const cards = await getCardsByIds(cardsIds);
@@ -30,7 +30,7 @@ async function httpPostCardsByIds(req, res) {
     return res.status(400).json({ error: error.message });
   }
 }
-async function httpPostCreateNewCard(req, res) {
+export async function httpPostCreateNewCard(req, res) {
   const token = req.token;
 
   if (token === null) {
@@ -77,7 +77,7 @@ async function httpPostCreateNewCard(req, res) {
   }
 }
 
-async function httpGetAllCards(req, res) {
+export async function httpGetAllCards(req, res) {
   try {
     const allCards = await getAllCards();
     res.json(allCards);
@@ -85,9 +85,3 @@ async function httpGetAllCards(req, res) {
     res.status(500).json({ error });
   }
 }
-module.exports = {
-  httpGetCardsByCategory,
-  httpPostCreateNewCard,
-  httpGetAllCards,
-  httpPostCardsByIds,
-};

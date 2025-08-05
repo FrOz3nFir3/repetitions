@@ -1,10 +1,10 @@
-const createDOMPurify = require("dompurify");
-const { JSDOM } = require("jsdom");
+import createDOMPurify from "dompurify";
+import { JSDOM } from "jsdom";
 
 const window = new JSDOM("").window;
 const DOMPurify = createDOMPurify(window);
 
-function getTextFromHTML(html) {
+export function getTextFromHTML(html) {
   if (!html) return "";
   const sanitizedHtml = DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true },
@@ -14,12 +14,6 @@ function getTextFromHTML(html) {
   return sanitizedHtml.textContent || sanitizedHtml.innerText || "";
 }
 
-function sanitizeHTML(html) {
+export function sanitizeHTML(html) {
   return DOMPurify.sanitize(html);
 }
-
-module.exports = {
-  getTextFromHTML,
-  sanitizeHTML,
-  // other utility functions can be added here
-};

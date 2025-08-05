@@ -1,12 +1,12 @@
-const express = require("express");
-const cardRouter = express.Router();
-const {
+import { Router } from "express";
+const cardRouter = Router();
+import {
   httpPatchUpdateCard,
   httpGetCardById,
   httpGetCardLogs,
-} = require("./card.controller");
-const { requireAuthentication } = require("../../middleware/auth.middleware");
-const { apiLimiter } = require("../../middleware/rateLimiter.middleware");
+} from "./card.controller.js";
+import { requireAuthentication } from "../../middleware/auth.middleware.js";
+import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
 
 cardRouter.use(apiLimiter);
 
@@ -14,4 +14,4 @@ cardRouter.get("/:id", httpGetCardById);
 cardRouter.get("/:id/logs", httpGetCardLogs);
 cardRouter.patch("/", requireAuthentication, httpPatchUpdateCard);
 
-module.exports = cardRouter;
+export default cardRouter;

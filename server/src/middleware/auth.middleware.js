@@ -1,8 +1,9 @@
-const jwt = require("jsonwebtoken");
-require("dotenv").config({ path: "../.env" });
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config({ path: "../.env" });
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
-function requireAuthentication(req, res, next) {
+export function requireAuthentication(req, res, next) {
   const token = req.signedCookies.jwt_access;
   // cookie can also be deleted
   if (!token) {
@@ -21,5 +22,3 @@ function requireAuthentication(req, res, next) {
     next();
   });
 }
-
-module.exports = { requireAuthentication };

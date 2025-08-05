@@ -1,5 +1,5 @@
-const app = require("./app");
-const { mongoConnect } = require("./services/mongo");
+import app from "./app.js";
+import { mongoConnect } from "./services/mongo.js";
 const PORT = process.env.PORT || 80;
 
 async function startServer() {

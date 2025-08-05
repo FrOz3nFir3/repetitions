@@ -1,4 +1,4 @@
-const {
+import {
   createNewUser,
   findUserByEmail,
   findUserByGoogleId,
@@ -6,20 +6,20 @@ const {
   updateUser,
   getUserProgress,
   getUserById,
-} = require("../../models/users/users.model");
-const { getCardsByIds } = require("../../models/cards/cards.model");
-const {
+} from "../../models/users/users.model.js";
+import { getCardsByIds } from "../../models/cards/cards.model.js";
+import {
   setTokens,
   verifyRefreshToken,
   createAccessToken,
   ACCESS_TOKEN_MAX_AGE_MS,
-} = require("./auth.controller");
-const bcrypt = require("bcrypt");
-const EmailValidator = require("email-deep-validator");
+} from "./auth.controller.js";
+import { compare } from "bcrypt";
+import EmailValidator from "email-deep-validator";
 const emailValidator = new EmailValidator({ timeout: 10000 });
-const { userDetailsProjection } = require("../../utils/constants");
+import { userDetailsProjection } from "../../utils/constants.js";
 
-async function httpRefreshToken(req, res) {
+export async function httpRefreshToken(req, res) {
   const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
 
   if (!refreshTokenFromCookie) {
@@ -45,7 +45,7 @@ async function httpRefreshToken(req, res) {
   res.status(200).json({ ok: true });
 }
 
-async function httpPostAuthDetails(req, res) {
+export async function httpPostAuthDetails(req, res) {
   const token = req.token; // From requireAuthentication middleware
 
   const user = await getUserById(token.id, userDetailsProjection);
@@ -55,7 +55,7 @@ async function httpPostAuthDetails(req, res) {
   res.status(200).json({ user });
 }
 
-async function httpCreateNewUser(req, res) {
+export async function httpCreateNewUser(req, res) {
   const newUser = req.body;
   try {
     if (!newUser.name || typeof newUser.name !== "string") {
@@ -105,7 +105,7 @@ async function httpCreateNewUser(req, res) {
   }
 }
 
-async function httpUpdateUser(req, res) {
+export async function httpUpdateUser(req, res) {
   try {
     const { id } = req.token;
     const { name, email, googleId } = req.body;
@@ -158,7 +158,7 @@ async function httpUpdateUser(req, res) {
   }
 }
 
-async function httpUpdateUserProgress(req, res) {
+export async function httpUpdateUserProgress(req, res) {
   const { id } = req.token;
 
   try {
@@ -170,7 +170,7 @@ async function httpUpdateUserProgress(req, res) {
   }
 }
 
-async function httpLoginUser(req, res) {
+export async function httpLoginUser(req, res) {
   const { email, password } = req.body;
   try {
     const user = await findUserByEmail(email, {
@@ -184,7 +184,7 @@ async function httpLoginUser(req, res) {
       return res.status(401).json({ error: "you have logged in with google" });
     }
 
-    const isCorrect = await bcrypt.compare(password, user.password);
+    const isCorrect = await compare(password, user.password);
     if (isCorrect == false) {
       return res.status(401).json({ error: "password does not match" });
     }
@@ -198,7 +198,7 @@ async function httpLoginUser(req, res) {
   }
 }
 
-async function httpLoginGoogleUser(req, res) {
+export async function httpLoginGoogleUser(req, res) {
   const { email, name, googleId } = req.body;
   try {
     if (!email) {
@@ -223,7 +223,7 @@ async function httpLoginGoogleUser(req, res) {
   }
 }
 
-async function httpLogoutUser(req, res) {
+export async function httpLogoutUser(req, res) {
   const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
   if (!refreshTokenFromCookie) {
     return res.sendStatus(204); // No content
@@ -233,7 +233,7 @@ async function httpLogoutUser(req, res) {
   return res.status(200).json({ ok: true });
 }
 
-async function httpGetUserProgress(req, res) {
+export async function httpGetUserProgress(req, res) {
   const { id: userId } = req.token;
 
   try {
@@ -251,7 +251,7 @@ async function httpGetUserProgress(req, res) {
   }
 }
 
-async function httpGetDetailedReport(req, res) {
+export async function httpGetDetailedReport(req, res) {
   const { card_id } = req.params;
   const { id: userId } = req.token;
 
@@ -276,16 +276,3 @@ async function httpGetDetailedReport(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
-
-module.exports = {
-  httpCreateNewUser,
-  httpLoginUser,
-  httpLoginGoogleUser,
-  httpLogoutUser,
-  httpPostAuthDetails,
-  httpUpdateUser,
-  httpGetUserProgress,
-  httpGetDetailedReport,
-  httpUpdateUserProgress,
-  httpRefreshToken,
-};

@@ -1,4 +1,4 @@
-const {
+import {
   getCardById,
   updateCard,
   getCardLogs,
@@ -6,10 +6,10 @@ const {
   getAuthorOfCard,
   getQuizById,
   findExistingCard,
-} = require("../../models/cards/cards.model");
-const { getTextFromHTML, sanitizeHTML } = require("../../utils/dom");
+} from "../../models/cards/cards.model.js";
+import { getTextFromHTML, sanitizeHTML } from "../../utils/dom.js";
 
-async function httpGetCardById(req, res) {
+export async function httpGetCardById(req, res) {
   const { id } = req.params;
   try {
     const card = await getCardById(id);
@@ -25,7 +25,7 @@ async function httpGetCardById(req, res) {
   }
 }
 
-async function httpGetCardLogs(req, res) {
+export async function httpGetCardLogs(req, res) {
   const { id } = req.params;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
@@ -39,7 +39,7 @@ async function httpGetCardLogs(req, res) {
   }
 }
 
-async function httpPatchUpdateCard(req, res) {
+export async function httpPatchUpdateCard(req, res) {
   const token = req.token;
 
   if (token == null) {
@@ -248,9 +248,3 @@ async function httpPatchUpdateCard(req, res) {
     return res.status(400).json({ error: error.message });
   }
 }
-
-module.exports = {
-  httpGetCardById,
-  httpPatchUpdateCard,
-  httpGetCardLogs,
-};
