@@ -1,6 +1,7 @@
-server/public/**
+server/public/**/*.js
+server/public/**/*.css
+server/public/**/*.map
 client/dist/**
 client/build/**
+client/src/**
 *.js.map
-node_modules/**
-.git/**
