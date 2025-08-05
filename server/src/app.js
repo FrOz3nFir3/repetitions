@@ -6,6 +6,7 @@ import cors from "cors";
 const app = express();
 import cookieParser from "cookie-parser";
 import { accessLimiter } from "./middleware/rateLimiter.middleware.js";
+import { healthCheck } from "./middleware/health.middleware.js";
 import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 
@@ -46,6 +47,9 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 // cookie parser (sending jwt tokens)
 app.use(cookieParser(cookieSecret));
+
+// Health check middleware
+app.use(healthCheck);
 
 // all main api routes here
 app.use("/api", apiRouter);

@@ -11,7 +11,7 @@
     "client": "npm run build --prefix client",
     "server-dev": "npm run watch --prefix server",
     "client-dev": "npm run watch --prefix client",
-    "dev": "set PORT=3000&& npm-run-all -p client-dev server-dev",
+    "dev": "set PORT=3000&& npm-run-all -p server-dev client-dev",
     "deploy": "npm run client && npm run server"
   },
   "keywords": [],
