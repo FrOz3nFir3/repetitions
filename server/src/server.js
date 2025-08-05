@@ -4,15 +4,23 @@ import { initMongoDB } from "./services/mongo.js";
 const PORT = process.env.PORT || 80;
 
 async function startServer() {
-  // Initialize MongoDB first (blocking)
-  await initMongoDB();
+  const localStartTime = Date.now();
 
-  // For local development, start the HTTP server
-  const server = app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
-  });
+  try {
+    // Initialize MongoDB first (blocking)
+    await initMongoDB();
 
-  return server;
+    // Start HTTP server
+    const server = app.listen(PORT, () => {
+      console.log(`Server listening on http://localhost:${PORT}`);
+      console.log(`Server Started in ${Date.now() - localStartTime}ms`);
+    });
+
+    return server;
+  } catch (err) {
+    console.error(`Server startup failed:`, err.message);
+    throw err;
+  }
 }
 
 startServer();
