@@ -1,12 +1,12 @@
 import compression from "compression";
 import apiRouter from "./routes/api.router.js";
+import healthRouter from "./routes/health.router.js";
 import express from "express";
 import path from "node:path";
 import cors from "cors";
 const app = express();
 import cookieParser from "cookie-parser";
 import { accessLimiter } from "./middleware/rateLimiter.middleware.js";
-import { healthCheck } from "./middleware/health.middleware.js";
 import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 
@@ -48,8 +48,8 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 // cookie parser (sending jwt tokens)
 app.use(cookieParser(cookieSecret));
 
-// Health check middleware
-app.use(healthCheck);
+// Health check route (fast response, no middleware)
+app.use("/health", healthRouter);
 
 // all main api routes here
 app.use("/api", apiRouter);
