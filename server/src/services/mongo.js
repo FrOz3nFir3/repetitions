@@ -11,21 +11,16 @@ setServers(["1.1.1.1", "8.8.8.8"]);
 // Update below to match your own MongoDB connection string.
 const MONGO_URI = process.env.MONGO_URI;
 
-// Global connection promise to cache across serverless invocations
-let cachedConnection = null;
-
 mongoose.connection.once("open", () => {
   console.log("MongoDB connection ready!");
 });
 
 mongoose.connection.on("error", (err) => {
   console.error("MongoDB error:", err);
-  cachedConnection = null; // Reset cache on error
 });
 
 mongoose.connection.on("disconnected", () => {
   console.warn("MongoDB disconnected");
-  cachedConnection = null; // Reset cache on disconnect
 });
 
 mongoose.connection.on("reconnected", () => {
@@ -33,34 +28,20 @@ mongoose.connection.on("reconnected", () => {
 });
 
 export async function mongoConnect() {
-  // Return cached connection if available and connected
-  if (cachedConnection && mongoose.connection.readyState === 1) {
-    console.log("Using cached MongoDB connection");
-    return cachedConnection;
+  // Skip if already connected
+  if (mongoose.connection.readyState === 1) {
+    console.log("MongoDB already connected");
+    return;
   }
 
-  // If connection exists but not ready, wait for it
-  if (cachedConnection) {
-    console.log("Waiting for existing connection attempt...");
-    return cachedConnection;
-  }
-
-  // Create new connection promise and cache it
-  console.log("Creating new MongoDB connection...");
-  cachedConnection = mongoose
-    .connect(MONGO_URI, {
-      maxPoolSize: 10, // Pool of connections for concurrent users
-      minPoolSize: 2, // Keep minimum connections alive
-      bufferCommands: false, // Don't buffer commands if not connected
-      compressors: "zlib",
-      maxIdleTimeMS: 600000, // 10 minutes
-    })
-    .catch((err) => {
-      cachedConnection = null; // Reset cache on connection failure
-      throw err;
-    });
-
-  return cachedConnection;
+  // Connect to MongoDB
+  await mongoose.connect(MONGO_URI, {
+    maxPoolSize: 10, // Pool of connections for concurrent users
+    minPoolSize: 3, // Keep minimum connections alive
+    compressors: "zlib",
+    bufferCommands: false, // Don't buffer commands if not connected
+    maxIdleTimeMS: 600000, // 10 minutes
+  });
 }
 
 export async function mongoDisconnect() {
@@ -105,7 +86,6 @@ export const getConnectionStatus = () => {
 // Force reconnection (useful for testing or recovery)
 export const forceReconnect = async () => {
   console.log("Forcing MongoDB reconnection...");
-  cachedConnection = null;
   await mongoDisconnect();
   return await initMongoDB();
 };
