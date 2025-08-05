@@ -1,7 +1,2 @@
-server/public/**/*.js
-server/public/**/*.css
-server/public/**/*.map
-client/dist/**
-client/build/**
-client/src/**
-*.js.map
+server/public/assets/*.js
+server/public/assets/*.css
