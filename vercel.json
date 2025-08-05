@@ -19,5 +19,10 @@
       "dest": "server/src/server.js"
     }
   ],
+  "functions": {
+    "server/public/**": {
+      "excludeFiles": "**"
+    }
+  },
   "buildCommand": "npm run install-deploy"
 }

@@ -1,0 +1,6 @@
+server/public/**
+client/dist/**
+client/build/**
+*.js.map
+node_modules/**
+.git/**
