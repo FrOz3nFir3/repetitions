@@ -11,18 +11,14 @@ import {
   ArrowsRightLeftIcon,
   BookOpenIcon,
   InformationCircleIcon,
-  TrophyIcon,
-  SparklesIcon,
-  CheckIcon,
-  ExclamationTriangleIcon,
-  QuestionMarkCircleIcon,
-  LightBulbIcon,
 } from "@heroicons/react/24/solid";
 import SearchBar from "./Review/SearchBar";
 import Flashcard from "./Review/Flashcard";
 import Navigation from "./Review/Navigation";
 import CardGallery from "./Review/CardGallery";
 import ReviewTips from "./Review/ReviewTips";
+import ConfidenceRater from "./Review/ConfidenceRater";
+import ReviewCompletion from "./Review/ReviewCompletion";
 import { useSearchParams } from "react-router-dom";
 
 function Review() {
@@ -317,6 +313,18 @@ function Review() {
     }, 150);
   };
 
+  const restartReview = () => {
+    setShowCompletion(false);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setSlideDirection("");
+    setShowConfidenceRating(false);
+    setReviewCards([]);
+    setCompletedCards(new Set());
+    setCardFeedback({});
+    handleSetSearchParams("cardNo", "1");
+  };
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "ArrowRight") handleNext();
@@ -405,7 +413,7 @@ function Review() {
             handleSearchReset={handleSearchReset}
           />
         )}
-        {!showCompletion && (
+        {!showCompletion ? (
           <Flashcard
             currentFlashcard={currentFlashcard}
             isFlipped={isFlipped}
@@ -420,56 +428,11 @@ function Review() {
             isReviewCard={currentFlashcard?.isReview}
             showEditIcon={!currentFlashcard?.isReview}
           />
-        )}
-
-        {/* Completion Message */}
-        {showCompletion && (
-          <div className="flex justify-center mb-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-xl border border-green-200/50 dark:border-green-700/50 max-w-md text-center">
-              <div className="flex justify-center mb-4">
-                <div className="relative">
-                  <TrophyIcon className="h-16 w-16 text-yellow-500 animate-bounce" />
-                  <SparklesIcon className="h-6 w-6 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                🎉 Great Job!
-              </h3>
-
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                You've completed this review session!
-                {completedCards.size > 0 && (
-                  <span className="block mt-1 text-sm">
-                    You mastered {completedCards.size} cards
-                  </span>
-                )}
-              </p>
-
-              <div className="space-y-3">
-                <button
-                  onClick={() => {
-                    setShowCompletion(false);
-                    setCurrentIndex(0);
-                    setIsFlipped(false);
-                    setSlideDirection("");
-                    setShowConfidenceRating(false);
-                    setReviewCards([]);
-                    setCompletedCards(new Set());
-                    setCardFeedback({});
-                    handleSetSearchParams("cardNo", "1");
-                  }}
-                  className="cursor-pointer w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  Review Again
-                </button>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                  💡 Try Quiz Mode below for a different challenge!
-                </p>
-              </div>
-            </div>
-          </div>
+        ) : (
+          <ReviewCompletion
+            onRestart={restartReview}
+            completedCardsCount={completedCards.size}
+          />
         )}
 
         {/* Confidence Rating - Outside the card */}
@@ -477,100 +440,7 @@ function Review() {
           showConfidenceRating &&
           currentFlashcard &&
           !showCompletion && (
-            <div className="flex justify-center mb-6 animate-in slide-in-from-bottom-4 duration-300">
-              <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-gray-200/60 dark:border-gray-700/60 w-full max-w-4xl ">
-                {/* Header */}
-                <div className="text-center mb-6">
-                  <div className="inline-flex flex-wrap justify-center items-center gap-3 mb-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                      <LightBulbIcon className="w-4 h-4 text-white" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                      Rate Your Understanding
-                    </h3>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    How confident are you with this flashcard?
-                  </p>
-                </div>
-
-                {/* Rating Buttons */}
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                  {/* Perfect Understanding */}
-                  <button
-                    onClick={() => handleConfidenceRating("mastered")}
-                    className="shrink-0 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 hover:from-emerald-600 hover:via-green-600 hover:to-teal-700 text-white p-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
-                  >
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex flex-col sm:flex-row items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <CheckIcon className="w-6 h-6" />
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <div className="text-base font-semibold">Perfect!</div>
-                        <div className="text-xs opacity-90">
-                          I knew this well
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* Partial Understanding */}
-                  <button
-                    onClick={() => handleConfidenceRating("partial")}
-                    className="shrink-0 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-600 hover:from-amber-600 hover:via-orange-600 hover:to-yellow-700 text-white p-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
-                  >
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex flex-col sm:flex-row items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <ExclamationTriangleIcon className="w-6 h-6" />
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <div className="text-base font-semibold">Close</div>
-                        <div className="text-xs opacity-90">Almost got it</div>
-                      </div>
-                    </div>
-                    <div className="absolute top-2 right-2 ">
-                      <div className="bg-white/30 text-xs px-2 py-1 rounded-full text-white font-medium shadow-sm">
-                        Review
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* Poor Understanding */}
-                  <button
-                    onClick={() => handleConfidenceRating("struggling")}
-                    className="cursor-pointer group relative overflow-hidden bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 hover:from-red-600 hover:via-rose-600 hover:to-pink-700 text-white p-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
-                  >
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="relative flex flex-col sm:flex-row items-center gap-3">
-                      <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                        <QuestionMarkCircleIcon className="w-6 h-6" />
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <div className="text-base font-semibold">Difficult</div>
-                        <div className="text-xs opacity-90">
-                          Need more practice
-                        </div>
-                      </div>
-                    </div>
-                    <div className="absolute top-2 right-2">
-                      <div className="bg-white/30 text-xs px-2 py-1 rounded-full text-white font-medium shadow-sm">
-                        Review
-                      </div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Footer Info */}
-                <div className="mt-6 text-center">
-                  <div className="inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100/50 dark:bg-gray-700/30 px-3 py-2 rounded-full">
-                    <InformationCircleIcon className="w-4 h-4" />
-                    <span>Cards marked for review will appear again later</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ConfidenceRater onRate={handleConfidenceRating} />
           )}
 
         {!!filteredReview.length && !showCompletion && (

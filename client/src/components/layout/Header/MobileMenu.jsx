@@ -1,39 +1,17 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
 import {
-  UserCircleIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
   UserIcon,
-  RocketLaunchIcon,
   HomeIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/outline";
-import { usePostLogoutUserMutation } from "../../../api/apiSlice";
-import { useDispatch } from "react-redux";
-import { initialUser } from "../../../features/authentication/state/authSlice";
+import useLogout from "../../../hooks/useLogout";
+import UserInfo from "./UserInfo";
 
 const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
-  const [logoutUser] = usePostLogoutUserMutation();
-  const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser().unwrap();
-      const gapi = import("gapi-script").then((module) => module.gapi);
-      if (gapi.auth2) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.disconnect();
-        }
-      }
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      dispatch(initialUser({ user: null }));
-      setIsOpen(false);
-    }
-  };
+  const handleLogout = useLogout();
 
   const getNavIcon = (name) => {
     switch (name) {
@@ -91,21 +69,8 @@ const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
           {user ? (
             <>
               {/* User Info */}
-              <div className="flex items-center space-x-3 px-4 py-3 mb-3 bg-gradient-to-r from-gray-50 to-indigo-50 dark:from-gray-800/50 dark:to-indigo-900/20 rounded-xl">
-                <div className="relative">
-                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <UserIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white dark:border-gray-900"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    Signed in as
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                    {user.email}
-                  </p>
-                </div>
+              <div className="px-4 py-3 mb-3 bg-gradient-to-r from-gray-50 to-indigo-50 dark:from-gray-800/50 dark:to-indigo-900/20 rounded-xl">
+                <UserInfo user={user} />
               </div>
 
               {/* User Menu Items */}
@@ -129,7 +94,7 @@ const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
                 </Link>
 
                 <button
-                  onClick={handleLogout}
+                  onClick={() => handleLogout(setIsOpen)}
                   className="cursor-pointer flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
                 >
                   <ArrowRightOnRectangleIcon className="w-5 h-5" />
@@ -143,8 +108,7 @@ const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-base hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
             >
-              <RocketLaunchIcon className="w-5 h-5" />
-              <span>Get Started</span>
+              <span>Register / Login</span>
             </Link>
           )}
         </div>

@@ -5,11 +5,9 @@ import {
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
   UserIcon,
-  RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
-import { usePostLogoutUserMutation } from "../../../api/apiSlice";
-import { useDispatch } from "react-redux";
-import { initialUser } from "../../../features/authentication/state/authSlice";
+import useLogout from "../../../hooks/useLogout";
+import UserInfo from "./UserInfo";
 
 const ProfileMenu = ({
   user,
@@ -17,26 +15,7 @@ const ProfileMenu = ({
   setIsProfileOpen,
   profileMenuRef,
 }) => {
-  const [logoutUser] = usePostLogoutUserMutation();
-  const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser().unwrap();
-      const gapi = import("gapi-script").then((module) => module.gapi);
-      if (gapi.auth2) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.disconnect();
-        }
-      }
-    } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      dispatch(initialUser({ user: null }));
-      setIsProfileOpen(false);
-    }
-  };
+  const handleLogout = useLogout();
 
   return (
     <div className="hidden md:block">
@@ -60,22 +39,7 @@ const ProfileMenu = ({
               <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-xl ring-1 ring-black/5 dark:ring-white/10 border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-sm">
                 {/* User Info Header */}
                 <div className="px-4 py-3 border-b border-gray-200/50 dark:border-gray-700/50">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <UserIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white dark:border-gray-800"></div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Signed in as
-                      </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
+                  <UserInfo user={user} />
                 </div>
 
                 {/* Menu Items */}
@@ -102,7 +66,7 @@ const ProfileMenu = ({
                 {/* Logout Section */}
                 <div className="border-t border-gray-200/50 dark:border-gray-700/50 py-2">
                   <button
-                    onClick={handleLogout}
+                    onClick={() => handleLogout(setIsProfileOpen)}
                     className="cursor-pointer flex items-center space-x-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
                   >
                     <ArrowRightOnRectangleIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />

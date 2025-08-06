@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { usePostAuthDetailsQuery } from "../../../api/apiSlice";
 import {
   selectCurrentUser,
@@ -8,8 +8,9 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import ThemeToggler from "./ThemeToggler";
-import ProfileMenuSkeleton from "./ProfileMenuSkeleton";
+import ProfileMenuSkeleton from "../../ui/skeletons/ProfileMenuSkeleton";
 import RepetitionsLogo from "../../svg/RepetitionsLogo";
+import DesktopNav from "./DesktopNav"; // Import the new component
 
 const ProfileMenu = React.lazy(() => import("./ProfileMenu"));
 const MobileMenu = React.lazy(() => import("./MobileMenu"));
@@ -95,32 +96,7 @@ function Header() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:block ml-10">
-              <div className="flex items-center space-x-1">
-                {navigation.map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    className={({ isActive }) =>
-                      `relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
-                        isActive
-                          ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30"
-                          : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {item.name}
-                        {isActive && (
-                          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
+            <DesktopNav navigation={navigation} />
           </div>
 
           {/* Right Section */}

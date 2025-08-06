@@ -1,5 +1,5 @@
 import React from "react";
-import NotFound from "../../../components/ui/NotFound";
+import NotFound from "../components/NotFound";
 
 const NotFoundPage = () => {
   return (

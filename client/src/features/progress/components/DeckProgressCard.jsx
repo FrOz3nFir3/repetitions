@@ -6,9 +6,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   TrophyIcon,
-  BookOpenIcon,
   TagIcon,
-  AcademicCapIcon,
   FolderIcon,
   ArrowRightIcon,
   SparklesIcon,
@@ -17,41 +15,8 @@ import {
   ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import { HashtagIcon } from "@heroicons/react/24/solid";
-
-const ProgressBar = ({ label, value, color }) => (
-  <div className="mt-4">
-    <div className="flex items-center justify-between mb-2">
-      <div className="flex items-center">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {label}
-        </span>
-      </div>
-      <span className="text-sm font-bold text-gray-900 dark:text-white">
-        {value}%
-      </span>
-    </div>
-    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 shadow-inner">
-      <div
-        className={`${color} h-3 rounded-full transition-all duration-500 ease-out shadow-sm`}
-        style={{ width: `${value}%` }}
-      >
-        <div className="h-full w-full bg-gradient-to-r from-transparent to-white/20 rounded-full"></div>
-      </div>
-    </div>
-  </div>
-);
-
-const StatBadge = ({ label, value, color, icon: Icon }) => (
-  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center border border-gray-200 dark:border-gray-600">
-    <div className="flex items-center justify-center mb-1">
-      <Icon className={`w-4 h-4 ${color} mr-1`} />
-      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-        {label}
-      </p>
-    </div>
-    <p className={`text-lg font-bold ${color}`}>{value}</p>
-  </div>
-);
+import ProgressBar from "../../../components/ui/ProgressBar";
+import StatBadge from "../../../components/ui/StatBadge";
 
 const DeckProgressCard = ({ progress, cardDetails, onViewReport }) => {
   // not valid data

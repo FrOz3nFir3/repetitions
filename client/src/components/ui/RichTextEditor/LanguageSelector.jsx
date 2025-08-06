@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDownIcon, StarIcon } from "@heroicons/react/24/solid";
-import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { SUPPORTED_LANGUAGES } from "./extensions";
 import {
   getFavoriteLanguages,
@@ -8,6 +7,7 @@ import {
   removeFromFavoriteLanguages,
   isLanguageFavorite,
 } from "../../../utils/dom";
+import LanguageOption from "./LanguageOption"; // New import
 
 const LanguageSelector = ({ editor, currentLanguage = "plaintext" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,47 +90,6 @@ const LanguageSelector = ({ editor, currentLanguage = "plaintext" }) => {
     }
   };
 
-  const renderLanguageOption = (language, isFavorite = false) => (
-    <button
-      key={language.value}
-      type="button"
-      onClick={() => handleLanguageSelect(language)}
-      className={`cursor-pointer w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-between group ${
-        language.value === currentLanguage
-          ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300"
-          : "text-gray-700 dark:text-gray-300"
-      }`}
-    >
-      <div className="flex-1 min-w-0">
-        <div className="font-medium">
-          <span className="truncate">{language.label}</span>
-        </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-          {language.value}
-        </div>
-      </div>
-      <div
-        onClick={(e) => handleToggleFavorite(language.value, e)}
-        className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex-shrink-0 cursor-pointer"
-        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleToggleFavorite(language.value, e);
-          }
-        }}
-      >
-        {isFavorite ? (
-          <StarIcon className="h-4 w-4 text-yellow-500 hover:text-yellow-600 cursor-pointer" />
-        ) : (
-          <StarOutlineIcon className="h-4 w-4 text-gray-400 hover:text-yellow-500 cursor-pointer" />
-        )}
-      </div>
-    </button>
-  );
-
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -171,9 +130,16 @@ const LanguageSelector = ({ editor, currentLanguage = "plaintext" }) => {
                     <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600">
                       Favorites
                     </div>
-                    {favoriteLanguages.map((language) =>
-                      renderLanguageOption(language, true)
-                    )}
+                    {favoriteLanguages.map((language) => (
+                      <LanguageOption
+                        key={language.value}
+                        language={language}
+                        currentLanguage={currentLanguage}
+                        isFavorite={true}
+                        onSelect={handleLanguageSelect}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
                     {nonFavoriteLanguages.length > 0 && (
                       <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
                     )}
@@ -188,9 +154,16 @@ const LanguageSelector = ({ editor, currentLanguage = "plaintext" }) => {
                         All Languages
                       </div>
                     )}
-                    {nonFavoriteLanguages.map((language) =>
-                      renderLanguageOption(language, false)
-                    )}
+                    {nonFavoriteLanguages.map((language) => (
+                      <LanguageOption
+                        key={language.value}
+                        language={language}
+                        currentLanguage={currentLanguage}
+                        isFavorite={false}
+                        onSelect={handleLanguageSelect}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
                   </>
                 )}
               </>
