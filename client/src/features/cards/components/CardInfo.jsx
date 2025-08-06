@@ -20,7 +20,7 @@ const CardInfo = ({ card }) => {
   } = card;
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6">
+    <div className="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
       {/* Header */}
       <div className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">

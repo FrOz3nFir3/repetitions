@@ -1,13 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  UserCircleIcon,
-  ChartBarIcon,
-  ArrowRightOnRectangleIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
-import useLogout from "../../../hooks/useLogout";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import UserInfo from "./UserInfo";
+import UserMenuItems from "./UserMenuItems";
 
 const ProfileMenu = ({
   user,
@@ -15,8 +10,7 @@ const ProfileMenu = ({
   setIsProfileOpen,
   profileMenuRef,
 }) => {
-  const handleLogout = useLogout();
-
+  const closeMenu = () => setIsProfileOpen(false);
   return (
     <div className="hidden md:block">
       {user ? (
@@ -43,36 +37,7 @@ const ProfileMenu = ({
                 </div>
 
                 {/* Menu Items */}
-                <div className="py-2">
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 group"
-                  >
-                    <UserIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                    <span>Your Profile</span>
-                  </Link>
-
-                  <Link
-                    to="/progress"
-                    onClick={() => setIsProfileOpen(false)}
-                    className="flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 group"
-                  >
-                    <ChartBarIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                    <span>Your Progress</span>
-                  </Link>
-                </div>
-
-                {/* Logout Section */}
-                <div className="border-t border-gray-200/50 dark:border-gray-700/50 py-2">
-                  <button
-                    onClick={() => handleLogout(setIsProfileOpen)}
-                    className="cursor-pointer flex items-center space-x-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
-                  >
-                    <ArrowRightOnRectangleIcon className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                    <span>Sign out</span>
-                  </button>
-                </div>
+                <UserMenuItems isMobile={false} closeMenu={closeMenu} />
               </div>
             </div>
           )}

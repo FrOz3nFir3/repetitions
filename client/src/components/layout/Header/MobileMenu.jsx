@@ -2,16 +2,14 @@ import React from "react";
 import { NavLink, Link } from "react-router-dom";
 import {
   ChartBarIcon,
-  ArrowRightOnRectangleIcon,
-  UserIcon,
   HomeIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/outline";
-import useLogout from "../../../hooks/useLogout";
 import UserInfo from "./UserInfo";
+import UserMenuItems from "./UserMenuItems";
 
 const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
-  const handleLogout = useLogout();
+  const closeMenu = () => setIsOpen(false);
 
   const getNavIcon = (name) => {
     switch (name) {
@@ -37,7 +35,7 @@ const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
               <NavLink
                 key={item.name}
                 to={item.href}
-                onClick={() => setIsOpen(false)}
+                onClick={closeMenu}
                 className={({ isActive }) =>
                   `flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-300 ${
                     isActive
@@ -75,37 +73,13 @@ const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
 
               {/* User Menu Items */}
               <div className="space-y-1">
-                <Link
-                  to="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-300"
-                >
-                  <UserIcon className="w-5 h-5" />
-                  <span>Your Profile</span>
-                </Link>
-
-                <Link
-                  to="/progress"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-300"
-                >
-                  <ChartBarIcon className="w-5 h-5" />
-                  <span>Your Progress</span>
-                </Link>
-
-                <button
-                  onClick={() => handleLogout(setIsOpen)}
-                  className="cursor-pointer flex items-center space-x-3 w-full px-4 py-3 rounded-xl text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
-                >
-                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                  <span>Sign out</span>
-                </button>
+                <UserMenuItems isMobile={true} closeMenu={closeMenu} />
               </div>
             </>
           ) : (
             <Link
               to="/authenticate"
-              onClick={() => setIsOpen(false)}
+              onClick={closeMenu}
               className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-base hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
             >
               <span>Register / Login</span>

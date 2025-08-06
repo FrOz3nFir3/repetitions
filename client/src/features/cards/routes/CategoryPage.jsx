@@ -4,6 +4,7 @@ import { Outlet, useParams, useNavigate } from "react-router-dom";
 import CategorySkeleton from "../../../components/ui/skeletons/CategoryPageSkeleton";
 import PreviouslyStudied from "../../progress/components/PreviouslyStudied";
 import CreateCategoryCard from "../components/CreateCategoryCard";
+import CategoryHeader from "../components/CategoryHeader";
 import Modal from "../../../components/ui/Modal";
 import CategorySearch from "../components/CategorySearch";
 import CategoryGrid from "../components/CategoryGrid";
@@ -81,15 +82,7 @@ function CategoryPage() {
       </div>
       <div className="relative z-10 container mx-auto px-4 py-8">
         <PreviouslyStudied />
-        <div className="text-center my-16">
-          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent pb-4">
-            Pick a Category
-          </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Select a category to continue your learning journey or create a new
-            one to organize your knowledge
-          </p>
-        </div>
+        <CategoryHeader />
         <div className="mb-16">
           <CategorySearch
             searchQuery={searchQuery}
