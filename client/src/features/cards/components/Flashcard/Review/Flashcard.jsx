@@ -28,7 +28,7 @@ const Flashcard = ({
     // onTouchEnd={handleTouchEnd}
   >
     <div
-      className={`w-full max-w-4xl ${getSlideClass?.()}`}
+      className={`w-full max-w-5xl ${getSlideClass?.()}`}
       style={{ perspective: "1200px" }}
     >
       {currentFlashcard ? (
