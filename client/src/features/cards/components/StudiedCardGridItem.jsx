@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ClockIcon,
   CheckBadgeIcon,
@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 const StudiedCardGridItem = ({ card }) => {
+  const navigate = useNavigate();
   const lastReviewedCardNo = card.lastReviewedCardNo ?? 0;
   const totalReviewCards = card.reviewLength ?? 0;
   const hasStarted = lastReviewedCardNo > 0;
@@ -22,6 +23,12 @@ const StudiedCardGridItem = ({ card }) => {
     : hasStarted
     ? `/card/${card._id}/review?cardNo=${lastReviewedCardNo}`
     : `/card/${card._id}/review`;
+
+  const handleQuizClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/card/${card._id}/quiz`);
+  };
 
   return (
     <Link
@@ -163,14 +170,13 @@ const StudiedCardGridItem = ({ card }) => {
                 <ArrowPathIcon className="h-4 w-4" />
                 <span>Review Again</span>
               </div>
-              <Link
-                to={`/card/${card._id}/quiz`}
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
+              <button
+                onClick={handleQuizClick}
+                className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
               >
                 <AcademicCapIcon className="h-4 w-4" />
                 <span>Take Quiz</span>
-              </Link>
+              </button>
             </>
           ) : (
             <>
@@ -178,14 +184,13 @@ const StudiedCardGridItem = ({ card }) => {
                 <PlayIcon className="h-4 w-4" />
                 <span>{hasStarted ? "Continue" : "Start Review"}</span>
               </div>
-              <Link
-                to={`/card/${card._id}/quiz`}
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
+              <button
+                onClick={handleQuizClick}
+                className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
               >
                 <AcademicCapIcon className="h-4 w-4" />
                 <span>Take Quiz</span>
-              </Link>
+              </button>
             </>
           )}
         </div>
