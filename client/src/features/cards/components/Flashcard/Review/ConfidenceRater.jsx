@@ -44,7 +44,7 @@ const ConfidenceRater = ({ onRate }) => {
           </button>
           <button
             onClick={() => onRate("partial")}
-            className="shrink-0 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-600 hover:from-amber-600 hover:via-orange-600 hover:to-yellow-700 text-white p-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
+            className="shrink-0 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-600 hover:from-amber-600 hover:via-orange-600 hover:to-yellow-700 text-white p-4 pt-8 sm:pt-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative flex flex-col sm:flex-row items-center gap-3">
@@ -64,7 +64,7 @@ const ConfidenceRater = ({ onRate }) => {
           </button>
           <button
             onClick={() => onRate("struggling")}
-            className="cursor-pointer group relative overflow-hidden bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 hover:from-red-600 hover:via-rose-600 hover:to-pink-700 text-white p-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
+            className="cursor-pointer group relative overflow-hidden bg-gradient-to-br from-red-500 via-rose-500 to-pink-600 hover:from-red-600 hover:via-rose-600 hover:to-pink-700 text-white p-4 pt-8 sm:pt-4 rounded-2xl font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex-1"
           >
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="relative flex flex-col sm:flex-row items-center gap-3">

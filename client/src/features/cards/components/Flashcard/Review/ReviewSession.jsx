@@ -1,25 +1,13 @@
 import React from "react";
-import {
-  ArrowsRightLeftIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/solid";
-
-import SearchBar from "./SearchBar";
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import Flashcard from "./Flashcard";
 import Navigation from "./Navigation";
 import CardGallery from "./CardGallery";
-import ReviewTips from "./ReviewTips";
 import ConfidenceRater from "./ConfidenceRater";
 import ReviewCompletion from "./ReviewCompletion";
 import ReviewHeader from "./ReviewHeader";
 
-const ReviewSession = ({
-  review,
-  searchTerm,
-  handleSearchChange,
-  handleSearchReset,
-  session,
-}) => {
+const ReviewSession = ({ review, session }) => {
   const {
     currentIndex,
     currentFlashcard,
@@ -59,14 +47,7 @@ const ReviewSession = ({
 
   return (
     <div className="relative z-10 p-6 sm:p-8">
-      <ReviewHeader />
-      {!showCompletion && (
-        <SearchBar
-          searchTerm={searchTerm}
-          handleSearchChange={handleSearchChange}
-          handleSearchReset={handleSearchReset}
-        />
-      )}
+      <ReviewHeader showCompletion={showCompletion} />
       {!showCompletion ? (
         <Flashcard
           currentFlashcard={currentFlashcard}
@@ -99,6 +80,7 @@ const ReviewSession = ({
             </div>
           </div>
           <Navigation
+            isFlipped={isFlipped}
             handlePrev={handlePrev}
             handleNext={handleNext}
             currentIndex={currentIndex}
@@ -107,11 +89,10 @@ const ReviewSession = ({
             showEditIcon={!currentFlashcard?.isReview}
           />
           <CardGallery
+            isFlipped={isFlipped}
             review={review}
-            filteredReview={sessionCards}
             currentFlashcard={currentFlashcard}
             handleCardSelect={handleCardSelect}
-            searchTerm={searchTerm}
           />
         </>
       )}

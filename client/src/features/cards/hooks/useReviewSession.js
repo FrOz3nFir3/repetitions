@@ -1,18 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
 import {
   useGetCardReviewProgressQuery,
   useUpdateUserReviewProgressMutation,
 } from "../../../api/apiSlice";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
+import { useSearchParams } from "react-router-dom";
 
-export const useReviewSession = (
-  initialCards,
-  filteredCards,
-  searchTerm,
-  card_id
-) => {
+export const useReviewSession = (initialCards, card_id) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -43,20 +38,7 @@ export const useReviewSession = (
     [searchParams]
   );
 
-  const searchQuery = useMemo(() => searchParams.get("search"), [searchParams]);
-
   const sessionCards = useMemo(() => {
-    if (searchTerm) {
-      return filteredCards.map((card) => ({
-        ...card,
-        originalIndex: initialCards.findIndex(
-          (c) => c.question === card.question
-        ),
-        urlCardNo:
-          initialCards.findIndex((c) => c.question === card.question) + 1,
-      }));
-    }
-
     const cardsWithOriginalIndex = initialCards.map((card, index) => ({
       ...card,
       originalIndex: index,
@@ -72,7 +54,7 @@ export const useReviewSession = (
     }));
 
     return [...cardsWithOriginalIndex, ...reviewCardsWithMeta];
-  }, [initialCards, filteredCards, searchTerm, reviewCards]);
+  }, [initialCards, reviewCards]);
 
   const currentFlashcard = sessionCards[currentIndex];
 
@@ -85,7 +67,7 @@ export const useReviewSession = (
   };
 
   useEffect(() => {
-    if (!user || searchQuery) return;
+    if (!user) return;
     // Only run initial setup once when we first get cardProgress
     if (cardProgress && card_id && !isInitialSetupComplete.current) {
       const lastReviewedCardNo = cardProgress.lastReviewedCardNo;
@@ -256,12 +238,7 @@ export const useReviewSession = (
       }
 
       const isLastCard = currentIndex === sessionCards.length - 1;
-      if (
-        direction === "next" &&
-        isLastCard &&
-        !searchTerm &&
-        !justAddedReviewCard
-      ) {
+      if (direction === "next" && isLastCard && !justAddedReviewCard) {
         setShowCompletion(true);
         return;
       }
@@ -289,7 +266,7 @@ export const useReviewSession = (
         setSlideDirection(direction === "next" ? "in-right" : "in-left");
       }, 150);
     },
-    [currentIndex, sessionCards, searchTerm]
+    [currentIndex, sessionCards]
   );
 
   const handleNext = (justAddedReviewCard = false) =>
