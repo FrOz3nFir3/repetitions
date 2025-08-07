@@ -10,6 +10,7 @@ const FlashcardBack = ({
   answerContent,
   viewOnly,
   showFeedbackIndicator,
+  isFlipped,
 }) => {
   return (
     <div
@@ -17,6 +18,7 @@ const FlashcardBack = ({
       style={{
         backfaceVisibility: "hidden",
         transform: "rotateY(180deg)",
+        pointerEvents: isFlipped ? "auto" : "none",
       }}
     >
       {/* Header */}

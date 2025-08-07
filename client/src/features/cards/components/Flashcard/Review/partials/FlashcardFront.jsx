@@ -9,6 +9,7 @@ const FlashcardFront = ({
   isQuestionEmpty,
   questionContent,
   viewOnly,
+  isFlipped,
 }) => {
   return (
     <div
@@ -19,6 +20,7 @@ const FlashcardFront = ({
       } rounded-3xl shadow-2xl text-white flex flex-col`}
       style={{
         backfaceVisibility: "hidden",
+        pointerEvents: isFlipped ? "none" : "auto",
       }}
     >
       {/* Header */}

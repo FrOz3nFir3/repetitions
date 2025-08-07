@@ -23,9 +23,7 @@ const Flashcard = ({
     getTextFromHtml(currentFlashcard.answer).trim() === "";
 
   return (
-    <div
-      className="flex items-center justify-center mb-6"
-    >
+    <div className="flex items-center justify-center mb-6">
       <div
         className={`w-full max-w-5xl ${getSlideClass?.()}`}
         style={{ perspective: "1200px" }}
@@ -46,6 +44,7 @@ const Flashcard = ({
               isQuestionEmpty={isQuestionEmpty}
               questionContent={currentFlashcard.question}
               viewOnly={viewOnly}
+              isFlipped={isFlipped}
             />
             <FlashcardBack
               isReviewCard={isReviewCard}
@@ -55,6 +54,7 @@ const Flashcard = ({
               answerContent={currentFlashcard.answer}
               viewOnly={viewOnly}
               showFeedbackIndicator={showFeedbackIndicator}
+              isFlipped={isFlipped}
             />
           </div>
         ) : (
