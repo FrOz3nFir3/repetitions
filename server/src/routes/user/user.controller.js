@@ -6,6 +6,7 @@ import {
   updateUser,
   getUserProgress,
   getUserById,
+  updateUserReviewProgress,
 } from "../../models/users/users.model.js";
 import { getCardsByIds } from "../../models/cards/cards.model.js";
 import {
@@ -122,9 +123,7 @@ export async function httpUpdateUser(req, res) {
       return res.status(400).json({ error: "Email cannot be empty" });
     }
     if (email) {
-      const { validDomain, validMailbox } = await emailValidator.verify(
-        newUser.email
-      );
+      const { validDomain, validMailbox } = await emailValidator.verify(email);
       if (validDomain == false || validMailbox == false) {
         return res.status(409).json({ error: "Invalid Email" });
       }
@@ -163,6 +162,25 @@ export async function httpUpdateUserProgress(req, res) {
 
   try {
     await updateUserDetails(id, req.body);
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpUpdateUserReviewProgress(req, res) {
+  const { id } = req.token;
+  const { card_id, lastReviewedCardNo } = req.body;
+
+  if (!card_id || lastReviewedCardNo === undefined) {
+    return res
+      .status(400)
+      .json({ error: "card_id and lastReviewedCardNo are required." });
+  }
+
+  try {
+    await updateUserReviewProgress(id, card_id, lastReviewedCardNo);
     res.status(200).json({ ok: true });
   } catch (error) {
     console.log(error);
@@ -238,16 +256,57 @@ export async function httpGetUserProgress(req, res) {
 
   try {
     const user = await getUserProgress(userId);
-    const cardsIds = user?.[0]?.studying?.map((s) => s.card_id) ?? [];
-    if (!cardsIds || cardsIds.length === 0) {
+    const userStudying =
+      user?.[0]?.studying?.map((s) => ({
+        cardId: s.card_id,
+        lastReviewedCardNo: s.lastReviewedCardNo,
+      })) ?? [];
+    if (!userStudying || userStudying.length === 0) {
       return res.status(200).json([]);
     }
 
-    const cards = await getCardsByIds(cardsIds);
-    return res.json(cards);
+    const cards = await getCardsByIds(userStudying.map((s) => s.cardId));
+
+    // map back
+    const cardsWithProgress = userStudying.map((s) => {
+      const card = cards.find((c) => c._id.toString() === s.cardId.toString());
+      return {
+        ...(card?._doc ?? {}),
+        lastReviewedCardNo: s.lastReviewedCardNo,
+      };
+    });
+
+    return res.json(cardsWithProgress);
   } catch (error) {
     console.log(error, "erro");
     res.status(500).json({ error });
+  }
+}
+
+export async function httpGetCardReviewProgress(req, res) {
+  const { card_id } = req.params;
+  const { id: userId } = req.token;
+
+  if (!card_id) {
+    return res.status(400).json({ error: "card_id is required" });
+  }
+
+  try {
+    const user = await getUserProgress(userId);
+    const cardProgress = user?.[0]?.studying?.find(
+      (s) => s.card_id && s.card_id.toString() === card_id
+    );
+
+    if (!cardProgress) {
+      return res.status(200).json({ lastReviewedCardNo: 0 });
+    }
+
+    return res.status(200).json({
+      lastReviewedCardNo: cardProgress.lastReviewedCardNo || 0,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
   }
 }
 
@@ -262,7 +321,7 @@ export async function httpGetDetailedReport(req, res) {
     }
 
     const cardProgress = user.studying.find(
-      (s) => s.card_id && s.card_id.toString() === card_id
+      (s) => s && s.card_id && s.card_id.toString() === card_id
     );
 
     if (!cardProgress) {

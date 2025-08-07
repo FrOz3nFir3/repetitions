@@ -47,6 +47,10 @@ const studyingSchema = new Schema(
       default: 0,
     },
     quizAttempts: [quizAttemptSchema],
+    lastReviewedCardNo: {
+      type: Number,
+      default: 0,
+    },
   },
   { _id: false }
 );

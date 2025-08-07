@@ -13,7 +13,12 @@ function Review() {
   const { searchTerm, handleSearchChange, handleSearchReset, filteredReview } =
     useFlashcardSearch(review);
 
-  const session = useReviewSession(review, filteredReview, searchTerm);
+  const session = useReviewSession(
+    review,
+    filteredReview,
+    searchTerm,
+    card?._id
+  );
 
   useEffect(() => {
     const handleKeyDown = (event) => {

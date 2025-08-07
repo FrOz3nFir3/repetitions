@@ -51,6 +51,37 @@ export async function updateUser(userId, userDetails) {
   });
 }
 
+export async function updateUserReviewProgress(
+  userId,
+  card_id,
+  lastReviewedCardNo
+) {
+  const user = await Users.findOne({
+    _id: { $eq: userId },
+    "studying.card_id": { $eq: card_id },
+  });
+
+  if (user) {
+    // If the card is already in the studying array, update its lastReviewedCardNo
+    return Users.findOneAndUpdate(
+      { _id: { $eq: userId }, "studying.card_id": { $eq: card_id } },
+      { $set: { "studying.$.lastReviewedCardNo": lastReviewedCardNo } },
+      { new: true }
+    );
+  } else {
+    // If the card is not in the studying array, add it
+    const newReviewProgress = {
+      card_id,
+      lastReviewedCardNo,
+    };
+    return Users.findOneAndUpdate(
+      { _id: { $eq: userId } },
+      { $push: { studying: newReviewProgress } },
+      { new: true, upsert: true }
+    );
+  }
+}
+
 export async function updateUserDetails(userId, details) {
   const { card_id, quiz_id, correct, isFirstQuestion, isLastQuestion } =
     details;

@@ -7,7 +7,9 @@ import {
   httpUpdateUser,
   httpGetDetailedReport,
   httpGetUserProgress,
+  httpGetCardReviewProgress,
   httpUpdateUserProgress,
+  httpUpdateUserReviewProgress,
   httpRefreshToken,
 } from "./user.controller.js";
 import { requireAuthentication } from "../../middleware/auth.middleware.js";
@@ -32,6 +34,13 @@ userRouter.get(
   apiLimiter,
   requireAuthentication,
   httpGetUserProgress
+);
+
+userRouter.get(
+  "/card-progress/:card_id",
+  apiLimiter,
+  requireAuthentication,
+  httpGetCardReviewProgress
 );
 
 userRouter.get(
@@ -60,6 +69,12 @@ userRouter.patch(
   apiLimiter,
   requireAuthentication,
   httpUpdateUserProgress
+);
+userRouter.patch(
+  "/review-progress",
+  apiLimiter,
+  requireAuthentication,
+  httpUpdateUserReviewProgress
 );
 
 export default userRouter;

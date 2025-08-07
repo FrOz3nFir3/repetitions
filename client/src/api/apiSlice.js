@@ -100,7 +100,14 @@ export const apiSlice = createApi({
 
     getUserProgress: builder.query({
       query: () => `/user/progress`,
-      providesTags: ["Report"],
+      providesTags: (result) => [
+        { type: "Report", id: "LIST" },
+        ...(result?.map(({ _id }) => ({ type: "Report", id: _id })) ?? []),
+      ],
+    }),
+
+    getCardReviewProgress: builder.query({
+      query: (card_id) => `/user/card-progress/${card_id}`,
     }),
 
     getDetailedReport: builder.query({
@@ -150,6 +157,41 @@ export const apiSlice = createApi({
       },
     }),
 
+    updateUserReviewProgress: builder.mutation({
+      query: (progress) => ({
+        url: "/user/review-progress",
+        method: "PATCH",
+        body: progress,
+      }),
+      invalidatesTags: (result, error) => {
+        if (!error) {
+          return [{ type: "Report", id: "LIST" }]; // Only invalidate the progress list
+        }
+        return [];
+      },
+      onQueryStarted: async (
+        { card_id, lastReviewedCardNo },
+        { dispatch, queryFulfilled }
+      ) => {
+        try {
+          await queryFulfilled;
+
+          // Manually update the card progress cache without triggering a refetch
+          dispatch(
+            apiSlice.util.updateQueryData(
+              "getCardReviewProgress",
+              card_id,
+              (draft) => {
+                draft.lastReviewedCardNo = lastReviewedCardNo;
+              }
+            )
+          );
+        } catch {
+          // Handle error if needed
+        }
+      },
+    }),
+
     postLogoutUser: builder.mutation({
       query: () => ({
         url: "/user/logout",
@@ -178,9 +220,11 @@ export const {
   usePostAuthDetailsQuery,
   usePatchUpdateUserProfileMutation,
   usePatchUpdateUserProgressMutation,
+  useUpdateUserReviewProgressMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
   useGetUserProgressQuery,
+  useGetCardReviewProgressQuery,
   useGetDetailedReportQuery,
   useGetCardLogsQuery,
 } = apiSlice;
