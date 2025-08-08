@@ -60,54 +60,159 @@ const CardGallery = ({
         />
       </div>
 
-      <div className="relative bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
-        {filteredReview.length > 0 ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handlePrev}
-              className="cursor-pointer flex-shrink-0 p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <ChevronDoubleLeftIcon className="h-4 w-4" />
-            </button>
+      <div className="relative">
+        {/* Desktop Layout - Buttons Outside */}
+        <div className="hidden sm:flex items-center gap-4">
+          {/* Left Scroll Button */}
+          <button
+            onClick={handlePrev}
+            title="Scroll cards left"
+            disabled={filteredReview.length === 0}
+            className="cursor-pointer flex-shrink-0 p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-200 group"
+          >
+            <ChevronDoubleLeftIcon className="h-4 w-4" />
+            <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              Scroll left
+            </span>
+          </button>
 
-            <div
-              ref={containerRef}
-              className="flex overflow-x-auto gap-4 px-2 py-2 flex-1 scrollbar-hide"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
-              {filteredReview.map((item) => {
-                const isSelected = item.question === currentFlashcard?.question;
+          {/* Cards Container */}
+          <div className="flex-1 bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg overflow-hidden">
+            {filteredReview.length > 0 ? (
+              <>
+                {/* Scrollable Cards Area */}
+                <div className="relative">
+                  {/* Subtle Scroll Indicators */}
+                  <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white/60 to-transparent dark:from-gray-800/60 dark:to-transparent z-10 pointer-events-none"></div>
+                  <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white/60 to-transparent dark:from-gray-800/60 dark:to-transparent z-10 pointer-events-none"></div>
 
-                const handleOnClick = () => {
-                  const originalIndex = review.findIndex(
-                    (i) => i.question === item.question
-                  );
-                  handleCardSelect(originalIndex);
-                };
+                  <div
+                    ref={containerRef}
+                    className="flex overflow-x-auto gap-4 p-6 scrollbar-hide scroll-smooth"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  >
+                    {filteredReview.map((item) => {
+                      const isSelected =
+                        item.question === currentFlashcard?.question;
 
-                return (
-                  <CardGalleryItem
-                    key={item.question}
-                    item={item}
-                    isFlipped={isFlipped}
-                    isSelected={isSelected}
-                    isFilteredOut={false}
-                    handleOnClick={handleOnClick}
-                  />
-                );
-              })}
-            </div>
+                      const handleOnClick = () => {
+                        const originalIndex = review.findIndex(
+                          (i) => i.question === item.question
+                        );
+                        handleCardSelect(originalIndex);
+                      };
 
-            <button
-              onClick={handleNext}
-              className="cursor-pointer flex-shrink-0 p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <ChevronDoubleRightIcon className="h-4 w-4" />
-            </button>
+                      return (
+                        <CardGalleryItem
+                          key={item.question}
+                          item={item}
+                          isFlipped={isFlipped}
+                          isSelected={isSelected}
+                          isFilteredOut={false}
+                          handleOnClick={handleOnClick}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Desktop Scroll Hint */}
+                <div className="px-6 pb-3">
+                  <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span>• Click cards to select</span>
+                    <span>• Scroll horizontally or use arrow buttons</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <NoSearchResults />
+            )}
           </div>
-        ) : (
-          <NoSearchResults />
-        )}
+
+          {/* Right Scroll Button */}
+          <button
+            onClick={handleNext}
+            title="Scroll cards right"
+            disabled={filteredReview.length === 0}
+            className="cursor-pointer flex-shrink-0 p-2.5 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-200 group"
+          >
+            <ChevronDoubleRightIcon className="h-4 w-4" />
+            <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              Scroll right
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile Layout - Full Width Container with Overlaid Buttons */}
+        <div className="sm:hidden">
+          <div className="relative bg-gradient-to-r from-gray-50/80 via-white/80 to-gray-50/80 dark:from-gray-900/80 dark:via-gray-800/80 dark:to-gray-900/80 backdrop-blur-sm rounded-2xl border border-gray-200/60 dark:border-gray-700/60 shadow-lg overflow-hidden">
+            {filteredReview.length > 0 ? (
+              <>
+                {/* Mobile Scroll Buttons - Overlaid */}
+                <button
+                  onClick={handlePrev}
+                  disabled={filteredReview.length === 0}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-20 disabled:cursor-not-allowed shadow-lg transition-all duration-200"
+                >
+                  <ChevronDoubleLeftIcon className="h-3.5 w-3.5" />
+                </button>
+
+                <button
+                  onClick={handleNext}
+                  disabled={filteredReview.length === 0}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200/60 dark:border-gray-700/60 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-20 disabled:cursor-not-allowed shadow-lg transition-all duration-200"
+                >
+                  <ChevronDoubleRightIcon className="h-3.5 w-3.5" />
+                </button>
+
+                {/* Scrollable Cards Area */}
+                <div className="relative">
+                  {/* Mobile Scroll Indicators - More Subtle */}
+                  <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-white/40 to-transparent dark:from-gray-800/40 dark:to-transparent z-10 pointer-events-none"></div>
+                  <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white/40 to-transparent dark:from-gray-800/40 dark:to-transparent z-10 pointer-events-none"></div>
+
+                  <div
+                    ref={containerRef}
+                    className="flex overflow-x-auto gap-3 p-4 scrollbar-hide scroll-smooth"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  >
+                    {filteredReview.map((item) => {
+                      const isSelected =
+                        item.question === currentFlashcard?.question;
+
+                      const handleOnClick = () => {
+                        const originalIndex = review.findIndex(
+                          (i) => i.question === item.question
+                        );
+                        handleCardSelect(originalIndex);
+                      };
+
+                      return (
+                        <CardGalleryItem
+                          key={item.question}
+                          item={item}
+                          isFlipped={isFlipped}
+                          isSelected={isSelected}
+                          isFilteredOut={false}
+                          handleOnClick={handleOnClick}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Mobile Scroll Hint */}
+                <div className="px-4 pb-3">
+                  <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                    • Tap cards to select • Swipe to scroll
+                  </div>
+                </div>
+              </>
+            ) : (
+              <NoSearchResults />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

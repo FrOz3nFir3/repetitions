@@ -26,11 +26,15 @@ const CardGalleryItem = ({
       ref={buttonRef}
       onClick={handleOnClick}
       disabled={isFilteredOut}
-      className={`group cursor-pointer flex-shrink-0 w-36 h-24 p-3 rounded-2xl text-left text-xs font-medium transition-all duration-300 relative overflow-hidden border-2
+      title={`Click to select: ${getTextFromHtml(item.question).substring(
+        0,
+        50
+      )}...`}
+      className={`group cursor-pointer flex-shrink-0 w-40 h-28 p-4 rounded-xl text-left text-xs font-medium transition-all duration-300 relative overflow-hidden border-2 hover:scale-[1.02] active:scale-[0.98]
               ${
                 isSelected
-                  ? "bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 text-white shadow-2xl transform scale-105 border-blue-300"
-                  : "bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 shadow-lg hover:shadow-xl border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500"
+                  ? "bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-700 text-white shadow-xl border-blue-400 ring-2 ring-blue-300/50"
+                  : "bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 shadow-md hover:shadow-lg border-gray-200/60 dark:border-gray-600/60 hover:border-indigo-300 dark:hover:border-indigo-500"
               }
               ${
                 isFilteredOut ? "opacity-30 !cursor-not-allowed" : "opacity-100"
