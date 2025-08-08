@@ -17,7 +17,7 @@ const useLogout = () => {
         }
       }
     } catch (err) {
-      console.error("Logout failed:", err);
+      // console.error("Logout failed:", err);
     } finally {
       dispatch(initialUser({ user: null }));
       if (callback && typeof callback === "function") {

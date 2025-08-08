@@ -52,7 +52,7 @@ export const useQuizSession = (card, onFinish) => {
       const data = await response.json();
       setRandomFact(data.text);
     } catch (error) {
-      console.error("Failed to fetch random fact:", error);
+      // console.error("Failed to fetch random fact:", error);
       setRandomFact("Could not load a fun fact, but you're doing great!");
     }
     setFactLoading(false);

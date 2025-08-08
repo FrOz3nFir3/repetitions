@@ -59,13 +59,16 @@ const ProfileContent = () => {
       if (error) return;
       dispatch(updateUserProfile(updatedUser));
     } catch (error) {
-      console.error("Failed to connect Google account:", error);
+      // console.error("Failed to connect Google account:", error);
     }
   };
 
   const login = useGoogleLogin({
     onSuccess: handleGoogleConnectSuccess,
-    onError: () => console.log("Google Connect Failed"),
+    onError: () => {
+      // handle this later
+      // console.log("Google Connect Failed")
+    },
   });
 
   if (isLoading) return <ProfileSkeleton />;

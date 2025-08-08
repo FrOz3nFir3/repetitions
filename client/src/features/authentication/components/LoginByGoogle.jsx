@@ -57,7 +57,8 @@ function LoginByGoogle(props) {
     loginWithGoogle({ name, email, googleId });
   }
   function unsuccessfulLogin() {
-    console.log("Login Failed");
+    // handle this later
+    // console.log("Login Failed");
   }
 }
 

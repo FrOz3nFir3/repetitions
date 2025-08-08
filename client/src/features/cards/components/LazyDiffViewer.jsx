@@ -10,7 +10,7 @@ const LazyDiffViewer = (props) => {
         setDiffViewer(() => module.default);
       })
       .catch((err) => {
-        console.error("Failed to load ReactDiffViewer:", err);
+        // console.error("Failed to load ReactDiffViewer:", err);
       });
   }, []);
 
