@@ -7,8 +7,9 @@ import {
 } from "@heroicons/react/24/outline";
 import UserInfo from "./UserInfo";
 import UserMenuItems from "./UserMenuItems";
+import MobileMenuSkeleton from "../../ui/skeletons/MobileMenuSkeleton";
 
-const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
+const MobileMenu = ({ isOpen, navigation, user, setIsOpen, isLoading }) => {
   const closeMenu = () => setIsOpen(false);
 
   const getNavIcon = (name) => {
@@ -76,6 +77,8 @@ const MobileMenu = ({ isOpen, navigation, user, setIsOpen }) => {
                 <UserMenuItems isMobile={true} closeMenu={closeMenu} />
               </div>
             </>
+          ) : isLoading ? (
+            <MobileMenuSkeleton />
           ) : (
             <Link
               to="/authenticate"

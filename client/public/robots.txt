@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Disallow API routes from search indexing
+Disallow: /api/

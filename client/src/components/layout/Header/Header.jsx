@@ -88,6 +88,7 @@ function Header() {
           navigation={navigation}
           user={user}
           setIsOpen={setIsOpen}
+          isLoading={isLoading}
         />
       </Suspense>
     </nav>
