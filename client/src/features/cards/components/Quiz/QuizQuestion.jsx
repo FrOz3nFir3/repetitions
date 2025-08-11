@@ -4,7 +4,7 @@ import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 
 const QuizQuestion = ({ questionText, current }) => {
   return (
-    <div className="relative mb-8">
+    <div className="relative mb-6">
       <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl border-2 border-purple-200/50 dark:border-purple-700/50 shadow-2xl p-6 sm:p-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -16,7 +16,7 @@ const QuizQuestion = ({ questionText, current }) => {
               Question {current}
             </span>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Choose the best answer
+              Select from options below
             </p>
           </div>
         </div>

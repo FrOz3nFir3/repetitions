@@ -11,9 +11,14 @@ const FunFactToggle = ({ showFacts, onToggle }) => {
               showFacts ? "text-yellow-500" : "text-gray-400"
             }`}
           />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Show Fun Facts
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Show Fun Facts
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Get interesting facts after each answer
+            </span>
+          </div>
           <button
             onClick={onToggle}
             className={`${

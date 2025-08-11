@@ -15,11 +15,11 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect, index }) => {
   if (selectedAnswer) {
     if (isCorrectAnswer) {
       stateClasses = `bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-green-400 dark:border-green-500 text-green-800 dark:text-green-200 shadow-lg ${
-        isSelected ? "ring-4 ring-green-300 dark:ring-green-600 scale-105" : ""
+        isSelected ? "ring-4 ring-green-300 dark:ring-green-600 scale-101" : ""
       }`;
     } else if (isSelected) {
       stateClasses =
-        "bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 border-red-400 dark:border-red-500 text-red-800 dark:text-red-200 ring-4 ring-red-300 dark:ring-red-600 scale-105 shadow-lg";
+        "bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/30 dark:to-rose-900/30 border-red-400 dark:border-red-500 text-red-800 dark:text-red-200 ring-4 ring-red-300 dark:ring-red-600 scale-101 shadow-lg";
     } else {
       stateClasses =
         "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed opacity-50";

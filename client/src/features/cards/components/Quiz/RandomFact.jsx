@@ -9,18 +9,18 @@ const SkeletonLoader = () => (
   </div>
 );
 
-const RandomFact = ({ fact, loading }) => {
+const RandomFact = ({ fact, loading, shouldAutoScroll = false }) => {
   const containerRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (loading || !fact) return;
+    if (loading || !fact || !shouldAutoScroll) return;
     if (containerRef.current) {
       containerRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
     }
-  }, [fact, loading]);
+  }, [fact, loading, shouldAutoScroll]);
 
   if (!fact && !loading) return null;
 

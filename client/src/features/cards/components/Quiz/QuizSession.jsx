@@ -34,25 +34,22 @@ const QuizSession = ({ session }) => {
         current={currentQuestionIndex + 1}
       />
 
-      {selectedAnswer && showFacts && (
-        <RandomFact fact={randomFact} loading={factLoading} />
-      )}
-
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl px-4 py-2">
-          <LightBulbIcon className="h-5 w-5" />
-          <p className="text-sm font-medium">
-            Select an option to test your knowledge
-          </p>
-        </div>
-      </div>
-
       <QuizOptions
         options={shuffledOptions}
         answer={currentQuestion.quizAnswer}
         selectedAnswer={selectedAnswer}
         onSelect={handleAnswerSelect}
       />
+
+      {selectedAnswer && showFacts && (
+        <div className="mt-6">
+          <RandomFact
+            fact={randomFact}
+            loading={factLoading}
+            shouldAutoScroll={selectedAnswer?.isCorrect}
+          />
+        </div>
+      )}
 
       <FunFactToggle showFacts={showFacts} onToggle={handleRandomFactToggle} />
     </div>
