@@ -1,6 +1,5 @@
 node_modules/
 .env
-server/public/*.html
-server/public/assets
-client/src/dist
+server/public/
+client/src/dist/
 .vercel
