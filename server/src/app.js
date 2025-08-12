@@ -78,6 +78,7 @@ app.use("/api", apiRouter);
 
 // Client routes with rate limiting
 app.get("/*allRoutes", accessLimiter, (req, res) => {
+  res.set("Cache-Control", "no-store");
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
