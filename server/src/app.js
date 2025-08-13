@@ -44,9 +44,9 @@ app.use(express.json({ limit: "10mb" })); // Add limit for security
 app.use(
   express.static(path.join(__dirname, "..", "public"), {
     setHeaders: function (res, filePath) {
-      // Prevent caching of index.html
+      // cache but invalidate with server
       if (path.basename(filePath) === "index.html") {
-        res.setHeader("Cache-Control", "no-store");
+        res.setHeader("Cache-Control", "no-cache");
       }
     },
   })
@@ -87,8 +87,8 @@ app.use("/api", apiRouter);
 
 // Client routes with rate limiting
 app.get("/*allRoutes", accessLimiter, (req, res) => {
-  // prevent caching of html file.
-  res.set("Cache-Control", "no-store");
+  // cache but invalidate with server
+  res.set("Cache-Control", "no-cache");
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
