@@ -17,6 +17,11 @@ const cookieSecret = process.env.COOKIE_SECRET;
 // Basic app configuration
 const runningInProduction = process.env.NODE_ENV == "production";
 
+// Generate deployment-specific ETag for production only
+const deploymentETag = runningInProduction
+  ? `"${process.env.VERCEL_GIT_COMMIT_SHA || Date.now()}"`
+  : null;
+
 // HTTPS redirect first
 app.set("trust proxy", 1);
 app.use((req, res, next) => {
@@ -44,9 +49,10 @@ app.use(express.json({ limit: "10mb" })); // Add limit for security
 app.use(
   express.static(path.join(__dirname, "..", "public"), {
     setHeaders: function (res, filePath) {
-      // cache but invalidate with server
-      if (path.basename(filePath) === "index.html") {
-        res.setHeader("Cache-Control", "no-cache");
+      // Only modify cache headers in production
+      if (runningInProduction && path.basename(filePath) === "index.html") {
+        res.setHeader("Cache-Control", "no-cache, must-revalidate");
+        res.setHeader("ETag", deploymentETag);
       }
     },
   })
@@ -87,8 +93,11 @@ app.use("/api", apiRouter);
 
 // Client routes with rate limiting
 app.get("/*allRoutes", accessLimiter, (req, res) => {
-  // cache but invalidate with server
-  res.set("Cache-Control", "no-cache");
+  // Only modify cache headers in production
+  if (runningInProduction) {
+    res.set("Cache-Control", "no-cache, must-revalidate");
+    res.set("ETag", deploymentETag);
+  }
   res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
