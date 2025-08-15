@@ -9,6 +9,7 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import apiRouter from "./routes/api.router.js";
 import { accessLimiter } from "./middleware/rateLimiter.middleware.js";
+import helmet from "helmet";
 
 const app = express();
 const __dirname = import.meta.dirname;
@@ -21,6 +22,9 @@ const runningInProduction = process.env.NODE_ENV == "production";
 const deploymentETag = runningInProduction
   ? `"${process.env.VERCEL_GIT_COMMIT_SHA || Date.now()}"`
   : null;
+
+// helmet js for fixing common vulnerabilities
+app.use(helmet());
 
 // HTTPS redirect first
 app.set("trust proxy", 1);
