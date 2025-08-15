@@ -5,13 +5,13 @@ import {
   httpGetCardById,
   httpGetCardLogs,
 } from "./card.controller.js";
-import { requireAuthentication } from "../../middleware/auth.middleware.js";
+import { requireAuthenticationWithCSRF } from "../../middleware/auth.middleware.js";
 import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
 
 cardRouter.use(apiLimiter);
 
 cardRouter.get("/:id", httpGetCardById);
 cardRouter.get("/:id/logs", httpGetCardLogs);
-cardRouter.patch("/", requireAuthentication, httpPatchUpdateCard);
+cardRouter.patch("/", requireAuthenticationWithCSRF, httpPatchUpdateCard);
 
 export default cardRouter;

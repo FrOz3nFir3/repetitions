@@ -13,6 +13,7 @@ import {
   setTokens,
   verifyRefreshToken,
   createAccessToken,
+  createCSRFToken,
   ACCESS_TOKEN_MAX_AGE_MS,
 } from "./auth.controller.js";
 import { compare } from "bcrypt";
@@ -33,17 +34,47 @@ export async function httpRefreshToken(req, res) {
   }
 
   const newAccessToken = createAccessToken(decoded.id);
+  const csrfToken = createCSRFToken();
+
+  const isProduction = process.env.NODE_ENV === "production";
 
   res.cookie("jwt_access", newAccessToken, {
     httpOnly: true,
     signed: true,
     maxAge: ACCESS_TOKEN_MAX_AGE_MS, // 1 hour
-    secure: process.env.NODE_ENV === "production",
+    secure: isProduction,
     sameSite: "lax",
     path: "/api",
   });
 
-  res.status(200).json({ ok: true });
+  // Set new CSRF token as session cookie
+  res.cookie("csrf_token", csrfToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/api",
+  });
+
+  res.status(200).json({
+    message: "Token refreshed successfully",
+    csrfToken, // For Redux store update
+  });
+}
+
+export async function httpGetCSRFToken(req, res) {
+  const csrfToken = createCSRFToken();
+  const isProduction = process.env.NODE_ENV === "production";
+
+  res.cookie("csrf_token", csrfToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/api",
+  });
+
+  res.status(200).json({
+    csrfToken,
+  });
 }
 
 export async function httpPostAuthDetails(req, res) {
@@ -53,7 +84,23 @@ export async function httpPostAuthDetails(req, res) {
   if (!user) {
     return res.status(404).json({ user: null });
   }
-  res.status(200).json({ user });
+
+  // Generate fresh CSRF token for authenticated user
+  const csrfToken = createCSRFToken();
+  const isProduction = process.env.NODE_ENV === "production";
+
+  // Update CSRF session cookie
+  res.cookie("csrf_token", csrfToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "lax",
+    path: "/api",
+  });
+
+  res.status(200).json({
+    user,
+    csrfToken,
+  });
 }
 
 export async function httpCreateNewUser(req, res) {
@@ -97,9 +144,12 @@ export async function httpCreateNewUser(req, res) {
     }
 
     const user = await createNewUser(newUser);
-    setTokens(res, user);
+    const csrfToken = setTokens(res, user);
     const { _id, password, __v, ...userDetails } = user._doc;
-    res.status(200).json({ user: userDetails });
+    res.status(200).json({
+      user: userDetails,
+      csrfToken,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
@@ -207,10 +257,13 @@ export async function httpLoginUser(req, res) {
       return res.status(401).json({ error: "password does not match" });
     }
 
-    setTokens(res, user);
+    const csrfToken = setTokens(res, user);
 
     const { _id, password: p, ...userDetails } = user._doc;
-    return res.status(200).json({ user: userDetails });
+    return res.status(200).json({
+      user: userDetails,
+      csrfToken,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -232,9 +285,12 @@ export async function httpLoginGoogleUser(req, res) {
       user = await updateUser(user._id, { googleId, name });
     }
 
-    setTokens(res, user);
+    const csrfToken = setTokens(res, user);
     const { _id, ...userDetails } = user._doc;
-    return res.status(200).json({ user: userDetails });
+    return res.status(200).json({
+      user: userDetails,
+      csrfToken,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error });
@@ -248,6 +304,7 @@ export async function httpLogoutUser(req, res) {
   }
   res.clearCookie("jwt_access", { path: "/api" });
   res.clearCookie("jwt_refresh", { path: "/api/user" });
+  res.clearCookie("csrf_token", { path: "/api" });
   return res.status(200).json({ ok: true });
 }
 

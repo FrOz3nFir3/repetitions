@@ -11,8 +11,12 @@ import {
   httpUpdateUserProgress,
   httpUpdateUserReviewProgress,
   httpRefreshToken,
+  httpGetCSRFToken,
 } from "./user.controller.js";
-import { requireAuthentication } from "../../middleware/auth.middleware.js";
+import {
+  requireAuthentication,
+  requireAuthenticationWithCSRF,
+} from "../../middleware/auth.middleware.js";
 import {
   authLimiter,
   apiLimiter,
@@ -22,6 +26,7 @@ import { Router } from "express";
 const userRouter = Router();
 
 // Apply the API limiter to the authenticated user details endpoint
+// /authed provides CSRF token, so only requires authentication (not CSRF)
 userRouter.post(
   "/authed",
   apiLimiter,
@@ -32,21 +37,21 @@ userRouter.post(
 userRouter.get(
   "/progress",
   apiLimiter,
-  requireAuthentication,
+  requireAuthenticationWithCSRF,
   httpGetUserProgress
 );
 
 userRouter.get(
   "/card-progress/:card_id",
   apiLimiter,
-  requireAuthentication,
+  requireAuthenticationWithCSRF,
   httpGetCardReviewProgress
 );
 
 userRouter.get(
   "/report/:card_id",
   apiLimiter,
-  requireAuthentication,
+  requireAuthenticationWithCSRF,
   httpGetDetailedReport
 );
 
@@ -55,25 +60,38 @@ userRouter.post("/register", authLimiter, httpCreateNewUser);
 userRouter.post("/login", authLimiter, httpLoginUser);
 userRouter.post("/google-login", authLimiter, httpLoginGoogleUser);
 
-userRouter.post("/logout", authLimiter, httpLogoutUser);
 userRouter.post(
-  "/refresh",
-  apiLimiter,
+  "/logout",
+  authLimiter,
+  requireAuthenticationWithCSRF,
+  httpLogoutUser
+);
+userRouter.post("/refresh", apiLimiter, httpRefreshToken);
 
-  httpRefreshToken
+// Dedicated CSRF token endpoint for lightweight token refresh
+userRouter.post(
+  "/csrf-refresh",
+  apiLimiter,
+  requireAuthentication,
+  httpGetCSRFToken
 );
 
-userRouter.patch("/", apiLimiter, requireAuthentication, httpUpdateUser);
+userRouter.patch(
+  "/",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpUpdateUser
+);
 userRouter.patch(
   "/progress",
   apiLimiter,
-  requireAuthentication,
+  requireAuthenticationWithCSRF,
   httpUpdateUserProgress
 );
 userRouter.patch(
   "/review-progress",
   apiLimiter,
-  requireAuthentication,
+  requireAuthenticationWithCSRF,
   httpUpdateUserReviewProgress
 );
 

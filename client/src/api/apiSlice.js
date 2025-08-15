@@ -1,5 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { initialUser } from "../features/authentication/state/authSlice";
+import {
+  initialUser,
+  setCsrfToken,
+} from "../features/authentication/state/authSlice";
 
 const baseQuery = fetchBaseQuery({
   baseUrl:
@@ -7,13 +10,24 @@ const baseQuery = fetchBaseQuery({
       ? `http://localhost:3000/api`
       : "/api",
   credentials: "include",
+  prepareHeaders: (headers, { getState }) => {
+    const csrfToken = getState().auth.csrfToken;
+    if (csrfToken) {
+      headers.set("X-CSRF-Token", csrfToken);
+    }
+    return headers;
+  },
 });
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions);
 
+  // Handle authentication token expiry
   if (result.error && result.error.status === 401) {
-    if (result.error.data?.message === "Authentication token expired.") {
+    if (
+      result.error.data?.error === "Authentication token expired." ||
+      result.error.data?.error === "User not Logged In."
+    ) {
       const refreshResult = await baseQuery(
         { url: "/user/refresh", method: "POST" },
         api,
@@ -21,10 +35,38 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       );
 
       if (refreshResult.meta.response.ok) {
+        // Update CSRF token if provided in refresh response
+        if (refreshResult.data?.csrfToken) {
+          api.dispatch(setCsrfToken(refreshResult.data.csrfToken));
+        }
         result = await baseQuery(args, api, extraOptions);
       } else {
         // Force logout if refresh fails
-        api.dispatch(initialUser({ user: null }));
+        api.dispatch(initialUser({ user: null, csrfToken: null }));
+      }
+    }
+  }
+
+  // Handle CSRF token issues (with retry limit)
+  if (result.error && result.error.status === 403) {
+    const errorMessage = result.error.data?.error || "";
+
+    // Check if it's a CSRF-related error
+    if (errorMessage.includes("CSRF token")) {
+      // Try to get a fresh CSRF token from lightweight /csrf-refresh endpoint
+      const authResult = await baseQuery(
+        { url: "/user/csrf-refresh", method: "POST" },
+        api,
+        extraOptions
+      );
+
+      if (authResult.meta?.response?.ok && authResult.data?.csrfToken) {
+        // Update CSRF token and retry original request
+        api.dispatch(setCsrfToken(authResult.data.csrfToken));
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        // Force logout if refresh fails
+        api.dispatch(initialUser({ user: null, csrfToken: null }));
       }
     }
   }

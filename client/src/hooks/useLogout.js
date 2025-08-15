@@ -19,7 +19,7 @@ const useLogout = () => {
     } catch (err) {
       // console.error("Logout failed:", err);
     } finally {
-      dispatch(initialUser({ user: null }));
+      dispatch(initialUser({ user: null, csrfToken: null }));
       if (callback && typeof callback === "function") {
         callback(false);
       }
