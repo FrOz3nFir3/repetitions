@@ -29,8 +29,9 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "script-src": ["'self'", "https://accounts.google.com/"],
-        "frame-src": ["'self'", "https://accounts.google.com/"],
+        "script-src": ["'self'", "https://accounts.google.com"],
+        "frame-src": ["'self'", "https://accounts.google.com"],
+        "connect-src": ["'self'", "https://accounts.google.com"],
       },
     },
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
