@@ -25,6 +25,11 @@ const InfoItem = ({ icon, label, value }) => (
 const CardMetaInfo = ({ card }) => {
   const { author, createdAt, lastUpdatedBy, updatedAt } = card;
 
+  const formatUser = (user) => {
+    if (!user) return "";
+    return `${user.name} (@${user.username})`;
+  };
+
   return (
     <div className="space-y-4">
       {author && (
@@ -32,7 +37,7 @@ const CardMetaInfo = ({ card }) => {
           <InfoItem
             icon={<UserCircleIcon />}
             label="Created by"
-            value={`${author.name} <${author.email}>`}
+            value={formatUser(author)}
           />
           <InfoItem
             icon={<CalendarIcon />}
@@ -47,7 +52,7 @@ const CardMetaInfo = ({ card }) => {
           <InfoItem
             icon={<PencilIcon />}
             label="Updated by"
-            value={`${lastUpdatedBy.name} <${lastUpdatedBy.email}>`}
+            value={formatUser(lastUpdatedBy)}
           />
           <InfoItem
             icon={<ClockIcon />}

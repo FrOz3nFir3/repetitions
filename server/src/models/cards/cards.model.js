@@ -85,10 +85,10 @@ export async function getCardById(id) {
         description: 1,
         createdAt: 1,
         updatedAt: 1,
-        author: { name: "$author.name", email: "$author.email" },
+        author: { name: "$author.name", username: "$author.username" },
         lastUpdatedBy: {
           name: "$lastUpdatedBy.name",
-          email: "$lastUpdatedBy.email",
+          username: "$lastUpdatedBy.username",
         },
         logs: {
           $sortArray: { input: "$logs", sortBy: { timestamp: -1 } },
@@ -160,7 +160,7 @@ export async function getCardById(id) {
               changes: "$$log.changes",
               user: {
                 name: "$$log.user.name",
-                email: "$$log.user.email",
+                username: "$$log.user.username",
               },
             },
           },
@@ -658,7 +658,7 @@ export async function getCardLogs(cardId, page = 1, limit = 10) {
         },
       },
     },
-    { $unwind: "$logs" },
+    { $unwind: { path: "$logs", preserveNullAndEmptyArrays: true } },
     { $skip: skip },
     { $limit: limit },
     {
@@ -669,7 +669,7 @@ export async function getCardLogs(cardId, page = 1, limit = 10) {
         as: "logs.user",
       },
     },
-    { $unwind: "$logs.user" },
+    { $unwind: { path: "$logs.user", preserveNullAndEmptyArrays: true } },
     {
       $group: {
         _id: "$_id",
@@ -693,7 +693,7 @@ export async function getCardLogs(cardId, page = 1, limit = 10) {
               changes: "$$log.changes",
               user: {
                 name: "$$log.user.name",
-                email: "$$log.user.email",
+                username: "$$log.user.username",
               },
             },
           },

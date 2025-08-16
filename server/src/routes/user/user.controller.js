@@ -7,6 +7,9 @@ import {
   getUserProgress,
   getUserById,
   updateUserReviewProgress,
+  findUserByUsername,
+  findUserByEmailOrUsername,
+  generateUniqueUsername,
 } from "../../models/users/users.model.js";
 import { getCardsByIds } from "../../models/cards/cards.model.js";
 import {
@@ -106,18 +109,70 @@ export async function httpPostAuthDetails(req, res) {
 export async function httpCreateNewUser(req, res) {
   const newUser = req.body;
   try {
+    // --- Username Validation ---
+    if (!newUser.username || typeof newUser.username !== "string") {
+      return res.status(400).json({ error: "Username is required" });
+    }
+    const username = newUser.username.trim();
+    if (username.length < 3) {
+      return res
+        .status(400)
+        .json({ error: "Username must be at least 3 characters" });
+    }
+    if (username.length > 30) {
+      return res
+        .status(400)
+        .json({ error: "Username must be 30 characters or less" });
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return res.status(400).json({
+        error: "Username can only contain letters, numbers, and underscores",
+      });
+    }
+    const usernameExists = await findUserByUsername(username);
+    if (usernameExists) {
+      return res.status(409).json({ error: "Username is already taken" });
+    }
+    newUser.username = username; // Use the sanitized username
+
+    // --- Name Validation ---
     if (!newUser.name || typeof newUser.name !== "string") {
       return res.status(400).json({ error: "Name is required" });
     }
+
+    // --- Password Validation ---
     if (newUser.password != newUser.confirmPassword) {
       return res.status(409).json({ error: "Confirm Password does not match" });
     }
-    if (newUser.password.length < 5) {
+    const userPassword = newUser.password;
+    if (userPassword.length < 10) {
       return res
-        .status(409)
-        .json({ error: "Password should be minimum 5 characters" });
+        .status(400)
+        .json({ error: "Password must be at least 10 characters long" });
+    }
+    if (!/[A-Z]/.test(userPassword)) {
+      return res
+        .status(400)
+        .json({ error: "Password must contain at least one uppercase letter" });
+    }
+    if (!/[a-z]/.test(userPassword)) {
+      return res
+        .status(400)
+        .json({ error: "Password must contain at least one lowercase letter" });
+    }
+    if (!/[0-9]/.test(userPassword)) {
+      return res
+        .status(400)
+        .json({ error: "Password must contain at least one number" });
+    }
+    if (!/[!@#$%^&*]/.test(userPassword)) {
+      return res.status(400).json({
+        error:
+          "Password must contain at least one special character (!@#$%^&*)",
+      });
     }
 
+    // --- Email Validation ---
     const userExists = await findUserByEmail(
       newUser.email,
       userDetailsProjection
@@ -159,7 +214,7 @@ export async function httpCreateNewUser(req, res) {
 export async function httpUpdateUser(req, res) {
   try {
     const { id } = req.token;
-    const { name, email, googleId } = req.body;
+    const { name, email, username, googleId } = req.body;
     const updateFields = {};
 
     if (name?.trim() === "") {
@@ -167,6 +222,27 @@ export async function httpUpdateUser(req, res) {
     }
     if (name) {
       updateFields.name = name.trim();
+    }
+
+    if (username) {
+      const sanitizedUsername = username.trim();
+      if (sanitizedUsername.length < 3 || sanitizedUsername.length > 30) {
+        return res
+          .status(400)
+          .json({ error: "Username must be between 3 and 30 characters" });
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(sanitizedUsername)) {
+        return res.status(400).json({
+          error: "Username can only contain letters, numbers, and underscores",
+        });
+      }
+      const existingUser = await findUserByUsername(sanitizedUsername, {
+        _id: 1,
+      });
+      if (existingUser && existingUser._id.toString() !== id) {
+        return res.status(409).json({ error: "Username already in use" });
+      }
+      updateFields.username = sanitizedUsername;
     }
 
     if (email?.trim() === "") {
@@ -239,14 +315,17 @@ export async function httpUpdateUserReviewProgress(req, res) {
 }
 
 export async function httpLoginUser(req, res) {
-  const { email, password } = req.body;
+  const { loginIdentifier, password } = req.body;
   try {
-    const user = await findUserByEmail(email, {
+    const user = await findUserByEmailOrUsername(loginIdentifier, {
       __v: 0,
       "studying.quizAttempts": 0,
     });
+
     if (user == null) {
-      return res.status(401).json({ error: "email does not exist" });
+      return res
+        .status(401)
+        .json({ error: "User with that email or username does not exist" });
     }
     if (user.password == null) {
       return res.status(401).json({ error: "you have logged in with google" });
@@ -279,9 +358,20 @@ export async function httpLoginGoogleUser(req, res) {
     const userProjectionCopy = { ...userDetailsProjection };
     delete userProjectionCopy._id;
     let user = await findUserByGoogleId(googleId, userProjectionCopy);
+
     if (user == null) {
-      user = await createNewUser({ email, name, googleId });
+      // New Google user, check if email is already taken by a regular user
+      const emailUser = await findUserByEmail(email);
+      if (emailUser) {
+        // Email exists, link Google ID to it
+        user = await updateUser(emailUser._id, { googleId, name });
+      } else {
+        // Truly a new user
+        const username = await generateUniqueUsername(email);
+        user = await createNewUser({ email, name, googleId, username });
+      }
     } else if (!user.googleId) {
+      // This case is less likely with the above check but good for safety
       user = await updateUser(user._id, { googleId, name });
     }
 
@@ -351,7 +441,7 @@ export async function httpGetCardReviewProgress(req, res) {
   try {
     const user = await getUserProgress(userId);
     const cardProgress = user?.[0]?.studying?.find(
-      (s) => s.card_id && s.card_id.toString() === card_id
+      (s) => s && s.card_id && s.card_id.toString() === card_id
     );
 
     if (!cardProgress) {

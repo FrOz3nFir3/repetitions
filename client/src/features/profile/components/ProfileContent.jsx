@@ -20,6 +20,7 @@ import {
   UserIcon,
   LockClosedIcon,
   StarIcon,
+  AtSymbolIcon,
 } from "@heroicons/react/24/outline";
 
 const ProfileContent = () => {
@@ -30,18 +31,33 @@ const ProfileContent = () => {
     usePatchUpdateUserProfileMutation();
 
   const nameRef = useRef(user?.name);
+  const usernameRef = useRef(user?.username);
   const emailRef = useRef(user?.email);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedUser = {
-      name: nameRef.current.value,
-      email: emailRef.current.value,
-    };
+    const payload = {};
+    const newName = nameRef.current.value;
+    const newUsername = usernameRef.current.value;
+    const newEmail = emailRef.current.value;
 
-    updateUser(updatedUser).then((response) => {
+    if (newName !== user.name) {
+      payload.name = newName;
+    }
+    if (newUsername !== user.username) {
+      payload.username = newUsername;
+    }
+    if (newEmail !== user.email) {
+      payload.email = newEmail;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      return;
+    }
+
+    updateUser(payload).then((response) => {
       if (response.error) return;
-      dispatch(updateUserProfile(updatedUser));
+      dispatch(updateUserProfile(payload));
       setIsEditing(false);
     });
   };
@@ -194,6 +210,28 @@ const ProfileContent = () => {
 
                           <div className="space-y-2">
                             <label
+                              htmlFor="username"
+                              className="block text-sm font-semibold text-gray-700 dark:text-gray-300"
+                            >
+                              Username
+                            </label>
+                            <div className="relative">
+                              <input
+                                type="text"
+                                id="username"
+                                ref={usernameRef}
+                                defaultValue={user.username}
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white transition-all duration-200"
+                                placeholder="Enter your username"
+                              />
+                              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <UserCircleIcon className="w-5 h-5 text-gray-400" />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label
                               htmlFor="email"
                               className="block text-sm font-semibold text-gray-700 dark:text-gray-300"
                             >
@@ -209,7 +247,7 @@ const ProfileContent = () => {
                                 placeholder="Enter your email address"
                               />
                               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                <EnvelopeIcon className="w-5 h-5 text-gray-400" />
+                                <AtSymbolIcon className="w-5 h-5 text-gray-400" />
                               </div>
                             </div>
                           </div>
@@ -297,6 +335,15 @@ const ProfileContent = () => {
                           </label>
                           <p className="text-xl font-medium text-gray-900 dark:text-white">
                             {user.name || "Not provided"}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                            Username
+                          </label>
+                          <p className="text-xl font-medium text-gray-900 dark:text-white">
+                            {user.username}
                           </p>
                         </div>
 

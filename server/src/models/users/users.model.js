@@ -2,7 +2,29 @@ import Users from "../users/users.mongo.js";
 import mongoose from "mongoose";
 
 export async function findUserByEmail(email, projection = {}) {
-  return Users.findOne({ email: { $eq: email } }, projection);
+  return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } }, projection);
+}
+
+export async function findUserByUsername(username, projection = {}) {
+  return Users.findOne(
+    { username: { $regex: new RegExp(`^${username}$`, "i") } },
+    projection
+  );
+}
+
+export async function findUserByEmailOrUsername(
+  loginIdentifier,
+  projection = {}
+) {
+  return Users.findOne(
+    {
+      $or: [
+        { email: { $regex: new RegExp(`^${loginIdentifier}$`, "i") } },
+        { username: { $regex: new RegExp(`^${loginIdentifier}$`, "i") } },
+      ],
+    },
+    projection
+  );
 }
 
 export async function findUserByGoogleId(googleId, projection = {}) {
@@ -19,6 +41,22 @@ export async function getUserById(userId, projection = {}) {
 export async function createNewUser(user) {
   const newUser = new Users(user);
   return newUser.save();
+}
+
+export async function generateUniqueUsername(email) {
+  let username = email.split("@")[0].replace(/[^a-z0-9]/gi, "");
+  let user = await findUserByUsername(username);
+  let attempts = 0;
+  while (user) {
+    attempts++;
+    username = `${username}${Math.floor(Math.random() * 1000)}`;
+    if (attempts > 5) {
+      // Fallback for highly saturated usernames
+      username = `${username}${new Date().getTime()}`;
+    }
+    user = await findUserByUsername(username);
+  }
+  return username;
 }
 
 export async function getUserProgress(userId) {

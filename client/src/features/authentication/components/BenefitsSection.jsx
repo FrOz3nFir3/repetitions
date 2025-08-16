@@ -70,7 +70,7 @@ const BenefitsSection = () => {
                 Edit & Improve
               </h5>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Enhance any card with your name, email credited in the activity
+                Enhance any card with your name credited in the activity
                 timeline
               </p>
             </div>

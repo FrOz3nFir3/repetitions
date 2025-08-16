@@ -10,7 +10,7 @@ import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 const LoginForm = () => {
   const [loginUser, { data, isLoading, error }] = usePostLoginUserMutation();
-  const emailRef = useRef();
+  const loginIdentifierRef = useRef();
   const passwordRef = useRef();
   const dispatch = useDispatch();
 
@@ -22,9 +22,9 @@ const LoginForm = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const email = emailRef.current.value;
+    const loginIdentifier = loginIdentifierRef.current.value;
     const password = passwordRef.current.value;
-    loginUser({ email, password });
+    loginUser({ loginIdentifier, password });
   };
 
   return (
@@ -33,14 +33,14 @@ const LoginForm = () => {
 
       <div className="space-y-4">
         <AuthInput
-          id="email"
-          label="Email address"
+          id="loginIdentifier"
+          label="Email or Username"
           Icon={AtSymbolIcon}
-          ref={emailRef}
-          name="email"
-          type="email"
+          ref={loginIdentifierRef}
+          name="loginIdentifier"
+          type="text"
           autoComplete="email"
-          placeholder="Enter your email"
+          placeholder="Enter your email or username"
           required
           disabled={isLoading}
         />

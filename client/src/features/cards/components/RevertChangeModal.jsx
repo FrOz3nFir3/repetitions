@@ -161,10 +161,7 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
                 <div className="flex items-center gap-2 text-sm">
                   <UserCircleIcon className="h-4 w-4 text-orange-500" />
                   <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    {change.user.name}
-                  </span>
-                  <span className="text-gray-500 dark:text-gray-400">
-                    &lt;{change.user.email}&gt;
+                    {change.user.name} (@{change.user.username})
                   </span>
                 </div>
               )}

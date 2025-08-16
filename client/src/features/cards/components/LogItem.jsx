@@ -43,13 +43,10 @@ const LogItem = ({ log }) => {
               />
             </svg>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300  break-all line-clamp-2 ">
-              {user ? user.name : "System"}
+              {user?.name
+                ? `${user.name} (@${user.username})`
+                : "Deleted Account"}
             </span>
-            {user && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md break-all line-clamp-2">
-                {user.email}
-              </span>
-            )}
           </div>
 
           {/* Date and Time */}
