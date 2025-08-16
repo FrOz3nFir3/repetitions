@@ -42,6 +42,7 @@ function LoginByGoogle(props) {
           <GoogleLogin
             onSuccess={successfulLogin}
             onError={unsuccessfulLogin}
+            useOneTap
           />
         </Suspense>
       </div>

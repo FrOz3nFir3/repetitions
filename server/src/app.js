@@ -24,7 +24,18 @@ const deploymentETag = runningInProduction
   : null;
 
 // helmet js for fixing common vulnerabilities
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "script-src": ["'self'", "https://accounts.google.com/"],
+        "frame-src": ["'self'", "https://accounts.google.com/"],
+      },
+    },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  })
+);
 
 // HTTPS redirect first
 app.set("trust proxy", 1);

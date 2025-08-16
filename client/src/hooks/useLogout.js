@@ -1,6 +1,7 @@
 import { usePostLogoutUserMutation } from "../api/apiSlice";
 import { useDispatch } from "react-redux";
 import { initialUser } from "../features/authentication/state/authSlice";
+import { googleLogout } from "@react-oauth/google";
 
 const useLogout = () => {
   const [logoutUser] = usePostLogoutUserMutation();
@@ -9,13 +10,7 @@ const useLogout = () => {
   const handleLogout = async (callback) => {
     try {
       await logoutUser().unwrap();
-      const gapi = await import("gapi-script").then((module) => module.gapi);
-      if (gapi.auth2) {
-        const auth2 = gapi.auth2.getAuthInstance();
-        if (auth2) {
-          auth2.disconnect();
-        }
-      }
+      googleLogout();
     } catch (err) {
       // console.error("Logout failed:", err);
     } finally {
