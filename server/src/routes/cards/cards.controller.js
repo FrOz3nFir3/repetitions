@@ -7,10 +7,14 @@ import {
   getCardsByAuthor,
   countCardsByAuthor,
 } from "../../models/cards/cards.model.js";
+import { getPublicUserByUsername } from "../../models/users/users.model.js";
 import { getPagination } from "../../services/query.js";
 
 export async function httpGetCardsByAuthor(req, res) {
-  const { authorId } = req.params;
+  const { username } = req.params;
+  const user = await getPublicUserByUsername(username, false);
+
+  const authorId = user?._id;
   const { skip, limit } = getPagination(req.query);
   try {
     const cards = await getCardsByAuthor(authorId, { skip, limit });

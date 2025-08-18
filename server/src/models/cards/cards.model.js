@@ -9,7 +9,18 @@ import Card from "./cards.mongo.js";
 import { Types } from "mongoose";
 
 export async function cardsByCategory(category) {
-  return Card.find({ category: { $eq: category } });
+  return Card.find(
+    { category: { $eq: category } },
+    {
+      "main-topic": 1,
+      "sub-topic": 1,
+      category: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      reviewLength: { $size: "$review" },
+      quizzesLength: { $size: "$quizzes" },
+    }
+  );
 }
 
 export async function getAllCards() {
@@ -51,6 +62,7 @@ export async function createNewCard(card, userId) {
   return newCard.save();
 }
 
+// TODO: add projection, based on the urlType to save payload size
 export async function getCardById(id) {
   if (!Types.ObjectId.isValid(id)) return null;
   const cardId = new Types.ObjectId(id);
@@ -736,8 +748,18 @@ export async function getCardsByAuthor(authorId, { skip, limit }) {
   if (!Types.ObjectId.isValid(authorId)) {
     return [];
   }
-  return Card.find({ author: { $eq: authorId } })
-    .sort({ createdAt: -1 })
+  return Card.find(
+    { author: { $eq: authorId } },
+    {
+      "main-topic": 1,
+      "sub-topic": 1,
+      category: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      reviewLength: { $size: "$review" },
+      quizzesLength: { $size: "$quizzes" },
+    }
+  )
     .skip(skip)
     .limit(limit);
 }

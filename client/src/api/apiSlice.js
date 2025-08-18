@@ -255,8 +255,8 @@ export const apiSlice = createApi({
     }),
 
     getCardsByAuthor: builder.query({
-      query: ({ authorId, page, limit }) =>
-        `/users/${authorId}/cards?page=${page}&limit=${limit}`,
+      query: ({ username, page, limit }) =>
+        `/users/${username}/cards?page=${page}&limit=${limit}`,
       providesTags: (result) =>
         result?.cards
           ? [

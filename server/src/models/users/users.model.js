@@ -15,10 +15,10 @@ export async function findUserByUsername(username, projection = {}) {
   );
 }
 
-export async function getPublicUserByUsername(username) {
+export async function getPublicUserByUsername(username, excludeId = true) {
   return Users.findOne({
     username: { $regex: new RegExp(`^${username}$`, "i") },
-  }).select("name username createdAt");
+  }).select(`name username ${excludeId ? "-_id" : ""}`);
 }
 
 export async function findUserByEmailOrUsername(

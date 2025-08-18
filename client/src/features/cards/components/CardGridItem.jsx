@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { AcademicCapIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 
 const CardGridItem = ({ card, showCategory = false }) => {
   return (
@@ -44,7 +44,7 @@ const CardGridItem = ({ card, showCategory = false }) => {
             <div className="flex items-center gap-2 mb-1">
               <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
                 <svg
-                  className="h-3 w-3 text-blue-600 dark:text-blue-400"
+                  className="h-4 w-4 text-blue-600 dark:text-blue-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -67,11 +67,11 @@ const CardGridItem = ({ card, showCategory = false }) => {
           </div>
 
           {/* Sub Topic */}
-          <div className="mb-4">
+          <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="p-1 bg-purple-100 dark:bg-purple-900/30 rounded">
                 <svg
-                  className="h-3 w-3 text-purple-600 dark:text-purple-400"
+                  className="h-4 w-4 text-purple-600 dark:text-purple-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -96,15 +96,23 @@ const CardGridItem = ({ card, showCategory = false }) => {
 
         {/* Footer */}
         <div className="relative z-10 px-6 py-4 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 border-t border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <BookOpenIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                {card.review?.length || 0} Flashcard
-                {(card.review?.length || 0) !== 1 ? "s" : ""}
-              </span>
+          <div className="flex gap-2 flex-wrap justify-between items-center">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 ">
+                <BookOpenIcon className="h-5 w-5 text-blue-500" />
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  {card.reviewLength || 0} Flashcard
+                  {(card.reviewLength || 0) > 1 ? "s" : ""}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <AcademicCapIcon className="h-5 w-5 text-purple-500" />
+                <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  {card.quizzesLength || 0} Quiz
+                  {(card.quizzesLength || 0) > 1 ? "zes" : ""}
+                </span>
+              </div>
             </div>
-
             <div className="flex items-center gap-1 text-sm font-semibold text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all duration-300">
               Explore
               <svg

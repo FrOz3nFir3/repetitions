@@ -12,6 +12,7 @@ import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
 cardsRouter.use(apiLimiter);
 
 cardsRouter.get("/all", httpGetAllCards);
+// TODO: add pagination later
 cardsRouter.get("/:category", httpGetCardsByCategory);
 cardsRouter.post("/", requireAuthenticationWithCSRF, httpPostCreateNewCard);
 

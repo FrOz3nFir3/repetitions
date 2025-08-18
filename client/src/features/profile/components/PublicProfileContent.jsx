@@ -23,8 +23,8 @@ const PublicProfileContent = () => {
 
   const { data: cardsData, isFetching: isFetchingCards } =
     useGetCardsByAuthorQuery(
-      { authorId: user?._id, page: currentPage, limit: CARDS_PER_PAGE },
-      { skip: !user?._id }
+      { username: user?.username, page: currentPage, limit: CARDS_PER_PAGE },
+      { skip: !user?.username }
     );
 
   if (isLoadingUser) {
