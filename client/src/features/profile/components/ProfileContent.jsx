@@ -8,6 +8,7 @@ import {
   updateUserProfile,
 } from "../../authentication/state/authSlice";
 import RestrictedAccess from "../../../components/ui/RestrictedAccess";
+import { Link } from "react-router-dom";
 
 import {
   ShieldCheckIcon,
@@ -162,7 +163,7 @@ const ProfileContent = () => {
                       Profile Information
                     </h2>
                     <p className="text-gray-600 dark:text-gray-300 mt-1">
-                      Update your personal details
+                      Update your public and personal details
                     </p>
                   </div>
                 </div>
@@ -342,9 +343,12 @@ const ProfileContent = () => {
                           <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                             Username
                           </label>
-                          <p className="text-xl font-medium text-gray-900 dark:text-white">
-                            {user.username}
-                          </p>
+                          <Link
+                            to={`/profile/${user.username}`}
+                            className="text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            @{user.username}
+                          </Link>
                         </div>
 
                         <div className="space-y-2">

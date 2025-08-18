@@ -10,7 +10,21 @@ import {
   findUserByUsername,
   findUserByEmailOrUsername,
   generateUniqueUsername,
+  getPublicUserByUsername,
 } from "../../models/users/users.model.js";
+
+export async function httpGetPublicUserByUsername(req, res) {
+  const { username } = req.params;
+  try {
+    const user = await getPublicUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 import { getCardsByIds } from "../../models/cards/cards.model.js";
 import {
   setTokens,

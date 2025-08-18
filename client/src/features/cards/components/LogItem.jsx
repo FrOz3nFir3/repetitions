@@ -1,6 +1,7 @@
 import React, { useState, lazy, Suspense } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import CardLogSkeleton from "../../../components/ui/skeletons/CardLogSkeleton";
+import { Link } from "react-router-dom";
 
 const LogItemChange = lazy(() => import("./LogItemChange"));
 
@@ -43,9 +44,16 @@ const LogItem = ({ log }) => {
               />
             </svg>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300  break-all line-clamp-2 ">
-              {user?.name
-                ? `${user.name} (@${user.username})`
-                : "Deleted Account"}
+              {user?.username ? (
+                <Link
+                  to={`/profile/${user.username}`}
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  @{user.username}
+                </Link>
+              ) : (
+                "Deleted Account"
+              )}
             </span>
           </div>
 

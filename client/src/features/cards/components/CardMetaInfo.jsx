@@ -5,6 +5,7 @@ import {
   CalendarIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-3 py-2">
@@ -15,9 +16,9 @@ const InfoItem = ({ icon, label, value }) => (
       <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
         {label}
       </span>
-      <p className="text-sm text-gray-900 dark:text-white font-medium break-words">
+      <div className="text-sm text-gray-900 dark:text-white font-medium break-words">
         {value}
-      </p>
+      </div>
     </div>
   </div>
 );
@@ -27,7 +28,11 @@ const CardMetaInfo = ({ card }) => {
 
   const formatUser = (user) => {
     if (!user) return "";
-    return `${user.name} (@${user.username})`;
+    return (
+      <Link to={`/profile/${user.username}`} className="text-blue-600 dark:text-blue-400 hover:underline">
+        @{user.username}
+      </Link>
+    );
   };
 
   return (

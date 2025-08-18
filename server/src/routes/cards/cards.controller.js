@@ -4,7 +4,23 @@ import {
   findExistingCard,
   getAllCards,
   getCardsByIds,
+  getCardsByAuthor,
+  countCardsByAuthor,
 } from "../../models/cards/cards.model.js";
+import { getPagination } from "../../services/query.js";
+
+export async function httpGetCardsByAuthor(req, res) {
+  const { authorId } = req.params;
+  const { skip, limit } = getPagination(req.query);
+  try {
+    const cards = await getCardsByAuthor(authorId, { skip, limit });
+    const total = await countCardsByAuthor(authorId);
+    const hasMore = skip + limit < total;
+    res.json({ cards, total, hasMore });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+}
 import {
   normalizeWhitespace,
   normalizeCategory,

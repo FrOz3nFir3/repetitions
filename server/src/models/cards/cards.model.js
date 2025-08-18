@@ -731,3 +731,20 @@ export async function getQuizById(cardId, quizId) {
 
   return card.quizzes.find((q) => q._id.toString() === quizId);
 }
+
+export async function getCardsByAuthor(authorId, { skip, limit }) {
+  if (!Types.ObjectId.isValid(authorId)) {
+    return [];
+  }
+  return Card.find({ author: { $eq: authorId } })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+}
+
+export async function countCardsByAuthor(authorId) {
+  if (!Types.ObjectId.isValid(authorId)) {
+    return 0;
+  }
+  return Card.countDocuments({ author: { $eq: authorId } });
+}

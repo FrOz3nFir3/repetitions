@@ -19,6 +19,9 @@ const ProgressPageRoute = lazy(() =>
 const ProfilePageRoute = lazy(() =>
   import("../features/profile/routes/ProfilePageRoute")
 );
+const PublicPageRoute = lazy(() =>
+  import("../features/profile/routes/PublicPageRoute")
+);
 const AuthenticationRoute = lazy(() =>
   import("../features/authentication/routes/AuthenticationRoute")
 );
@@ -37,6 +40,7 @@ function App() {
           <Route path="/card/:id/*" element={<IndividualCardPageRoute />} />
           <Route path="/progress" element={<ProgressPageRoute />} />
           <Route path="/profile" element={<ProfilePageRoute />} />
+          <Route path="/profile/:username" element={<PublicPageRoute />} />
           <Route path="/authenticate" element={<AuthenticationRoute />} />
           <Route path="*" element={<NotFoundRoute />} />
         </Routes>

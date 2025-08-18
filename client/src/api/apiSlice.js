@@ -248,6 +248,23 @@ export const apiSlice = createApi({
         body: user,
       }),
     }),
+
+    getPublicUserByUsername: builder.query({
+      query: (username) => `/users/${username}`,
+      providesTags: (result, error, arg) => [{ type: "User", id: arg }],
+    }),
+
+    getCardsByAuthor: builder.query({
+      query: ({ authorId, page, limit }) =>
+        `/users/${authorId}/cards?page=${page}&limit=${limit}`,
+      providesTags: (result) =>
+        result?.cards
+          ? [
+              ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
+              { type: "Card", id: "LIST" },
+            ]
+          : [{ type: "Card", id: "LIST" }],
+    }),
   }),
 });
 
@@ -269,4 +286,6 @@ export const {
   useGetCardReviewProgressQuery,
   useGetDetailedReportQuery,
   useGetCardLogsQuery,
+  useGetPublicUserByUsernameQuery,
+  useGetCardsByAuthorQuery,
 } = apiSlice;

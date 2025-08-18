@@ -80,7 +80,7 @@ export const memberFeatures = [
   {
     icon: UserCircleIcon,
     title: "Activity Timeline",
-    description: "Your name appears in edit history",
+    description: "Your Username appears in edit history",
     available: true,
   },
 ];

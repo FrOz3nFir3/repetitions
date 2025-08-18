@@ -2,7 +2,10 @@ import Users from "../users/users.mongo.js";
 import mongoose from "mongoose";
 
 export async function findUserByEmail(email, projection = {}) {
-  return Users.findOne({ email: { $regex: new RegExp(`^${email}$`, "i") } }, projection);
+  return Users.findOne(
+    { email: { $regex: new RegExp(`^${email}$`, "i") } },
+    projection
+  );
 }
 
 export async function findUserByUsername(username, projection = {}) {
@@ -10,6 +13,12 @@ export async function findUserByUsername(username, projection = {}) {
     { username: { $regex: new RegExp(`^${username}$`, "i") } },
     projection
   );
+}
+
+export async function getPublicUserByUsername(username) {
+  return Users.findOne({
+    username: { $regex: new RegExp(`^${username}$`, "i") },
+  }).select("name username createdAt");
 }
 
 export async function findUserByEmailOrUsername(

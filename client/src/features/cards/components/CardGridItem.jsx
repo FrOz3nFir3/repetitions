@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 
-const CardGridItem = ({ card }) => {
+const CardGridItem = ({ card, showCategory = false }) => {
   return (
     <Link to={`/card/${card._id}`} className="block">
       <div className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] h-full flex flex-col overflow-hidden cursor-pointer">
@@ -10,6 +10,35 @@ const CardGridItem = ({ card }) => {
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 rounded-full blur-2xl transition-all duration-300 group-hover:from-blue-500/10 group-hover:to-indigo-600/10"></div>
 
         <div className="relative z-10 p-6 flex-grow">
+          {/* Category Badge */}
+          {card.category && showCategory && (
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg shadow-sm">
+                <svg
+                  className="h-3 w-3 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                  />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">
+                  Category
+                </span>
+                <span className="text-sm font-semibold text-green-700 dark:text-green-300">
+                  {card.category}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Main Topic */}
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-1">
