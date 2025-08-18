@@ -30,14 +30,14 @@ const StudiedDecksControls = ({
   return (
     <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-8 p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
       <div className="relative flex-1 max-w-2xl">
-        <div className="absolute inset-y-0 left-0 flex items-center pl-6 pointer-events-none">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
           <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
             <MagnifyingGlassIcon className="h-5 w-5 text-green-600 dark:text-green-400" />
           </div>
         </div>
         <input
           type="text"
-          placeholder="Search your progress..."
+          placeholder="Search cards in your progress..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-16 pr-12 py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 text-lg font-medium"

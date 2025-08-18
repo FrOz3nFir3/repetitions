@@ -20,70 +20,115 @@ const Pagination = ({
     }
   };
 
-  const pageNumbers = [];
-  const maxPagesToShow = 5;
-  let startPage, endPage;
+  const getPageNumbers = () => {
+    const pageNeighbours = 1; // Pages to show on each side of current page
+    const totalNumbers = 3 + pageNeighbours * 2; // e.g., First, ..., Prev, Current, Next, ..., Last
+    const totalBlocks = totalNumbers + 2; // Including ellipses
 
-  if (totalPages <= maxPagesToShow) {
-    startPage = 0;
-    endPage = totalPages - 1;
-  } else {
-    if (currentPage <= 2) {
-      startPage = 0;
-      endPage = maxPagesToShow - 1;
-    } else if (currentPage + 2 >= totalPages) {
-      startPage = totalPages - maxPagesToShow;
-      endPage = totalPages - 1;
-    } else {
-      startPage = currentPage - 2;
-      endPage = currentPage + 2;
+    if (totalPages <= totalBlocks) {
+      return Array.from({ length: totalPages }, (_, i) => i);
     }
-  }
 
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
-  }
+    const result = [];
+    const startPage = 0;
+    const endPage = totalPages - 1;
+
+    const leftSiblingIndex = Math.max(currentPage - pageNeighbours, 1);
+    const rightSiblingIndex = Math.min(
+      currentPage + pageNeighbours,
+      totalPages - 2
+    );
+
+    const shouldShowLeftDots = leftSiblingIndex > 1;
+    const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
+
+    result.push(startPage);
+
+    if (shouldShowLeftDots) {
+      result.push("...");
+    }
+
+    for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
+      result.push(i);
+    }
+
+    if (shouldShowRightDots) {
+      result.push("...");
+    }
+
+    result.push(endPage);
+    return result;
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  const renderButton = (text, onClick, disabled = false, isIcon = false) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 bg-white dark:text-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 ${
+        isIcon ? "w-10 h-10 !px-2" : ""
+      }`}
+    >
+      {text}
+    </button>
+  );
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-6 bg-white/60 dark:bg-gray-800/60 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-lg">
-      <div className="text-sm text-gray-600 dark:text-gray-400">
-        Showing {startIndex + 1}-{endIndex} of {itemsCount} items
+      <div className="text-lg text-gray-600 dark:text-gray-400">
+        Showing{" "}
+        <strong>
+          {startIndex + 1}-{endIndex}
+        </strong>{" "}
+        of {itemsCount} items
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 0}
-          className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white dark:text-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          <ChevronLeftIcon className="h-4 w-4" />
-          Previous
-        </button>
+        {renderButton("First", () => handlePageChange(0), currentPage === 0)}
+        {renderButton(
+          <ChevronLeftIcon className="h-8 w-8" />,
+          () => handlePageChange(currentPage - 1),
+          currentPage === 0,
+          true
+        )}
 
         <div className="flex gap-1">
-          {pageNumbers.map((pageNum) => (
-            <button
-              key={pageNum}
-              onClick={() => handlePageChange(pageNum)}
-              className={`cursor-pointer w-10 h-10 rounded-xl font-medium transition-all duration-200 ${
-                currentPage === pageNum
-                  ? `${activeColorClass} text-white shadow-lg`
-                  : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              }`}
-            >
-              {pageNum + 1}
-            </button>
-          ))}
+          {pageNumbers.map((pageNum, index) =>
+            typeof pageNum === "string" ? (
+              <span
+                key={`ellipsis-${index}`}
+                className="w-10 h-10 inline-flex items-center justify-center text-gray-500 dark:text-gray-400"
+              >
+                ...
+              </span>
+            ) : (
+              <button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={`cursor-pointer w-10 h-10 rounded-xl font-medium transition-all duration-200 ${
+                  currentPage === pageNum
+                    ? `${activeColorClass} text-white shadow-lg`
+                    : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                {pageNum + 1}
+              </button>
+            )
+          )}
         </div>
 
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages - 1}
-          className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white dark:text-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-        >
-          Next
-          <ChevronRightIcon className="h-4 w-4" />
-        </button>
+        {renderButton(
+          <ChevronRightIcon className="h-8 w-8" />,
+          () => handlePageChange(currentPage + 1),
+          currentPage === totalPages - 1,
+          true
+        )}
+        {renderButton(
+          "Last",
+          () => handlePageChange(totalPages - 1),
+          currentPage === totalPages - 1
+        )}
       </div>
     </div>
   );
