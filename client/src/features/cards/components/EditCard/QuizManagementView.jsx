@@ -65,7 +65,7 @@ const QuizManagementView = ({
 
   const flashcardDropdownOptions = useMemo(
     () =>
-      review.map((flashcard, index) => {
+      review?.map((flashcard, index) => {
         const plainText = getTextFromHtml(flashcard.question);
         const truncatedText =
           plainText.length > 50

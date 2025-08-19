@@ -1,23 +1,25 @@
 import Users from "../users/users.mongo.js";
 import mongoose from "mongoose";
+import crypto from "crypto";
+import { escapeRegex } from "../../utils/textNormalization.js";
 
 export async function findUserByEmail(email, projection = {}) {
   return Users.findOne(
-    { email: { $regex: new RegExp(`^${email}$`, "i") } },
+    { email: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") } },
     projection
   );
 }
 
 export async function findUserByUsername(username, projection = {}) {
   return Users.findOne(
-    { username: { $regex: new RegExp(`^${username}$`, "i") } },
+    { username: { $regex: new RegExp(`^${escapeRegex(username)}$`, "i") } },
     projection
   );
 }
 
 export async function getPublicUserByUsername(username, excludeId = true) {
   return Users.findOne({
-    username: { $regex: new RegExp(`^${username}$`, "i") },
+    username: { $regex: new RegExp(`^${escapeRegex(username)}$`, "i") },
   }).select(`name username ${excludeId ? "-_id" : ""}`);
 }
 
@@ -25,11 +27,12 @@ export async function findUserByEmailOrUsername(
   loginIdentifier,
   projection = {}
 ) {
+  const escapedIdentifier = escapeRegex(loginIdentifier);
   return Users.findOne(
     {
       $or: [
-        { email: { $regex: new RegExp(`^${loginIdentifier}$`, "i") } },
-        { username: { $regex: new RegExp(`^${loginIdentifier}$`, "i") } },
+        { email: { $regex: new RegExp(`^${escapedIdentifier}$`, "i") } },
+        { username: { $regex: new RegExp(`^${escapedIdentifier}$`, "i") } },
       ],
     },
     projection
@@ -58,7 +61,8 @@ export async function generateUniqueUsername(email) {
   let attempts = 0;
   while (user) {
     attempts++;
-    username = `${username}${Math.floor(Math.random() * 1000)}`;
+    // Use cryptographically secure random bytes to generate a suffix.
+    username = `${username}${crypto.randomBytes(2).toString("hex")}`;
     if (attempts > 5) {
       // Fallback for highly saturated usernames
       username = `${username}${new Date().getTime()}`;
