@@ -4,30 +4,24 @@
     {
       "src": "server/src/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "client",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "server/public"
-      }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/assets/(.*)",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      },
-      "dest": "/assets/$1"
-    },
+      "source": "/(.*)",
+      "destination": "server/src/server.js"
+    }
+  ],
+  "buildCommand": "npm run install-deploy",
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "server/src/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }
