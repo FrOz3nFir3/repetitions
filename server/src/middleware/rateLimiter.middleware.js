@@ -1,11 +1,22 @@
 import rateLimit from "express-rate-limit";
 
+const getClientIp = (req) => {
+  // 'x-vercel-forwarded-for' is a trusted header provided by Vercel.
+  // It contains the real client IP and cannot be spoofed.
+  const ip = req.headers["x-vercel-forwarded-for"];
+
+  // Fallback to req.ip for local development and other environments.
+  // req.ip is determined by Express's 'trust proxy' setting.
+  return ip || req.ip;
+};
+
 // Rate limiter for sensitive authentication actions like login and registration
 export const authLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
   max: 10, // Limit each IP to 10 requests per windowMs
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: getClientIp,
   message: {
     error: "Too many requests from this IP, please try again after 10 minutes",
   },
@@ -17,6 +28,7 @@ export const apiLimiter = rateLimit({
   max: 100, // Limit each IP to 100 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
   message: {
     error: "Too many requests from this IP, please try again after 15 minutes",
   },
@@ -27,6 +39,7 @@ export const accessLimiter = rateLimit({
   max: 300, // Limit each IP to 300 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: getClientIp,
   message: {
     error:
       "Too many requests from this IP, please try again after half an hour",
