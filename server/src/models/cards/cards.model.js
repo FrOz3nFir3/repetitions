@@ -62,12 +62,32 @@ export async function createNewCard(card, userId) {
   return newCard.save();
 }
 
-// TODO: add projection, based on the urlType to save payload size
-export async function getCardById(id) {
+export async function getCardById(id, view = "overview") {
   if (!Types.ObjectId.isValid(id)) return null;
+
+  // Optimized paths for simple views that don't need population
+  if (view === "review") {
+    return Card.findById(id, {
+      review: 1,
+      quizzesLength: {
+        $size: "$quizzes",
+      },
+      category: 1,
+    }).lean();
+  }
+  if (view === "quiz") {
+    return Card.findById(id, {
+      quizzes: 1,
+      reviewLength: {
+        $size: "$review",
+      },
+      category: 1,
+    }).lean();
+  }
+
   const cardId = new Types.ObjectId(id);
 
-  const result = await Card.aggregate([
+  const pipeline = [
     { $match: { _id: cardId } },
     {
       $lookup: {
@@ -148,38 +168,66 @@ export async function getCardById(id) {
         logs: { $push: "$logs" },
       },
     },
-    {
-      $project: {
-        "main-topic": 1,
-        "sub-topic": 1,
-        category: 1,
-        review: 1,
-        quizzes: 1,
-        description: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        author: 1,
-        lastUpdatedBy: 1,
-        logs: {
-          $map: {
-            input: "$logs",
-            as: "log",
-            in: {
-              _id: "$$log._id",
-              eventType: "$$log.eventType",
-              timestamp: "$$log.timestamp",
-              summary: "$$log.summary",
-              changes: "$$log.changes",
-              user: {
-                name: "$$log.user.name",
-                username: "$$log.user.username",
-              },
-            },
+  ];
+
+  const baseProjection = {
+    "main-topic": 1,
+    "sub-topic": 1,
+    category: 1,
+    description: 1,
+    createdAt: 1,
+    updatedAt: 1,
+    author: 1,
+    lastUpdatedBy: 1,
+    logs: {
+      $map: {
+        input: "$logs",
+        as: "log",
+        in: {
+          _id: "$$log._id",
+          eventType: "$$log.eventType",
+          timestamp: "$$log.timestamp",
+          summary: "$$log.summary",
+          changes: "$$log.changes",
+          user: {
+            name: "$$log.user.name",
+            username: "$$log.user.username",
           },
         },
       },
     },
-  ]);
+  };
+
+  let finalProjection = { ...baseProjection };
+
+  switch (view) {
+    case "overview":
+      finalProjection.reviewLength = { $size: "$review" };
+      finalProjection.quizzesLength = { $size: "$quizzes" };
+      break;
+    case "edit_flashcards":
+      finalProjection.review = 1;
+      finalProjection.quizzesLength = { $size: "$quizzes" };
+      break;
+    case "edit_quizzes":
+      finalProjection.quizzes = 1;
+      finalProjection.review = {
+        $map: {
+          input: "$review",
+          as: "r",
+          in: { _id: "$$r._id", question: "$$r.question" },
+        },
+      };
+      break;
+    default: // Fallback for any unknown view
+      finalProjection.reviewLength = { $size: "$review" };
+      finalProjection.quizzesLength = { $size: "$quizzes" };
+      break;
+  }
+
+  pipeline.push({ $project: finalProjection });
+
+  const result = await Card.aggregate(pipeline);
 
   if (!result || result.length === 0) return null;
 
@@ -190,6 +238,16 @@ export async function getCardById(id) {
 
   if (card.logs) {
     card.logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  }
+
+  // optimizing the payload upfront
+  if (view === "edit_quizzes") {
+    card.review = card.review.map((item) => {
+      return {
+        ...item,
+        question: getTextFromHTML(item.question),
+      };
+    });
   }
 
   return card;

@@ -13,16 +13,22 @@ import {
   LightBulbIcon,
 } from "@heroicons/react/24/solid";
 import ActionCard from "./ActionCard";
+import { useSelector } from "react-redux";
+import { selectCurrentCard } from "../state/cardSlice";
 
 const CardActions = ({
   layout = "vertical",
   showInfo = false,
   isRelative = false,
 }) => {
+  const card = useSelector(selectCurrentCard);
   const containerClasses = {
     vertical: "grid grid-cols-1 sm:grid-cols-2 gap-8",
     horizontal: "grid grid-cols-1 lg:grid-cols-2 gap-6",
   };
+
+  const reviewLength = card?.review?.length || card?.reviewLength || 0;
+  const quizzesLength = card?.quizzes?.length || card?.quizzesLength || 0;
 
   // Create relative paths that navigate to sibling routes
   const getActionPath = (action) => (isRelative ? action : `../${action}`);
@@ -60,6 +66,13 @@ const CardActions = ({
           color="blue"
           layout={layout}
           scrollToTop={true}
+          stats={[
+            {
+              value: reviewLength,
+              label: "Flashcards",
+              icon: BookOpenSolid,
+            },
+          ]}
         />
 
         <ActionCard
@@ -74,6 +87,13 @@ const CardActions = ({
           color="purple"
           layout={layout}
           scrollToTop={true}
+          stats={[
+            {
+              value: quizzesLength,
+              label: "Quizzes",
+              icon: AcademicCapSolid,
+            },
+          ]}
         />
 
         <ActionCard

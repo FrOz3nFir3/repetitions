@@ -1,5 +1,10 @@
 import React, { useEffect } from "react";
-import { useParams, Outlet, useLocation } from "react-router-dom";
+import {
+  useParams,
+  Outlet,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetIndividualCardQuery } from "../../../api/apiSlice";
 import { initialCard, selectCurrentCard } from "../state/cardSlice";
@@ -10,15 +15,44 @@ import IndividualCardPageSkeleton from "../../../components/ui/skeletons/Individ
 
 function IndividualCardPage() {
   const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const { data: cardData, isFetching } = useGetIndividualCardQuery(params.id);
+  const getCardViewType = () => {
+    const { pathname, search } = location;
+    if (pathname.includes("/review")) return "review";
+    if (pathname.includes("/quiz")) return "quiz";
+
+    if (pathname.includes("/edit")) {
+      const view = searchParams.get("view");
+      if (view === "flashcards") return "edit_flashcards";
+      if (view === "quizzes") return "edit_quizzes";
+
+      // default when in edit
+      return "edit_flashcards";
+    }
+    return "overview"; // default view
+  };
+
+  const { data: cardData, isFetching } = useGetIndividualCardQuery({
+    id: params.id,
+    view: getCardViewType(),
+  });
   const card = useSelector(selectCurrentCard);
 
   useEffect(() => {
     if (cardData) {
       dispatch(initialCard(cardData));
+    }
+
+    // sync up edit to flaschards
+    const { pathname } = location;
+    const view = searchParams.get("view");
+    const inValidView = view !== "flashcards" && view !== "quizzes";
+    if (pathname.includes("/edit") && inValidView) {
+      searchParams.set("view", "flashcards");
+      setSearchParams(searchParams);
     }
   }, [cardData, dispatch]);
 

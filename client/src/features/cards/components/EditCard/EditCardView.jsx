@@ -44,8 +44,8 @@ const EditCardView = () => {
       <ViewSwitcher
         view={view}
         setSearchParams={setSearchParams}
-        totalFlashcards={review.length}
-        totalQuizzes={quizzes.length}
+        totalFlashcards={review.length || card?.reviewLength}
+        totalQuizzes={quizzes.length || card?.quizzesLength}
       />
 
       {view === "flashcards" ? (

@@ -69,6 +69,7 @@ export const useReviewSession = (initialCards, card_id) => {
   useEffect(() => {
     if (!user) return;
     // Only run initial setup once when we first get cardProgress
+
     if (cardProgress && card_id && !isInitialSetupComplete.current) {
       const lastReviewedCardNo = cardProgress.lastReviewedCardNo;
 
@@ -149,6 +150,10 @@ export const useReviewSession = (initialCards, card_id) => {
     if (!currentCard?.isReview && currentIndex < initialCards.length) {
       currentProgressRef.current = currentIndex + 1;
     }
+
+    return () => {
+      isInitialSetupComplete.current = false;
+    };
   }, [currentIndex, sessionCards, initialCards.length]);
 
   // Debounced progress tracking on index change - only after user interaction

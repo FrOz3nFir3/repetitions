@@ -133,22 +133,17 @@ const ActionCard = ({
 
               {/* Stats */}
               {stats && (
-                <div className="flex items-center gap-4 mt-4 pt-3 border-t border-white/20">
+                <div className="flex justify-center items-center gap-4 mt-auto pt-3 border-t border-white/20">
                   {stats.map((stat, index) => (
                     <div key={index} className="flex items-center gap-1.5">
                       <stat.icon
-                        className={`w-4 h-4 ${
-                          isActive ? "text-white/60" : "text-gray-500"
-                        }`}
+                        className={`w-5 h-5 text-${color}-600 dark:text-${color}-400`}
                       />
                       <span
-                        className={`text-xs font-medium ${
-                          isActive
-                            ? "text-white/80"
-                            : "text-gray-600 dark:text-gray-400"
-                        }`}
+                        className={`text-sm font-medium dark:text-white
+                        `}
                       >
-                        {stat.value}
+                        <strong>{stat.value}</strong> {stat.label}
                       </span>
                     </div>
                   ))}
@@ -253,24 +248,35 @@ const ActionCard = ({
 
           {/* Stats */}
           {stats && (
-            <div className="flex justify-center gap-6 mt-6 pt-4 border-t border-white/20">
+            <div className="flex justify-center gap-6 mt-0 pt-4 border-t border-white/20">
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <stat.icon
-                      className={`w-4 h-4 ${
-                        isActive ? "text-white/70" : "text-gray-500"
+                      className={`w-5 h-5 ${
+                        isActive
+                          ? "text-white"
+                          : `text-${color}-600 dark:text-${color}-400`
                       }`}
                     />
                   </div>
                   <span
-                    className={`text-xs font-bold ${
+                    className={`text-lg font-bold ${
                       isActive
-                        ? "text-white/90"
-                        : "text-gray-700 dark:text-gray-300"
+                        ? "text-white"
+                        : "text-gray-800 dark:text-gray-200"
                     }`}
                   >
                     {stat.value}
+                  </span>
+                  <span
+                    className={`block text-xs font-medium ${
+                      isActive
+                        ? "text-white/80"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
+                    {stat.label}
                   </span>
                 </div>
               ))}

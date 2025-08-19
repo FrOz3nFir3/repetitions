@@ -11,13 +11,9 @@ import { getTextFromHTML, sanitizeHTML } from "../../utils/dom.js";
 
 export async function httpGetCardById(req, res) {
   const { id } = req.params;
+  const { view } = req.query;
   try {
-    const card = await getCardById(id);
-    if (card && card.logs) {
-      card.logs = card.logs
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .slice(0, 6);
-    }
+    const card = await getCardById(id, view);
     res.json(card);
   } catch (error) {
     console.log(error);

@@ -92,7 +92,7 @@ export const apiSlice = createApi({
     }),
 
     getIndividualCard: builder.query({
-      query: (id) => `/card/${id}`,
+      query: ({ id, view = "overview" }) => `/card/${id}?view=${view}`,
       providesTags: ["IndividualCard"],
       // providesTags: ["Card"],
     }),

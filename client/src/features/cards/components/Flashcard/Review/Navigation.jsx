@@ -20,7 +20,7 @@ const Navigation = ({
   const [searchParams] = useSearchParams();
 
   const handleEdit = () => {
-    navigate(`/card/${params.id}/edit?${searchParams}`);
+    navigate(`/card/${params.id}/edit?view=flashcards&${searchParams}`);
   };
 
   return (
