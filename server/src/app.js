@@ -119,8 +119,8 @@ app.use("/api", apiRouter);
 
 // this will only run in development mode
 if (!runningInProduction) {
-  res.set("Cache-Control", "no-cache, must-revalidate");
   app.get("/*allRoutes", accessLimiter, (req, res) => {
+    res.set("Cache-Control", "no-cache, must-revalidate");
     res.sendFile(path.join(__dirname, "..", "public", "index.html"));
   });
 }

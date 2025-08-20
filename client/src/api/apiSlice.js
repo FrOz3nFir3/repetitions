@@ -8,7 +8,7 @@ const baseQuery = fetchBaseQuery({
   baseUrl:
     process.env.NODE_ENV === "development"
       ? `http://localhost:3000/api`
-      : import.meta.env.VITE_API_URL ?? "/api",
+      : import.meta.env.VITE_API_URL + "/api" ?? "/api",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const csrfToken = getState().auth.csrfToken;
