@@ -12,6 +12,5 @@
       "destination": "server/src/server.js"
     }
   ],
-  "installCommand": "npm install",
-  "buildCommand": "npm run start"
+  "installCommand": "npm install"
 }
