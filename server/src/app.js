@@ -103,18 +103,26 @@ if (!runningInProduction) {
       optionsSuccessStatus: 200,
     })(req, res, next);
   });
+} else {
+  app.use("/api", async (req, res, next) => {
+    const cors = (await import("cors")).default;
+    // allowing front host origin
+    cors({
+      origin: "https://repetitions.learnapp.workers.dev",
+      credentials: true,
+      optionsSuccessStatus: 200,
+    })(req, res, next);
+  });
 }
 
 app.use("/api", apiRouter);
 
-// Client routes with rate limiting
-app.get("/*allRoutes", accessLimiter, (req, res) => {
-  // Only modify cache headers in production
-  if (runningInProduction) {
-    res.set("Cache-Control", "no-cache, must-revalidate");
-    res.set("ETag", deploymentETag);
-  }
-  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
-});
+// this will only run in development mode
+if (!runningInProduction) {
+  res.set("Cache-Control", "no-cache, must-revalidate");
+  app.get("/*allRoutes", accessLimiter, (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+  });
+}
 
 export default app;
