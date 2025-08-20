@@ -38,6 +38,8 @@ import EmailValidator from "email-deep-validator";
 const emailValidator = new EmailValidator({ timeout: 10000 });
 import { userDetailsProjection } from "../../utils/constants.js";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 export async function httpRefreshToken(req, res) {
   const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
 
@@ -53,14 +55,12 @@ export async function httpRefreshToken(req, res) {
   const newAccessToken = createAccessToken(decoded.id);
   const csrfToken = createCSRFToken();
 
-  const isProduction = process.env.NODE_ENV === "production";
-
   res.cookie("jwt_access", newAccessToken, {
     httpOnly: true,
     signed: true,
     maxAge: ACCESS_TOKEN_MAX_AGE_MS, // 1 hour
     secure: isProduction,
-    sameSite: "none",
+    sameSite: isProduction ? "none" : "lax",
     path: "/api",
   });
 
@@ -68,7 +68,7 @@ export async function httpRefreshToken(req, res) {
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "none",
+    sameSite: isProduction ? "none" : "lax",
     path: "/api",
   });
 
@@ -80,12 +80,11 @@ export async function httpRefreshToken(req, res) {
 
 export async function httpGetCSRFToken(req, res) {
   const csrfToken = createCSRFToken();
-  const isProduction = process.env.NODE_ENV === "production";
 
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "none",
+    sameSite: isProduction ? "none" : "lax",
     path: "/api",
   });
 
@@ -104,14 +103,13 @@ export async function httpPostAuthDetails(req, res) {
 
   // Generate fresh CSRF token for authenticated user
   const csrfToken = createCSRFToken();
-  const isProduction = process.env.NODE_ENV === "production";
 
   // TODO: make samesite back to lax after domain is same
   // Update CSRF session cookie
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "none",
+    sameSite: isProduction ? "none" : "lax",
     path: "/api",
   });
 
@@ -407,20 +405,25 @@ export async function httpLogoutUser(req, res) {
   if (!refreshTokenFromCookie) {
     return res.sendStatus(204); // No content
   }
+  let extraOptions = {};
+  if (isProduction) {
+    extraOptions = {
+      secure: true,
+      sameSite: "none",
+    };
+  }
+
   res.clearCookie("jwt_access", {
     path: "/api",
-    sameSite: "none",
-    secure: isProduction,
+    ...extraOptions,
   });
   res.clearCookie("jwt_refresh", {
     path: "/api/user",
-    sameSite: "none",
-    secure: isProduction,
+    ...extraOptions,
   });
   res.clearCookie("csrf_token", {
     path: "/api",
-    sameSite: "none",
-    secure: isProduction,
+    ...extraOptions,
   });
   return res.status(200).json({ ok: true });
 }
