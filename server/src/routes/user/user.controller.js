@@ -407,9 +407,9 @@ export async function httpLogoutUser(req, res) {
   if (!refreshTokenFromCookie) {
     return res.sendStatus(204); // No content
   }
-  res.clearCookie("jwt_access", { path: "/api" });
-  res.clearCookie("jwt_refresh", { path: "/api/user" });
-  res.clearCookie("csrf_token", { path: "/api" });
+  res.clearCookie("jwt_access", { path: "/api", sameSite: "none" });
+  res.clearCookie("jwt_refresh", { path: "/api/user", sameSite: "none" });
+  res.clearCookie("csrf_token", { path: "/api", sameSite: "none" });
   return res.status(200).json({ ok: true });
 }
 
