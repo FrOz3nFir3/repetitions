@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import apiRouter from "./routes/api.router.js";
 import { accessLimiter } from "./middleware/rateLimiter.middleware.js";
 import helmet from "helmet";
+import cors from "cors";
 
 const app = express();
 const __dirname = import.meta.dirname;
@@ -93,27 +94,17 @@ app.get("/health", async (req, res) => {
 // Cookie parser for API routes
 app.use("/api", cookieParser(cookieSecret));
 
-// CORS only in development
-if (!runningInProduction) {
-  app.use("/api", async (req, res, next) => {
-    const cors = (await import("cors")).default;
-    cors({
-      origin: "http://localhost",
-      credentials: true,
-      optionsSuccessStatus: 200,
-    })(req, res, next);
-  });
-} else {
-  app.use("/api", async (req, res, next) => {
-    const cors = (await import("cors")).default;
-    // allowing front host origin
-    cors({
-      origin: "https://repetitions.learnapp.workers.dev",
-      credentials: true,
-      optionsSuccessStatus: 200,
-    })(req, res, next);
-  });
-}
+
+// CORS configuration
+const corsOptions = {
+  origin: runningInProduction
+    ? "https://repetitions.learnapp.workers.dev"
+    : "http://localhost",
+  credentials: true,
+  optionsSuccessStatus: 200, // For legacy browser support
+};
+app.use("/api", cors(corsOptions));
+
 
 app.use("/api", apiRouter);
 
