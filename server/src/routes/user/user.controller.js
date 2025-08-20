@@ -407,9 +407,21 @@ export async function httpLogoutUser(req, res) {
   if (!refreshTokenFromCookie) {
     return res.sendStatus(204); // No content
   }
-  res.clearCookie("jwt_access", { path: "/api", sameSite: "none" });
-  res.clearCookie("jwt_refresh", { path: "/api/user", sameSite: "none" });
-  res.clearCookie("csrf_token", { path: "/api", sameSite: "none" });
+  res.clearCookie("jwt_access", {
+    path: "/api",
+    sameSite: "none",
+    secure: isProduction,
+  });
+  res.clearCookie("jwt_refresh", {
+    path: "/api/user",
+    sameSite: "none",
+    secure: isProduction,
+  });
+  res.clearCookie("csrf_token", {
+    path: "/api",
+    sameSite: "none",
+    secure: isProduction,
+  });
   return res.status(200).json({ ok: true });
 }
 
