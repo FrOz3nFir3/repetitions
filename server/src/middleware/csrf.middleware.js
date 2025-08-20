@@ -1,9 +1,12 @@
 // implemented from https://web.dev/articles/fetch-metadata
 
+const allowedOrigins = ["https://repetitions.learnapp.workers.dev"];
+
 export function csrfProtectionMiddleware(req, res, next) {
   const secFetchSite = req.headers["sec-fetch-site"];
   const secFetchMode = req.headers["sec-fetch-mode"];
   const secFetchDest = req.headers["sec-fetch-dest"];
+  const origin = req.headers["origin"];
 
   if (!secFetchSite) {
     return next();
@@ -22,7 +25,7 @@ export function csrfProtectionMiddleware(req, res, next) {
   }
 
   // need to allow all request from this frontend domain
-  if (req.path.includes("https://repetitions.learnapp.workers.dev")) {
+  if (allowedOrigins.includes(origin)) {
     return next();
   }
 
