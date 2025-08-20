@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { analyzer } from "vite-bundle-analyzer";
 import compression from "compression";
+import { cloudflare } from "@cloudflare/vite-plugin";
 
 // TODO: check this out later
 // import { bundleStats } from "rollup-plugin-bundle-stats";
@@ -10,6 +11,7 @@ import compression from "compression";
 export default defineConfig(() => {
   const plugins = [
     react({}),
+    cloudflare(),
     // Custom compression plugin for dev mode
     {
       name: "dev-compression",

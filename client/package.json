@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.11.6",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "compression": "^1.8.1",
     "postcss": "^8.5.6",
