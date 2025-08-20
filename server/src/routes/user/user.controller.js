@@ -60,7 +60,7 @@ export async function httpRefreshToken(req, res) {
     signed: true,
     maxAge: ACCESS_TOKEN_MAX_AGE_MS, // 1 hour
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api",
   });
 
@@ -68,7 +68,7 @@ export async function httpRefreshToken(req, res) {
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api",
   });
 
@@ -85,7 +85,7 @@ export async function httpGetCSRFToken(req, res) {
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api",
   });
 
@@ -106,11 +106,12 @@ export async function httpPostAuthDetails(req, res) {
   const csrfToken = createCSRFToken();
   const isProduction = process.env.NODE_ENV === "production";
 
+  // TODO: make samesite back to lax after domain is same
   // Update CSRF session cookie
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api",
   });
 

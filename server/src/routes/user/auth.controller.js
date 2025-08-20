@@ -112,12 +112,13 @@ export function setTokens(res, user) {
 
   const isProduction = process.env.NODE_ENV === "production";
 
+  // TODO: make samesite back to lax after domain is same
   res.cookie("jwt_access", accessToken, {
     httpOnly: true,
     signed: true,
     maxAge: ACCESS_TOKEN_MAX_AGE_MS,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api",
   });
 
@@ -126,7 +127,7 @@ export function setTokens(res, user) {
     signed: true,
     maxAge: REFRESH_TOKEN_MAX_AGE_MS,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api/user",
   });
 
@@ -134,7 +135,7 @@ export function setTokens(res, user) {
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/api",
   });
 
