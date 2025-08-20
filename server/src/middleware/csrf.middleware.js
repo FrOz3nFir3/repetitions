@@ -21,6 +21,11 @@ export function csrfProtectionMiddleware(req, res, next) {
     return next();
   }
 
+  // need to allow all request from this frontend domain
+  if (req.path.includes("https://repetitions.learnapp.workers.dev")) {
+    return next();
+  }
+
   console.warn(
     "CSRF_BLOCKED: A cross-site request to %s was blocked. Details:",
     req.path,
