@@ -1,17 +1,21 @@
-import React, { useEffect } from "react";
+import React, { lazy, useEffect } from "react";
 import {
   useParams,
   Outlet,
   useLocation,
   useSearchParams,
 } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useGetIndividualCardQuery } from "../../../api/apiSlice";
-import { initialCard, selectCurrentCard } from "../state/cardSlice";
+import { initialCard } from "../state/cardSlice";
 import CardInfo from "../components/CardInfo";
 import CardLogs from "../components/CardLogs";
 import Breadcrumbs from "../components/Breadcrumbs";
 import IndividualCardPageSkeleton from "../../../components/ui/skeletons/IndividualCardPageSkeleton";
+
+const NotFound = lazy(() =>
+  import("../../../features/not-found/components/NotFound")
+);
 
 function IndividualCardPage() {
   const params = useParams();
@@ -39,7 +43,6 @@ function IndividualCardPage() {
     id: params.id,
     view: getCardViewType(),
   });
-  const card = useSelector(selectCurrentCard);
 
   useEffect(() => {
     if (cardData) {
@@ -60,14 +63,23 @@ function IndividualCardPage() {
     location.pathname.includes("/review") ||
     location.pathname.includes("/quiz");
 
-  if (isFetching || !card) {
-    return <IndividualCardPageSkeleton isFocusedActivity={isFocusedActivity} />;
+  if (isFetching) {
+    return (
+      <IndividualCardPageSkeleton
+        isFocusedActivity={isFocusedActivity}
+        view={getCardViewType()}
+      />
+    );
+  }
+
+  if (!cardData) {
+    return <NotFound />;
   }
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <Breadcrumbs card={card} cardData={cardData} />
+        <Breadcrumbs card={cardData} cardData={cardData} />
 
         <div
           className={`grid grid-cols-1 ${
@@ -76,8 +88,8 @@ function IndividualCardPage() {
         >
           {!isFocusedActivity && (
             <div className="lg:col-span-1 space-y-6">
-              <CardInfo card={card} />
-              <CardLogs logs={card.logs || []} cardId={card._id} />
+              <CardInfo card={cardData} />
+              <CardLogs logs={cardData.logs || []} cardId={cardData._id} />
             </div>
           )}
 
