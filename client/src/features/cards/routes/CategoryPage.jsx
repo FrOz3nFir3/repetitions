@@ -11,6 +11,7 @@ import CategoryGrid from "../components/CategoryGrid";
 import Pagination from "../../../components/ui/Pagination";
 import useSearchAndPagination from "../../../hooks/useSearchAndPagination";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { normalizeCategory } from "../../../utils/textNormalization";
 
 const CATEGORIES_PER_PAGE = 8;
 
@@ -19,7 +20,8 @@ const categoryFilterFn = (category, query) =>
 
 function CategoryPage() {
   const navigate = useNavigate();
-  const { name: categoryName } = useParams();
+  let { name: categoryName } = useParams();
+  categoryName = normalizeCategory(categoryName);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const { data: allCards = [], isFetching: isFetchingAllCards } =

@@ -131,6 +131,15 @@ export function setTokens(res, user) {
     path: "/api/user",
   });
 
+  res.cookie("session-status", "active", {
+    httpOnly: false,
+    signed: false,
+    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
+  });
+
   // Set CSRF token as HttpOnly session cookie (expires when browser closes)
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,

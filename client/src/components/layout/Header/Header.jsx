@@ -1,6 +1,6 @@
 import React, { useState, useRef, Suspense } from "react";
 import { useSelector } from "react-redux";
-import { usePostAuthDetailsQuery } from "../../../api/apiSlice";
+import { usePostAuthDetailsMutation } from "../../../api/apiSlice";
 import { selectCurrentUser } from "../../../features/authentication/state/authSlice";
 
 // Hooks
@@ -19,14 +19,14 @@ const ProfileMenu = React.lazy(() => import("./ProfileMenu"));
 const MobileMenu = React.lazy(() => import("./MobileMenu"));
 
 function Header() {
-  const { data: existingUser, isLoading } = usePostAuthDetailsQuery();
+  const [postAuthDetails, { isLoading }] = usePostAuthDetailsMutation();
   const user = useSelector(selectCurrentUser);
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileMenuRef = useRef(null);
 
   // Custom Hooks for logic and side effects
-  useAuthEffect(existingUser);
+  useAuthEffect(postAuthDetails);
   useClickOutside(profileMenuRef, () => setIsProfileOpen(false));
   const { isScrolled, isFocusedSession } = useHeaderScroll();
 

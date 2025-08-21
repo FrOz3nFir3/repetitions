@@ -14,11 +14,14 @@ import {
 
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
 import FlashcardTips from "./FlashcardTips";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
 const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
   const [updateCard, { error, isSuccess }] = usePatchUpdateCardMutation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const errorRef = React.useRef(null);
+  const user = useSelector(selectCurrentUser);
 
   const handleDeleteFlashcard = () => {
     const updateDetails = {

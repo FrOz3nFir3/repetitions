@@ -2,6 +2,7 @@ import { usePostLogoutUserMutation } from "../api/apiSlice";
 import { useDispatch } from "react-redux";
 import { initialUser } from "../features/authentication/state/authSlice";
 import { googleLogout } from "@react-oauth/google";
+import { clearSessionStatusCookie } from "../utils/session";
 
 const useLogout = () => {
   const [logoutUser] = usePostLogoutUserMutation();
@@ -15,6 +16,7 @@ const useLogout = () => {
       // console.error("Logout failed:", err);
     } finally {
       dispatch(initialUser({ user: null, csrfToken: null }));
+      clearSessionStatusCookie();
       if (callback && typeof callback === "function") {
         callback(false);
       }

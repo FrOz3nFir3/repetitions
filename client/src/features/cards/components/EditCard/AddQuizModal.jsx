@@ -17,12 +17,15 @@ import {
 import SearchableDropdown from "../../components/ui/SearchableDropdown";
 import { getTextFromHtml } from "../../../../utils/dom";
 import QuizTips from "./QuizTips";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
 const AddQuizModal = ({ cardId, flashcards }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [quizQuestion, setQuizQuestion] = useState("");
   const [quizAnswer, setQuizAnswer] = useState("");
   const [selectedFlashcardId, setSelectedFlashcardId] = useState(null);
+  const user = useSelector(selectCurrentUser);
 
   const [updateCard, { error, isLoading }] = usePatchUpdateCardMutation();
   const questionEditorRef = useRef(null);
@@ -215,18 +218,20 @@ const AddQuizModal = ({ cardId, flashcards }) => {
             </div>
 
             {/* Footer Actions */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-wrap gap-4 items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {quizQuestion && quizAnswer ? (
+                {quizQuestion && quizAnswer && user ? (
                   <span className="text-green-600 dark:text-green-400">
                     Ready to create quiz
                   </span>
+                ) : !user ? (
+                  "Login in to create"
                 ) : (
                   "Fill in both question and answer to continue"
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={onClose}
@@ -237,7 +242,7 @@ const AddQuizModal = ({ cardId, flashcards }) => {
                 </button>
                 <button
                   type="submit"
-                  disabled={isInputEmpty || isLoading}
+                  disabled={isInputEmpty || isLoading || !user}
                   className="group cursor-pointer flex items-center gap-3 px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isLoading ? (

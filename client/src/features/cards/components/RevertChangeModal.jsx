@@ -12,11 +12,13 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { selectCurrentUser } from "../../authentication/state/authSlice";
 
 const RevertChangeModal = ({ isOpen, onClose, change }) => {
   const errorRef = React.useRef(null);
   const card = useSelector(selectCurrentCard);
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
+  const user = useSelector(selectCurrentUser);
 
   const handleRevert = () => {
     const { field, oldValue, cardId, quizId, optionId } = change;
@@ -204,27 +206,32 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={onClose}
-          disabled={isLoading}
-          className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 disabled:opacity-50 transition-all duration-200 font-medium"
-        >
-          <XMarkIcon className="h-5 w-5" />
-          Cancel
-        </button>
-        <button
-          onClick={handleRevert}
-          disabled={isLoading}
-          className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl hover:from-orange-700 hover:to-amber-700 disabled:from-orange-400 disabled:to-amber-400 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
-        >
-          {isLoading ? (
-            <ArrowPathIcon className="h-5 w-5 animate-spin" />
-          ) : (
-            <ArrowUturnLeftIcon className="h-5 w-5" />
-          )}
-          {isLoading ? "Reverting..." : "Revert Change"}
-        </button>
+      <div className="pt-4 mt-4 flex flex-wrap gap-4 items-center justify-between border-t border-gray-200 dark:border-gray-700">
+        <div className="text-sm text-gray-700 dark:text-gray-400 ">
+          {!user && "Login in to revert"}
+        </div>
+        <div className="flex flex-wrap justify-end gap-3">
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 font-medium"
+          >
+            <XMarkIcon className="h-5 w-5" />
+            Cancel
+          </button>
+          <button
+            onClick={handleRevert}
+            disabled={isLoading || !user}
+            className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl hover:from-orange-700 hover:to-amber-700 disabled:cursor-not-allowed disabled:opacity-50  transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+          >
+            {isLoading ? (
+              <ArrowPathIcon className="h-5 w-5 animate-spin" />
+            ) : (
+              <ArrowUturnLeftIcon className="h-5 w-5" />
+            )}
+            {isLoading ? "Reverting..." : "Revert Change"}
+          </button>
+        </div>
       </div>
     </Modal>
   );

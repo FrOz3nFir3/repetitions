@@ -11,6 +11,8 @@ import {
   HashtagIcon,
 } from "@heroicons/react/24/solid";
 import Modal from "../../../components/ui/Modal";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../authentication/state/authSlice";
 
 const FormField = ({ icon: Icon, title, children, color = "blue" }) => {
   const colorClasses = {
@@ -46,6 +48,7 @@ const FormField = ({ icon: Icon, title, children, color = "blue" }) => {
 
 export function NewCardForm({ category, newCard }) {
   const [isOpen, setIsOpen] = useState(newCard);
+  const user = useSelector(selectCurrentUser);
   const [createNewCard, { isLoading, error, isSuccess }] =
     usePostCreateNewCardMutation();
 
@@ -150,27 +153,33 @@ export function NewCardForm({ category, newCard }) {
           </div>
 
           {/* Action Button */}
-          <div className="pt-6 flex justify-end gap-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => setIsOpen(false)}
-              disabled={isLoading}
-              className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 disabled:opacity-50 transition-all duration-200 font-medium"
-            >
-              <XMarkIcon className="h-5 w-5" />
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="cursor-pointer flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-purple-700 disabled:from-blue-400 disabled:to-purple-400 transition-all duration-200 group"
-            >
-              {isLoading ? (
-                <ArrowPathIcon className="h-5 w-5 animate-spin" />
-              ) : (
-                <PlusIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
-              )}
-              {isLoading ? "Creating Card..." : "Create New Card"}
-            </button>
+          <div className="pt-6  flex flex-wrap gap-4 items-center justify-between border-t border-gray-200 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400 ">
+              {!user && "Login in to Create"}
+            </div>
+            <div className="flex flex-wrap justify-center sm:justify-end gap-4 ">
+              <button
+                onClick={() => setIsOpen(false)}
+                disabled={isLoading}
+                className="cursor-pointer flex items-center gap-2 px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 disabled:opacity-50 transition-all duration-200 font-medium"
+              >
+                <XMarkIcon className="h-5 w-5" />
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={isLoading || !user}
+                className="cursor-pointer flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-purple-700 disabled:from-blue-400 disabled:to-purple-400 transition-all duration-200 group"
+              >
+                {isLoading ? (
+                  <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                ) : (
+                  <PlusIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+                )}
+                {isLoading ? "Creating Card..." : "Create New Card"}
+              </button>
+            </div>
           </div>
         </form>
       </Modal>

@@ -1,15 +1,19 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { initialUser } from "../features/authentication/state/authSlice";
+import { isSessionPotentiallyActive } from "../utils/session";
 
-const useAuthEffect = (existingUser) => {
+const useAuthEffect = (postAuthDetails) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (existingUser) {
-      dispatch(initialUser(existingUser));
+    const isValidSession = isSessionPotentiallyActive();
+    if (isValidSession) {
+      postAuthDetails().then(({ data }) => {
+        dispatch(initialUser(data));
+      });
     }
-  }, [existingUser, dispatch]);
+  }, [postAuthDetails]);
 };
 
 export default useAuthEffect;

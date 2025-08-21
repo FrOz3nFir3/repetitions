@@ -9,6 +9,8 @@ import {
 import RichTextEditor from "../../../components/ui/RichTextEditor";
 import HtmlRenderer from "../../../components/ui/HtmlRenderer";
 import Flashcard from "./Flashcard/Review/Flashcard";
+import { selectCurrentUser } from "../../authentication/state/authSlice";
+import { useSelector } from "react-redux";
 
 export function CardField({
   _id,
@@ -20,6 +22,7 @@ export function CardField({
   showFlashcardPreview,
   flashcardData,
 }) {
+  const user = useSelector(selectCurrentUser);
   const errorRef = React.useRef(null);
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const [isEditing, setIsEditing] = useState(false);
@@ -123,10 +126,14 @@ export function CardField({
               />
             </div>
           )}
+
+          <div className="text-sm text-gray-500 dark:text-gray-400 text-right">
+            {!user && "Login in to edit"}
+          </div>
           <div className="flex gap-2 justify-end mt-2">
             <button
               type="submit"
-              disabled={isUnchanged || isLoading}
+              disabled={isUnchanged || isLoading || !user}
               className="cursor-pointer flex justify-center items-center h-8 w-8 rounded-full text-green-500 hover:bg-green-100 dark:hover:bg-green-800 disabled:text-gray-400 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (

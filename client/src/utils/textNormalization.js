@@ -1,5 +1,7 @@
-export function normalizeCategory(category) {
+export function normalizeCategory(category = "") {
   // Convert to title case: "programming" -> "Programming", "react hooks" -> "React Hooks"
+  if (!category?.trim) return category;
+
   return category
     .trim()
     .replace(/\s+/g, " ") // Normalize whitespace first

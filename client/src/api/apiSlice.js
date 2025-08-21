@@ -3,6 +3,10 @@ import {
   initialUser,
   setCsrfToken,
 } from "../features/authentication/state/authSlice";
+import {
+  clearSessionStatusCookie,
+  isSessionPotentiallyActive,
+} from "../utils/session";
 
 const baseQuery = fetchBaseQuery({
   baseUrl:
@@ -28,6 +32,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       result.error.data?.error === "Authentication token expired." ||
       result.error.data?.error === "User not Logged In."
     ) {
+      const isValidSession = isSessionPotentiallyActive();
+      if (!isValidSession) return result;
       const refreshResult = await baseQuery(
         { url: "/user/refresh", method: "POST" },
         api,
@@ -43,6 +49,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       } else {
         // Force logout if refresh fails
         api.dispatch(initialUser({ user: null, csrfToken: null }));
+        clearSessionStatusCookie();
       }
     }
   }
@@ -132,7 +139,7 @@ export const apiSlice = createApi({
       }),
     }),
 
-    postAuthDetails: builder.query({
+    postAuthDetails: builder.mutation({
       query: () => ({
         url: `/user/authed`,
         method: "POST",
@@ -276,7 +283,7 @@ export const {
   usePatchUpdateCardMutation,
   usePostRegisterUserMutation,
   usePostLoginUserMutation,
-  usePostAuthDetailsQuery,
+  usePostAuthDetailsMutation,
   usePatchUpdateUserProfileMutation,
   usePatchUpdateUserProgressMutation,
   useUpdateUserReviewProgressMutation,

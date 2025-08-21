@@ -2,6 +2,8 @@ import React from "react";
 import Modal from "./Modal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { ShieldExclamationIcon } from "@heroicons/react/24/solid";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../features/authentication/state/authSlice";
 
 const DeleteConfirmationModal = ({
   isOpen,
@@ -10,6 +12,8 @@ const DeleteConfirmationModal = ({
   title,
   description,
 }) => {
+  const user = useSelector(selectCurrentUser);
+
   if (!isOpen) {
     return null;
   }
@@ -54,24 +58,31 @@ const DeleteConfirmationModal = ({
             </div>
           </div>
         </div>
-        <div className="mt-8 flex justify-end space-x-4">
-          <button
-            type="button"
-            className="cursor-pointer px-6 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-transparent border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer px-6 py-2 text-sm font-semibold text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-          >
-            Delete
-          </button>
+
+        <div className="pt-4 mt-4 flex flex-wrap gap-4 items-center justify-between border-t border-gray-200 dark:border-gray-700">
+          <div className="text-sm text-gray-500 dark:text-gray-400 ">
+            {!user && "Login in to delete"}
+          </div>
+          <div className="flex flex-wra[] justify-end space-x-4">
+            <button
+              type="button"
+              className="cursor-pointer px-6 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-transparent border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-gray-800"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              disabled={!user}
+              type="button"
+              className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-30 px-6 py-2 text-sm font-semibold text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
+              onClick={() => {
+                onConfirm();
+                onClose();
+              }}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </Modal>

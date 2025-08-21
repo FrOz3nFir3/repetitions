@@ -11,6 +11,7 @@ import {
   PlusIcon,
   FolderIcon,
 } from "@heroicons/react/24/outline";
+import { normalizeCategory } from "../../../utils/textNormalization";
 
 const CARDS_PER_PAGE = 9;
 
@@ -20,7 +21,8 @@ const cardFilterFn = (card, query) =>
   card["sub-topic"].toLowerCase().includes(query);
 
 const CardList = () => {
-  const { name: category } = useParams();
+  let { name: category } = useParams();
+  category = normalizeCategory(category);
   const cardListRef = React.useRef(null);
 
   // Rename data to cards for clarity, as it's the source for the hook
@@ -139,7 +141,7 @@ const CardList = () => {
                   </span>
                 </div>
               </div>
-              <NewCardForm category={category} newCard={cards.length === 0} />
+              <NewCardForm category={category} />
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   PlusIcon,
   ArrowPathIcon,
@@ -18,8 +18,10 @@ import Modal from "../../../../components/ui/Modal";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import Flashcard from "../Flashcard/Review/Flashcard";
 import FlashcardTips from "./FlashcardTips";
+import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
 export function NewFlashcardModal({ flashcardId }) {
+  const user = useSelector(selectCurrentUser);
   const [isOpen, setIsOpen] = useState(false);
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const dispatch = useDispatch();
@@ -222,19 +224,21 @@ export function NewFlashcardModal({ flashcardId }) {
             </div>
 
             {/* Footer Actions */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex gap-4 flex-wrap items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {question && answer ? (
+                {question && answer && user ? (
                   <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
                     <CheckCircleIcon className="h-4 w-4" />
                     Ready to create
                   </span>
+                ) : !user ? (
+                  "Login in to create"
                 ) : (
                   "Fill in both question and answer to continue"
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"
                   onClick={onClose}
@@ -245,7 +249,7 @@ export function NewFlashcardModal({ flashcardId }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading || !question || !answer}
+                  disabled={isLoading || !question || !answer || !user}
                   className="group cursor-pointer flex items-center gap-3 px-8 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isLoading ? (
