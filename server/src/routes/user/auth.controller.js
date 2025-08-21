@@ -6,10 +6,10 @@ dotenv.config({ path: "../.env" });
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
-const ACCESS_TOKEN_EXPIRY_HOURS = 2;
+const ACCESS_TOKEN_EXPIRY_HOURS = 3;
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
 
-// JWT `expiresIn` as a string (e.g., "2h", "30d")
+// JWT `expiresIn` as a string (e.g., "3h", "30d")
 const ACCESS_TOKEN_EXPIRY_JWT = `${ACCESS_TOKEN_EXPIRY_HOURS}h`;
 const REFRESH_TOKEN_EXPIRY_JWT = `${REFRESH_TOKEN_EXPIRY_DAYS}d`;
 
@@ -131,14 +131,15 @@ export function setTokens(res, user) {
     path: "/api/user",
   });
 
-  res.cookie("session-status", "active", {
-    httpOnly: false,
-    signed: false,
-    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    path: "/",
-  });
+  // doesn't work across cross domains need to enable this later
+  // res.cookie("session-status", "active", {
+  //   httpOnly: false,
+  //   signed: false,
+  //   maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+  //   secure: isProduction,
+  //   sameSite: isProduction ? "none" : "lax",
+  //   path: "/",
+  // });
 
   // Set CSRF token as HttpOnly session cookie (expires when browser closes)
   res.cookie("csrf_token", csrfToken, {

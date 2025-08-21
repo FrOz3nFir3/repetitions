@@ -7,6 +7,7 @@ import AuthInput from "./ui/AuthInput";
 import AuthSubmitButton from "./ui/AuthSubmitButton";
 import AuthErrorDisplay from "./ui/AuthErrorDisplay";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { setSessionStatus } from "../../../utils/session";
 
 const LoginForm = () => {
   const [loginUser, { data, isLoading, error }] = usePostLoginUserMutation();
@@ -17,8 +18,9 @@ const LoginForm = () => {
   useEffect(() => {
     if (data) {
       dispatch(initialUser(data));
+      setSessionStatus(true);
     }
-  }, [data, dispatch]);
+  }, [data]);
 
   const handleSubmit = (event) => {
     event.preventDefault();

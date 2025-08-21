@@ -3,10 +3,7 @@ import {
   initialUser,
   setCsrfToken,
 } from "../features/authentication/state/authSlice";
-import {
-  clearSessionStatusCookie,
-  isSessionPotentiallyActive,
-} from "../utils/session";
+import { setSessionStatus, isSessionPotentiallyActive } from "../utils/session";
 
 const baseQuery = fetchBaseQuery({
   baseUrl:
@@ -49,7 +46,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       } else {
         // Force logout if refresh fails
         api.dispatch(initialUser({ user: null, csrfToken: null }));
-        clearSessionStatusCookie();
+        setSessionStatus();
       }
     }
   }
@@ -74,6 +71,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       } else {
         // Force logout if refresh fails
         api.dispatch(initialUser({ user: null, csrfToken: null }));
+        setSessionStatus();
       }
     }
   }

@@ -25,8 +25,9 @@ const RegisterForm = () => {
   useEffect(() => {
     if (data) {
       dispatch(initialUser(data));
+      setSessionStatus(true);
     }
-  }, [data, dispatch]);
+  }, [data]);
 
   const handleSubmit = (event) => {
     event.preventDefault();

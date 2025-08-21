@@ -5,6 +5,7 @@ import { initialUser } from "../state/authSlice";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import LoginByGoogleSkeleton from "../../../components/ui/skeletons/LoginByGoogleSkeleton";
 import { jwtDecode } from "jwt-decode";
+import { setSessionStatus } from "../../../utils/session";
 
 const GoogleLogin = lazy(() =>
   import("@react-oauth/google").then((module) => ({
@@ -23,6 +24,7 @@ function LoginByGoogle(props) {
   React.useEffect(() => {
     if (data != null) {
       dispatch(initialUser(data));
+      setSessionStatus(true);
     }
   }, [data]);
 
