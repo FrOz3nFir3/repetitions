@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from "react";
-import { useGetAllCardsQuery } from "../../../api/apiSlice";
+import React, { useState } from "react";
 import { Outlet, useParams, useNavigate } from "react-router-dom";
 import CategorySkeleton from "../../../components/ui/skeletons/CategoryPageSkeleton";
 import PreviouslyStudied from "../../progress/components/PreviouslyStudied";
@@ -8,15 +7,11 @@ import CategoryHeader from "../components/CategoryHeader";
 import Modal from "../../../components/ui/Modal";
 import CategorySearch from "../components/CategorySearch";
 import CategoryGrid from "../components/CategoryGrid";
+import CategoryGridSkeleton from "../../../components/ui/skeletons/CategoryGridSkeleton";
 import Pagination from "../../../components/ui/Pagination";
-import useSearchAndPagination from "../../../hooks/useSearchAndPagination";
+import useCategoriesWithSearch from "../../../hooks/useCategoriesWithSearch";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { normalizeCategory } from "../../../utils/textNormalization";
-
-const CATEGORIES_PER_PAGE = 8;
-
-const categoryFilterFn = (category, query) =>
-  category.toLowerCase().includes(query);
 
 function CategoryPage() {
   const navigate = useNavigate();
@@ -24,26 +19,20 @@ function CategoryPage() {
   categoryName = normalizeCategory(categoryName);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
-  const { data: allCards = [], isFetching: isFetchingAllCards } =
-    useGetAllCardsQuery();
-
-  // This is safe now because allCards is always an array
-  const uniqueCategories = useMemo(() => [...new Set(allCards)], [allCards]);
-
   const {
     searchQuery,
     setSearchQuery,
     currentPage,
     setCurrentPage,
+    categories: currentCategories,
+    total: totalItemsCount,
     totalPages,
-    paginatedItems: currentCategories,
-    filteredItemsCount,
-    totalItemsCount,
-  } = useSearchAndPagination(
-    uniqueCategories,
-    CATEGORIES_PER_PAGE,
-    categoryFilterFn
-  );
+    isFetching,
+    isLoading,
+    isSearching,
+  } = useCategoriesWithSearch();
+
+  const filteredItemsCount = currentCategories.length;
 
   const handleCategoryClick = (category) => {
     if (categoryName) {
@@ -72,7 +61,7 @@ function CategoryPage() {
   };
 
   // Early return *after* hooks
-  if (isFetchingAllCards) {
+  if (isLoading) {
     return <CategorySkeleton />;
   }
 
@@ -102,11 +91,11 @@ function CategoryPage() {
                 {searchQuery ? "No categories found" : "No categories yet"}
               </h3>
               <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-                {searchQuery
+                {isSearching
                   ? `No categories match "${searchQuery}". Try a different search term.`
                   : "Create your first category to start organizing your study materials."}
               </p>
-              {!searchQuery && (
+              {!isSearching && (
                 <button
                   onClick={() => setShowCreateForm(true)}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -118,19 +107,32 @@ function CategoryPage() {
             </div>
           ) : (
             <>
-              <CategoryGrid
-                categories={currentCategories}
-                onCategoryClick={handleCategoryClick}
-                activeCategory={categoryName}
-              />
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                itemsCount={filteredItemsCount}
-                itemsPerPage={CATEGORIES_PER_PAGE}
-                activeColorClass="bg-indigo-600"
-              />
+              {isFetching && currentCategories.length === 0 ? (
+                <CategoryGridSkeleton count={12} />
+              ) : (
+                <CategoryGrid
+                  categories={currentCategories}
+                  onCategoryClick={handleCategoryClick}
+                  activeCategory={categoryName}
+                />
+              )}
+
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                  itemsCount={totalItemsCount}
+                  itemsPerPage={12}
+                  activeColorClass="bg-indigo-600"
+                />
+              )}
+
+              {isFetching && currentCategories.length > 0 && (
+                <div className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                </div>
+              )}
             </>
           )}
         </div>

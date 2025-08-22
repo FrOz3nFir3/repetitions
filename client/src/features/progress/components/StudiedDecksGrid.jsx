@@ -2,6 +2,7 @@ import React from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import StudiedCardGridItem from "../../cards/components/StudiedCardGridItem";
 import Pagination from "../../../components/ui/Pagination";
+import CardSkeleton from "../../../components/ui/skeletons/CardSkeleton";
 
 const StudiedDecksGrid = ({
   paginatedCards,
@@ -10,6 +11,7 @@ const StudiedDecksGrid = ({
   onPageChange,
   filteredCount,
   itemsPerPage,
+  isFetching = false,
 }) => {
   if (filteredCount === 0) {
     return (
@@ -29,27 +31,40 @@ const StudiedDecksGrid = ({
 
   return (
     <>
-      <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {paginatedCards.map((card, index) => (
-            <div
-              key={card._id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <StudiedCardGridItem card={card} />
-            </div>
-          ))}
+      {isFetching && paginatedCards.length === 0 ? (
+        <CardSkeleton />
+      ) : (
+        <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {paginatedCards.map((card, index) => (
+              <div
+                key={card._id}
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <StudiedCardGridItem card={card} />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={onPageChange}
-        itemsCount={filteredCount}
-        itemsPerPage={itemsPerPage}
-        activeColorClass="bg-green-600"
-      />
+      )}
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          itemsCount={filteredCount}
+          itemsPerPage={itemsPerPage}
+          activeColorClass="bg-green-600"
+        />
+      )}
+
+      {isFetching && paginatedCards.length > 0 && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+        </div>
+      )}
     </>
   );
 };

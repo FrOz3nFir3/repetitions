@@ -91,9 +91,52 @@ export const apiSlice = createApi({
       providesTags: ["Card"],
     }),
 
+    getCategoriesPaginated: builder.query({
+      query: ({ page = 1, limit = 12, search = "" }) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        if (search.trim()) {
+          params.append("search", search.trim());
+        }
+        return `/cards/categories/paginated?${params.toString()}`;
+      },
+      providesTags: ["Card"],
+      // Keep separate cache entries for each page and search combination
+      serializeQueryArgs: ({ queryArgs }) => {
+        return {
+          page: queryArgs.page || 1,
+          search: queryArgs.search || "",
+        };
+      },
+    }),
+
     getCardsByCategory: builder.query({
       query: (category) => `/cards/${category}`,
       providesTags: ["Card"],
+    }),
+
+    getCardsByCategoryPaginated: builder.query({
+      query: ({ category, page = 1, limit = 9, search = "" }) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        if (search.trim()) {
+          params.append("search", search.trim());
+        }
+        return `/cards/${category}?${params.toString()}`;
+      },
+      providesTags: ["Card"],
+      // Keep separate cache entries for each page and search combination
+      serializeQueryArgs: ({ queryArgs }) => {
+        return {
+          category: queryArgs.category,
+          page: queryArgs.page || 1,
+          search: queryArgs.search || "",
+        };
+      },
     }),
 
     getIndividualCard: builder.query({
@@ -153,6 +196,70 @@ export const apiSlice = createApi({
       ],
     }),
 
+    getUserProgressPaginated: builder.query({
+      query: ({ page = 1, limit = 9, search = "", category = "All" }) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        if (search.trim()) {
+          params.append("search", search.trim());
+        }
+        if (category && category !== "All") {
+          params.append("category", category);
+        }
+        return `/user/progress/paginated?${params.toString()}`;
+      },
+      providesTags: (result) => [
+        { type: "Report", id: "LIST" },
+        ...(result?.cards?.map(({ _id }) => ({ type: "Report", id: _id })) ??
+          []),
+      ],
+      // Keep separate cache entries for each page, search, and category combination
+      serializeQueryArgs: ({ queryArgs }) => {
+        return {
+          page: queryArgs.page || 1,
+          search: queryArgs.search || "",
+        };
+      },
+    }),
+
+    getUserStats: builder.query({
+      query: () => `/user/stats`,
+      providesTags: ["Report"],
+    }),
+
+    getUserCategories: builder.query({
+      query: () => `/user/categories`,
+    }),
+
+    getQuizProgress: builder.query({
+      query: ({ page = 1, limit = 9, search = "", category = "All" }) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        if (search.trim()) {
+          params.append("search", search.trim());
+        }
+        if (category && category !== "All") {
+          params.append("category", category);
+        }
+        return `/user/quiz-progress?${params.toString()}`;
+      },
+      providesTags: (result) => [
+        { type: "Report", id: "LIST" },
+        ...(result?.cards?.map(({ _id }) => ({ type: "Report", id: _id })) ??
+          []),
+      ],
+      serializeQueryArgs: ({ queryArgs }) => {
+        return {
+          page: queryArgs.page || 1,
+          search: queryArgs.search || "",
+        };
+      },
+    }),
+
     getCardReviewProgress: builder.query({
       query: (card_id) => `/user/card-progress/${card_id}`,
     }),
@@ -163,14 +270,29 @@ export const apiSlice = createApi({
     }),
 
     getCardLogs: builder.query({
-      query: ({ cardId, page }) => `/card/${cardId}/logs?page=${page}`,
-      serializeQueryArgs: ({ queryArgs, endpointDefinition, endpointName }) => {
-        return endpointName;
+      query: ({ cardId, page, search = "" }) => {
+        const params = new URLSearchParams({ page: page.toString() });
+        if (search.trim()) {
+          params.append("search", search.trim());
+        }
+        return `/card/${cardId}/logs?${params.toString()}`;
+      },
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { cardId, search = "" } = queryArgs;
+        return `${cardId}-${search.trim()}`;
       },
       forceRefetch({ currentArg, previousArg }) {
         return currentArg !== previousArg;
       },
-      merge: (currentCache, newItems) => {
+      merge: (currentCache, newItems, { arg }) => {
+        // If it's page 1, replace the cache (new search or reset)
+        if (arg.page === 1) {
+          return {
+            logs: newItems.logs,
+            hasMore: newItems.hasMore,
+          };
+        }
+        // Otherwise, append for infinite scroll
         return {
           logs: [...currentCache.logs, ...newItems.logs],
           hasMore: newItems.hasMore,
@@ -275,7 +397,9 @@ export const apiSlice = createApi({
 
 export const {
   useGetAllCardsQuery,
+  useGetCategoriesPaginatedQuery,
   useGetCardsByCategoryQuery,
+  useGetCardsByCategoryPaginatedQuery,
   usePostCreateNewCardMutation,
   useGetIndividualCardQuery,
   usePatchUpdateCardMutation,
@@ -288,6 +412,10 @@ export const {
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
   useGetUserProgressQuery,
+  useGetUserProgressPaginatedQuery,
+  useGetUserStatsQuery,
+  useGetUserCategoriesQuery,
+  useGetQuizProgressQuery,
   useGetCardReviewProgressQuery,
   useGetDetailedReportQuery,
   useGetCardLogsQuery,

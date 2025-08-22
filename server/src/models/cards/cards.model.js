@@ -8,23 +8,105 @@ import {
 import Card from "./cards.mongo.js";
 import { Types } from "mongoose";
 
-export async function cardsByCategory(category) {
-  return Card.find(
-    { category: { $eq: category } },
-    {
-      "main-topic": 1,
-      "sub-topic": 1,
-      category: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      reviewLength: { $size: "$review" },
-      quizzesLength: { $size: "$quizzes" },
-    }
-  );
+export async function cardsByCategory(category, { skip, limit, search } = {}) {
+  let filter = { category: { $eq: category } };
+
+  // Add search filter if provided
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
+    filter.$or = [{ "main-topic": searchRegex }, { "sub-topic": searchRegex }];
+  }
+
+  const query = Card.find(filter, {
+    "main-topic": 1,
+    "sub-topic": 1,
+    category: 1,
+    createdAt: 1,
+    updatedAt: 1,
+    reviewLength: { $size: "$review" },
+    quizzesLength: { $size: "$quizzes" },
+  }).sort({ updatedAt: -1 });
+
+  if (skip !== undefined && limit !== undefined) {
+    return query.skip(skip).limit(limit);
+  }
+
+  return query;
+}
+
+export async function countCardsByCategory(category, search) {
+  let filter = { category: { $eq: category } };
+
+  // Add search filter if provided
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
+    filter.$or = [{ "main-topic": searchRegex }, { "sub-topic": searchRegex }];
+  }
+
+  return Card.countDocuments(filter);
 }
 
 export async function getAllCards() {
   return Card.distinct("category");
+}
+
+export async function getAllCategoriesWithPagination({ skip, limit, search }) {
+  const pipeline = [
+    {
+      $group: {
+        _id: "$category",
+        count: { $sum: 1 },
+        lastUpdated: { $max: "$updatedAt" },
+      },
+    },
+  ];
+
+  // Add search filter if provided
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
+    pipeline.push({
+      $match: {
+        _id: searchRegex,
+      },
+    });
+  }
+
+  // Add sorting, skip, and limit
+  pipeline.push(
+    { $sort: { lastUpdated: -1 } },
+    { $skip: skip },
+    { $limit: limit }
+  );
+
+  const categories = await Card.aggregate(pipeline);
+  return categories.map((cat) => cat._id);
+}
+
+export async function countAllCategories(search) {
+  const pipeline = [
+    {
+      $group: {
+        _id: "$category",
+      },
+    },
+  ];
+
+  // Add search filter if provided
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
+    pipeline.push({
+      $match: {
+        _id: searchRegex,
+      },
+    });
+  }
+
+  pipeline.push({
+    $count: "total",
+  });
+
+  const result = await Card.aggregate(pipeline);
+  return result.length > 0 ? result[0].total : 0;
 }
 
 export async function findExistingCard(mainTopic, subTopic, category) {
@@ -82,6 +164,8 @@ export async function getCardById(id, view = "overview") {
         $size: "$review",
       },
       category: 1,
+      "main-topic": 1,
+      "sub-topic": 1,
     }).lean();
   }
 
@@ -710,7 +794,7 @@ export async function updateCard(details) {
   return card;
 }
 
-export async function getCardLogs(cardId, page = 1, limit = 10) {
+export async function getCardLogs(cardId, page = 1, limit = 10, search = "") {
   if (!Types.ObjectId.isValid(cardId)) return { logs: [], hasMore: false };
   const id = new Types.ObjectId(cardId);
   const skip = (page - 1) * limit;
@@ -729,6 +813,18 @@ export async function getCardLogs(cardId, page = 1, limit = 10) {
       },
     },
     { $unwind: { path: "$logs", preserveNullAndEmptyArrays: true } },
+    ...(search && search.trim()
+      ? [
+          {
+            $match: {
+              "logs.summary": {
+                $regex: search.trim(),
+                $options: "i", // Case insensitive
+              },
+            },
+          },
+        ]
+      : []),
     { $skip: skip },
     { $limit: limit },
     {

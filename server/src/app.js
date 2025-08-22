@@ -31,8 +31,16 @@ app.use(
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         "script-src": ["'self'", "https://accounts.google.com"],
-        "frame-src": ["'self'", "https://accounts.google.com"],
-        "connect-src": ["'self'", "https://accounts.google.com"],
+        "frame-src": [
+          "'self'",
+          "https://accounts.google.com",
+          "https://www.googleapis.com",
+        ],
+        "connect-src": [
+          "'self'",
+          "https://accounts.google.com",
+          "https://www.googleapis.com",
+        ],
       },
     },
     crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
@@ -94,7 +102,6 @@ app.get("/health", async (req, res) => {
 // Cookie parser for API routes
 app.use("/api", cookieParser(cookieSecret));
 
-
 // CORS configuration
 const corsOptions = {
   origin: runningInProduction
@@ -104,7 +111,6 @@ const corsOptions = {
   optionsSuccessStatus: 200, // For legacy browser support
 };
 app.use("/api", cors(corsOptions));
-
 
 app.use("/api", apiRouter);
 

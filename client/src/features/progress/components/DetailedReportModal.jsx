@@ -25,7 +25,10 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
     data: cardData,
     isLoading: isLoadingCard,
     isError: isErrorCard,
-  } = useGetIndividualCardQuery(cardId, { skip: !isOpen });
+  } = useGetIndividualCardQuery(
+    { id: cardId, view: "quiz" },
+    { skip: !isOpen }
+  );
 
   const isLoading = isLoadingReport || isLoadingCard;
   const isError = isErrorReport || isErrorCard;

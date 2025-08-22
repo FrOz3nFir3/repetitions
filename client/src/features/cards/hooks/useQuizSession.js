@@ -86,16 +86,7 @@ export const useQuizSession = (card, onFinish) => {
         isFirstQuestion: currentQuestionIndex === 0,
         isLastQuestion: currentQuestionIndex === quizzes.length - 1,
       };
-      updateUser(updateDetails).then(() => {
-        if (updateDetails.isFirstQuestion)
-          dispatch(modifyUser({ card_id: card._id, type: "times-started" }));
-        if (updateDetails.isLastQuestion)
-          dispatch(modifyUser({ card_id: card._id, type: "times-finished" }));
-        if (updateDetails.correct)
-          dispatch(modifyUser({ card_id: card._id, type: "total-correct" }));
-        else
-          dispatch(modifyUser({ card_id: card._id, type: "total-incorrect" }));
-      });
+      updateUser(updateDetails);
     }
   };
 

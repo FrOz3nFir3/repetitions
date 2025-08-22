@@ -1,24 +1,15 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
-import { useGetUserProgressQuery } from "../../../api/apiSlice";
 import ProgressPageSkeleton from "../../../components/ui/skeletons/ProgressPageSkeleton";
 import DetailedReportModal from "../components/DetailedReportModal";
 import RestrictedAccess from "../../../components/ui/RestrictedAccess";
 import OverallStats from "../components/OverallStats";
 import DeckProgressList from "../components/DeckProgressList";
 import ProgressPageHeader from "../components/ProgressPageHeader";
-import EmptyState from "../components/ui/EmptyState";
-import { RocketLaunchIcon } from "@heroicons/react/24/outline";
 
 function ProgressPage() {
   const user = useSelector(selectCurrentUser);
-  const { data: studyingCards, isLoading } = useGetUserProgressQuery(
-    undefined,
-    {
-      skip: !user?.email,
-    }
-  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -33,17 +24,11 @@ function ProgressPage() {
     setSelectedCard(null);
   };
 
-  if (!user && !isLoading) {
+  if (!user) {
     return (
       <RestrictedAccess description="You need to be logged in to view your progress and track your learning journey." />
     );
   }
-
-  if (isLoading) {
-    return <ProgressPageSkeleton />;
-  }
-
-  const totalDecksStudied = user.studying?.length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-indigo-900 dark:to-purple-900">
@@ -65,21 +50,7 @@ function ProgressPage() {
 
           {/* Decks Section */}
           <div className="mb-16">
-            {totalDecksStudied > 0 ? (
-              <DeckProgressList
-                user={user}
-                studyingCards={studyingCards}
-                onViewReport={handleViewReport}
-              />
-            ) : (
-              <EmptyState
-                title="Ready to Start Learning?"
-                message="Your learning journey begins with your first quiz. Choose a deck and start building your knowledge!"
-                ctaText="Explore Learning Decks"
-                ctaLink="/category"
-                icon={RocketLaunchIcon}
-              />
-            )}
+            <DeckProgressList user={user} onViewReport={handleViewReport} />
           </div>
         </div>
       </div>

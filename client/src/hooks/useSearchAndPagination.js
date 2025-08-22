@@ -7,11 +7,11 @@ const useSearchAndPagination = (
   initialSearchQuery = ""
 ) => {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Reset to the first page whenever the search query or the source items change
   useEffect(() => {
-    setCurrentPage(0);
+    setCurrentPage(1);
   }, [searchQuery, items]);
 
   const filteredItems = useMemo(() => {
@@ -21,7 +21,7 @@ const useSearchAndPagination = (
   }, [items, searchQuery, filterFn]);
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedItems = filteredItems.slice(
     startIndex,
     startIndex + itemsPerPage

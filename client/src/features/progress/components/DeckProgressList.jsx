@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   MagnifyingGlassIcon,
   BookOpenIcon,
@@ -6,39 +6,48 @@ import {
 } from "@heroicons/react/24/outline";
 import DeckProgressCard from "./DeckProgressCard";
 import Pagination from "../../../components/ui/Pagination";
+import { useGetUserStatsQuery } from "../../../api/apiSlice";
+import useQuizProgressWithSearch from "../../../hooks/useQuizProgressWithSearch";
+import EmptyState from "./ui/EmptyState";
+import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 
-const DeckProgressList = ({ user, studyingCards, onViewReport }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(0);
-
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [searchQuery]);
-
-  const filteredDecks = searchQuery.trim()
-    ? user.studying.filter((_, index) => {
-        const cardDetails = studyingCards[index];
-        if (!cardDetails) return false;
-        const searchLower = searchQuery.toLowerCase();
-        return (
-          cardDetails["main-topic"]?.toLowerCase().includes(searchLower) ||
-          cardDetails["sub-topic"]?.toLowerCase().includes(searchLower) ||
-          cardDetails.category?.toLowerCase().includes(searchLower)
-        );
-      })
-    : user.studying;
-
+const DeckProgressList = ({ user, onViewReport }) => {
   const CARDS_PER_PAGE = 6;
-  const totalPages = Math.ceil(filteredDecks.length / CARDS_PER_PAGE);
-  const startIndex = currentPage * CARDS_PER_PAGE;
-  const endIndex = startIndex + CARDS_PER_PAGE;
-  const currentCards = filteredDecks.slice(startIndex, endIndex);
 
-  const totalDecksStudied = user.studying.length;
-  const totalQuizzesCompleted = user.studying.reduce(
-    (sum, deck) => sum + (deck["times-finished"] || 0),
-    0
-  );
+  // Use custom hook for search and pagination - exactly like PreviouslyStudied
+  const {
+    searchQuery,
+    setSearchQuery,
+    currentPage,
+    setCurrentPage,
+    cards: currentCards,
+    total: totalItems,
+    totalPages,
+    isFetching,
+    isLoading,
+    isSearching,
+    resetSearch,
+  } = useQuizProgressWithSearch(user);
+
+  // Get stats for the summary
+  const { data: stats } = useGetUserStatsQuery(undefined, {
+    skip: !user?.studyingCount,
+  });
+
+  const totalDecksStudied = stats?.totalDecksStudied || 0;
+  const totalQuizzesCompleted = stats?.totalQuizzesFinished || 0;
+
+  if (!totalDecksStudied) {
+    return (
+      <EmptyState
+        title="Ready to Start Learning?"
+        message="Your learning journey begins with your first quiz. Choose a deck and start building your knowledge!"
+        ctaText="Explore Learning Decks"
+        ctaLink="/category"
+        icon={RocketLaunchIcon}
+      />
+    );
+  }
 
   return (
     <div className="mb-16">
@@ -72,6 +81,26 @@ const DeckProgressList = ({ user, studyingCards, onViewReport }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-16 pr-12 py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 text-lg font-medium"
           />
+          {searchQuery && (
+            <button
+              onClick={resetSearch}
+              className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl">
@@ -90,26 +119,41 @@ const DeckProgressList = ({ user, studyingCards, onViewReport }) => {
       </div>
 
       <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-          {currentCards.map((progress, index) => {
-            const actualIndex = user.studying.findIndex(
-              (p) => p.card_id === progress.card_id
-            );
-            return (
-              <div
-                key={progress.card_id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 50}ms` }}
+        {currentCards.length === 0 ? (
+          <div className="text-center py-12">
+            <BookOpenIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              {isSearching ? "No cards found" : "No study cards yet"}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              {isSearching
+                ? `No cards match "${searchQuery}". Try a different search term.`
+                : "Start studying some cards to see your progress here."}
+            </p>
+            {isSearching && (
+              <button
+                onClick={resetSearch}
+                className="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
               >
+                Clear Search
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {currentCards.map((card, index) => {
+              return (
                 <DeckProgressCard
-                  progress={progress}
-                  cardDetails={studyingCards[actualIndex]}
+                  // TODO: make this card._id later
+                  key={index}
+                  card={card}
+                  index={index}
                   onViewReport={onViewReport}
                 />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {totalPages > 1 && (
@@ -117,7 +161,7 @@ const DeckProgressList = ({ user, studyingCards, onViewReport }) => {
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
-          itemsCount={filteredDecks.length}
+          itemsCount={totalItems}
           itemsPerPage={CARDS_PER_PAGE}
           activeColorClass="bg-emerald-600"
         />

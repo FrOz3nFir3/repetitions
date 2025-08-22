@@ -18,7 +18,23 @@ import { HashtagIcon } from "@heroicons/react/24/solid";
 import ProgressBar from "../../../components/ui/ProgressBar";
 import StatBadge from "../../../components/ui/StatBadge";
 
-const DeckProgressCard = ({ progress, cardDetails, onViewReport }) => {
+const DeckProgressCard = ({ card, onViewReport, index }) => {
+  const progress = {
+    card_id: card._id,
+    "times-started": card["times-started"],
+    "times-finished": card["times-finished"],
+    "total-correct": card["total-correct"],
+    "total-incorrect": card["total-incorrect"],
+  };
+
+  const cardDetails = {
+    _id: card._id,
+    "main-topic": card["main-topic"],
+    "sub-topic": card["sub-topic"],
+    category: card.category,
+    lastReviewedCardNo: card.lastReviewedCardNo,
+  };
+
   // not valid data
   if (!cardDetails) {
     return null;
@@ -64,8 +80,13 @@ const DeckProgressCard = ({ progress, cardDetails, onViewReport }) => {
 
   const performance = getPerformanceLevel();
 
+  const notStarted = timesStarted === 0;
+
   return (
-    <div className="group relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]">
+    <div
+      style={{ animationDelay: `${index * 50}ms` }}
+      className="animate-fade-in group relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
+    >
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-full blur-2xl transition-all duration-500 group-hover:from-indigo-500/10 group-hover:to-purple-500/10"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-emerald-500/5 to-teal-500/5 rounded-full blur-xl"></div>
@@ -185,12 +206,13 @@ const DeckProgressCard = ({ progress, cardDetails, onViewReport }) => {
           className="group/btn w-full flex items-center justify-center px-5 py-4 border border-transparent rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
         >
           <PlayIcon className="w-5 h-5 mr-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
-          Continue Learning
+          {notStarted ? "Start Quiz" : "Continue Quiz"}
           <ArrowRightIcon className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
         </Link>
         <button
+          disabled={notStarted}
           onClick={() => onViewReport(progress)}
-          className="cursor-pointer group/btn w-full flex items-center justify-center px-5 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-lg"
+          className="cursor-pointer group/btn disabled:cursor-not-allowed disabled:opacity-30 w-full flex items-center justify-center px-5 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-lg"
         >
           <ChartBarIcon className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform duration-300" />
           View Detailed Report

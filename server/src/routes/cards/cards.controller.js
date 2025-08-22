@@ -1,14 +1,18 @@
 import {
   cardsByCategory,
+  countCardsByCategory,
   createNewCard,
   findExistingCard,
   getAllCards,
+  getAllCategoriesWithPagination,
+  countAllCategories,
   getCardsByIds,
   getCardsByAuthor,
   countCardsByAuthor,
 } from "../../models/cards/cards.model.js";
 import { getPublicUserByUsername } from "../../models/users/users.model.js";
 import { getPagination } from "../../services/query.js";
+import { getCategoriesPagination } from "../../services/categoryQuery.js";
 
 export async function httpGetCardsByAuthor(req, res) {
   const { username } = req.params;
@@ -32,9 +36,21 @@ import {
 
 export async function httpGetCardsByCategory(req, res) {
   const { category } = req.params;
+  const { skip, limit } = getPagination(req.query);
+  const { search } = req.query;
+
   try {
-    const cards = await cardsByCategory(category);
-    res.json(cards);
+    const cards = await cardsByCategory(category, { skip, limit, search });
+    const total = await countCardsByCategory(category, search);
+    const hasMore = skip + limit < total;
+
+    res.json({
+      cards,
+      total,
+      hasMore,
+      page: Math.floor(skip / limit) + 1,
+      limit,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
@@ -102,6 +118,32 @@ export async function httpGetAllCards(req, res) {
     const allCards = await getAllCards();
     res.json(allCards);
   } catch (error) {
+    res.status(500).json({ error });
+  }
+}
+
+export async function httpGetAllCategoriesPaginated(req, res) {
+  const { skip, limit } = getCategoriesPagination(req.query);
+  const { search } = req.query;
+
+  try {
+    const categories = await getAllCategoriesWithPagination({
+      skip,
+      limit,
+      search,
+    });
+    const total = await countAllCategories(search);
+    const hasMore = skip + limit < total;
+
+    res.json({
+      categories,
+      total,
+      hasMore,
+      page: Math.floor(skip / limit) + 1,
+      limit,
+    });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ error });
   }
 }

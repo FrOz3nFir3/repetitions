@@ -5,36 +5,28 @@ import {
   ChartBarIcon,
   PlayCircleIcon,
 } from "@heroicons/react/24/outline";
-import StatCard from "../../../components/ui/StatCard"; // Assuming this is the new path for StatCard
+import StatCard from "../../../components/ui/StatCard";
+import { useGetUserStatsQuery } from "../../../api/apiSlice";
 
 const OverallStats = ({ user }) => {
-  if (!user || !user.studying) return null;
+  const { data: statsData, isLoading } = useGetUserStatsQuery(undefined, {
+    skip: !user?.email,
+  });
 
-  // Calculate comprehensive stats
-  const totalDecksStudied = user.studying.length;
-  const totalQuizzesTaken = user.studying.reduce(
-    (acc, deck) => acc + (deck["times-started"] || 0),
-    0
-  );
-  const totalCorrect = user.studying.reduce(
-    (acc, deck) => acc + (deck["total-correct"] || 0),
-    0
-  );
-  const totalIncorrect = user.studying.reduce(
-    (acc, deck) => acc + (deck["total-incorrect"] || 0),
-    0
-  );
-  const totalQuizzesFinished = user.studying.reduce(
-    (acc, deck) => acc + (deck["times-finished"] || 0),
-    0
-  );
+  if (!user || isLoading) return null;
+  if (!statsData) return null;
+
+  const {
+    totalDecksStudied,
+    totalQuizzesTaken,
+    totalCorrect,
+    totalIncorrect,
+    totalQuizzesFinished,
+    overallAccuracy,
+    completionRate,
+  } = statsData;
+
   const totalAnswers = totalCorrect + totalIncorrect;
-  const overallAccuracy =
-    totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
-  const completionRate =
-    totalQuizzesTaken > 0
-      ? Math.round((totalQuizzesFinished / totalQuizzesTaken) * 100)
-      : 0;
 
   const stats = [
     {

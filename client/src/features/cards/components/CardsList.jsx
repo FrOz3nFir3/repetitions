@@ -1,11 +1,10 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import { useGetCardsByCategoryQuery } from "../../../api/apiSlice";
 import { NewCardForm } from "./NewCardForm";
 import CardSkeleton from "../../../components/ui/skeletons/CardSkeleton";
 import Pagination from "../../../components/ui/Pagination";
 import CardGridItem from "./CardGridItem";
-import useSearchAndPagination from "../../../hooks/useSearchAndPagination"; // Assuming this hook is created
+import useCardsWithSearch from "../../../hooks/useCardsWithSearch";
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -13,32 +12,25 @@ import {
 } from "@heroicons/react/24/outline";
 import { normalizeCategory } from "../../../utils/textNormalization";
 
-const CARDS_PER_PAGE = 9;
-
-// Define the filter function specific to cards
-const cardFilterFn = (card, query) =>
-  card["main-topic"].toLowerCase().includes(query) ||
-  card["sub-topic"].toLowerCase().includes(query);
-
 const CardList = () => {
   let { name: category } = useParams();
   category = normalizeCategory(category);
   const cardListRef = React.useRef(null);
 
-  // Rename data to cards for clarity, as it's the source for the hook
-  const { data: cards = [], isFetching } = useGetCardsByCategoryQuery(category);
-
-  // Use the custom hook for search and pagination
   const {
     searchQuery,
     setSearchQuery,
     currentPage,
     setCurrentPage,
+    cards,
+    total: totalItemsCount,
     totalPages,
-    paginatedItems,
-    filteredItemsCount,
-    totalItemsCount,
-  } = useSearchAndPagination(cards, CARDS_PER_PAGE, cardFilterFn);
+    isFetching,
+    isLoading,
+    isSearching,
+  } = useCardsWithSearch(category);
+
+  const filteredItemsCount = cards.length;
 
   return (
     <div
@@ -52,7 +44,7 @@ const CardList = () => {
         <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-purple-400/5 to-pink-600/5 rounded-full blur-3xl"></div>
       </div>
 
-      {isFetching ? (
+      {isLoading ? (
         <CardSkeleton />
       ) : (
         <div className="relative z-10 container mx-auto px-4">
@@ -163,26 +155,28 @@ const CardList = () => {
                   ? "Create your first card to start building your knowledge collection."
                   : `No cards match "${searchQuery}". Try a different search term.`}
               </p>
-              {totalItemsCount === 0 && (
-                <NewCardForm category={category} newCard={true} />
-              )}
+              {totalItemsCount === 0 && <NewCardForm category={category} />}
             </div>
           ) : (
             <>
               {/* Cards Grid */}
-              <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {paginatedItems.map((card, index) => (
-                    <div
-                      key={card._id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <CardGridItem card={card} />
-                    </div>
-                  ))}
+              {isFetching && cards.length === 0 ? (
+                <CardSkeleton />
+              ) : (
+                <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {cards.map((card, index) => (
+                      <div
+                        key={card._id}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <CardGridItem card={card} />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
@@ -190,9 +184,16 @@ const CardList = () => {
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={setCurrentPage}
-                  itemsCount={filteredItemsCount}
-                  itemsPerPage={CARDS_PER_PAGE}
+                  itemsCount={totalItemsCount}
+                  itemsPerPage={9}
+                  activeColorClass="bg-indigo-600"
                 />
+              )}
+
+              {isFetching && cards.length > 0 && (
+                <div className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+                </div>
               )}
             </>
           )}

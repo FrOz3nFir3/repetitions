@@ -11,11 +11,11 @@ const Pagination = ({
 }) => {
   if (totalPages <= 1) return null;
 
-  const startIndex = currentPage * itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, itemsCount);
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
+    if (newPage >= 1 && newPage <= totalPages) {
       onPageChange(newPage);
     }
   };
@@ -26,21 +26,21 @@ const Pagination = ({
     const totalBlocks = totalNumbers + 2; // Including ellipses
 
     if (totalPages <= totalBlocks) {
-      return Array.from({ length: totalPages }, (_, i) => i);
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
 
     const result = [];
-    const startPage = 0;
-    const endPage = totalPages - 1;
+    const startPage = 1;
+    const endPage = totalPages;
 
-    const leftSiblingIndex = Math.max(currentPage - pageNeighbours, 1);
+    const leftSiblingIndex = Math.max(currentPage - pageNeighbours, 2);
     const rightSiblingIndex = Math.min(
       currentPage + pageNeighbours,
-      totalPages - 2
+      totalPages - 1
     );
 
-    const shouldShowLeftDots = leftSiblingIndex > 1;
-    const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
+    const shouldShowLeftDots = leftSiblingIndex > 2;
+    const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
 
     result.push(startPage);
 
@@ -56,7 +56,9 @@ const Pagination = ({
       result.push("...");
     }
 
-    result.push(endPage);
+    if (endPage !== startPage) {
+      result.push(endPage);
+    }
     return result;
   };
 
@@ -85,11 +87,11 @@ const Pagination = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {renderButton("First", () => handlePageChange(0), currentPage === 0)}
+        {renderButton("First", () => handlePageChange(1), currentPage === 1)}
         {renderButton(
           <ChevronLeftIcon className="h-8 w-8" />,
           () => handlePageChange(currentPage - 1),
-          currentPage === 0,
+          currentPage === 1,
           true
         )}
 
@@ -112,7 +114,7 @@ const Pagination = ({
                     : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
               >
-                {pageNum + 1}
+                {pageNum}
               </button>
             )
           )}
@@ -121,13 +123,13 @@ const Pagination = ({
         {renderButton(
           <ChevronRightIcon className="h-8 w-8" />,
           () => handlePageChange(currentPage + 1),
-          currentPage === totalPages - 1,
+          currentPage === totalPages,
           true
         )}
         {renderButton(
           "Last",
-          () => handlePageChange(totalPages - 1),
-          currentPage === totalPages - 1
+          () => handlePageChange(totalPages),
+          currentPage === totalPages
         )}
       </div>
     </div>

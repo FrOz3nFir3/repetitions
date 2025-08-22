@@ -1,32 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import {
   MagnifyingGlassIcon,
   CheckCircleIcon,
-  ChevronDownIcon,
 } from "@heroicons/react/24/solid";
 
 const StudiedDecksControls = ({
   searchQuery,
   setSearchQuery,
-  categories,
-  selectedCategory,
-  setSelectedCategory,
   totalCount,
   filteredCount,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
     <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-8 p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
       <div className="relative flex-1 max-w-2xl">
@@ -80,48 +63,10 @@ const StudiedDecksControls = ({
             </span>
           </div>
         </div>
-        <div ref={dropdownRef} className="relative">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-200 dark:border-gray-600 shadow-sm px-4 py-2.5 bg-white dark:bg-gray-800 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <span>{selectedCategory}</span>
-            <ChevronDownIcon
-              className={`h-4 w-4 transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-          {isOpen && (
-            <div className="absolute right-0 top-14 w-48 rounded-xl shadow-2xl bg-white dark:bg-gray-800 ring-1 ring-black/10 dark:ring-white/10 z-[100] border-2 border-gray-200 dark:border-gray-700">
-              <div className="py-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      setIsOpen(false);
-                    }}
-                    className={`block w-full text-left px-4 py-3 text-sm font-medium transition-colors duration-200 ${
-                      selectedCategory === category
-                        ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                        : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                    }`}
-                  >
-                    {category}
-                    {selectedCategory === category && (
-                      <CheckCircleIcon className="inline h-4 w-4 ml-2" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
 };
 
 export default StudiedDecksControls;
+

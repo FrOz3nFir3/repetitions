@@ -4,6 +4,7 @@ import {
   httpGetCardsByCategory,
   httpPostCreateNewCard,
   httpGetAllCards,
+  httpGetAllCategoriesPaginated,
 } from "./cards.controller.js";
 import { requireAuthenticationWithCSRF } from "../../middleware/auth.middleware.js";
 import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
@@ -12,6 +13,7 @@ import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
 cardsRouter.use(apiLimiter);
 
 cardsRouter.get("/all", httpGetAllCards);
+cardsRouter.get("/categories/paginated", httpGetAllCategoriesPaginated);
 // TODO: add pagination later
 cardsRouter.get("/:category", httpGetCardsByCategory);
 cardsRouter.post("/", requireAuthenticationWithCSRF, httpPostCreateNewCard);

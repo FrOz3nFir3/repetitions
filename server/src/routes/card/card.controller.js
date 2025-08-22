@@ -25,9 +25,10 @@ export async function httpGetCardLogs(req, res) {
   const { id } = req.params;
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 10;
+  const search = req.query.search || "";
 
   try {
-    const data = await getCardLogs(id, page, limit);
+    const data = await getCardLogs(id, page, limit, search);
     res.json(data);
   } catch (error) {
     console.log(error);

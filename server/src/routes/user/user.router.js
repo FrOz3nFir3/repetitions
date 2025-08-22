@@ -7,6 +7,10 @@ import {
   httpUpdateUser,
   httpGetDetailedReport,
   httpGetUserProgress,
+  httpGetUserProgressPaginated,
+  httpGetUserStats,
+  httpGetUserCategories,
+  httpGetQuizProgress,
   httpGetCardReviewProgress,
   httpUpdateUserProgress,
   httpUpdateUserReviewProgress,
@@ -39,6 +43,34 @@ userRouter.get(
   apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetUserProgress
+);
+
+userRouter.get(
+  "/progress/paginated",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpGetUserProgressPaginated
+);
+
+userRouter.get(
+  "/stats",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpGetUserStats
+);
+
+userRouter.get(
+  "/categories",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpGetUserCategories
+);
+
+userRouter.get(
+  "/quiz-progress",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpGetQuizProgress
 );
 
 userRouter.get(

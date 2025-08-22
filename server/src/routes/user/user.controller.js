@@ -12,6 +12,7 @@ import {
   generateUniqueUsername,
   getPublicUserByUsername,
 } from "../../models/users/users.model.js";
+import { getPagination } from "../../services/query.js";
 
 export async function httpGetPublicUserByUsername(req, res) {
   const { username } = req.params;
@@ -213,7 +214,7 @@ export async function httpCreateNewUser(req, res) {
 
     const user = await createNewUser(newUser);
     const csrfToken = setTokens(res, user);
-    const { _id, password, __v, ...userDetails } = user._doc;
+    const { _id, password, __v, studying, ...userDetails } = user._doc;
     res.status(200).json({
       user: userDetails,
       csrfToken,
@@ -351,7 +352,7 @@ export async function httpLoginUser(req, res) {
 
     const csrfToken = setTokens(res, user);
 
-    const { _id, password: p, ...userDetails } = user._doc;
+    const { _id, password: p, studying, ...userDetails } = user._doc;
     return res.status(200).json({
       user: userDetails,
       csrfToken,
@@ -369,7 +370,7 @@ export async function httpLoginGoogleUser(req, res) {
     }
 
     const userProjectionCopy = { ...userDetailsProjection };
-    delete userProjectionCopy._id;
+    userProjectionCopy._id = 1;
     let user = await findUserByGoogleId(googleId, userProjectionCopy);
 
     if (user == null) {
@@ -460,6 +461,79 @@ export async function httpGetUserProgress(req, res) {
   }
 }
 
+export async function httpGetUserProgressPaginated(req, res) {
+  const { id: userId } = req.token;
+  const { skip, limit } = getPagination(req.query);
+  const { search, category } = req.query;
+
+  try {
+    const user = await getUserProgress(userId);
+    const userStudying =
+      user?.[0]?.studying?.map((s) => ({
+        cardId: s.card_id,
+        lastReviewedCardNo: s.lastReviewedCardNo,
+      })) ?? [];
+
+    if (!userStudying || userStudying.length === 0) {
+      return res.status(200).json({
+        cards: [],
+        total: 0,
+        hasMore: false,
+        page: 1,
+        limit,
+      });
+    }
+
+    const cards = await getCardsByIds(userStudying.map((s) => s.cardId));
+
+    // Map back with progress
+    let cardsWithProgress = userStudying
+      .map((s) => {
+        const card = cards.find(
+          (c) => c._id.toString() === s.cardId.toString()
+        );
+        return {
+          ...(card?._doc ?? {}),
+          lastReviewedCardNo: s.lastReviewedCardNo,
+        };
+      })
+      .filter((card) => card._id); // Filter out any cards that weren't found
+
+    // Apply category filter
+    if (category && category !== "All") {
+      cardsWithProgress = cardsWithProgress.filter(
+        (card) => card.category === category
+      );
+    }
+
+    // Apply search filter
+    if (search && search.trim()) {
+      const searchLower = search.toLowerCase();
+      cardsWithProgress = cardsWithProgress.filter(
+        (card) =>
+          card["main-topic"]?.toLowerCase().includes(searchLower) ||
+          card["sub-topic"]?.toLowerCase().includes(searchLower) ||
+          card.category?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    const total = cardsWithProgress.length;
+    const paginatedCards = cardsWithProgress.slice(skip, skip + limit);
+    const hasMore = skip + limit < total;
+
+    return res.json({
+      cards: paginatedCards,
+      total,
+      hasMore,
+      page: Math.floor(skip / limit) + 1,
+      limit,
+    });
+  } catch (error) {
+    console.log(error, "error in paginated progress");
+    res.status(500).json({ error });
+  }
+}
+
 export async function httpGetCardReviewProgress(req, res) {
   const { card_id } = req.params;
   const { id: userId } = req.token;
@@ -484,6 +558,160 @@ export async function httpGetCardReviewProgress(req, res) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpGetUserStats(req, res) {
+  const { id: userId } = req.token;
+
+  try {
+    const user = await getUserProgress(userId);
+    const userStudying = user?.[0]?.studying ?? [];
+
+    if (!userStudying || userStudying.length === 0) {
+      return res.status(200).json({
+        totalDecksStudied: 0,
+        totalQuizzesTaken: 0,
+        totalCorrect: 0,
+        totalIncorrect: 0,
+        totalQuizzesFinished: 0,
+        overallAccuracy: 0,
+        completionRate: 0,
+      });
+    }
+
+    // Calculate stats efficiently
+    const stats = userStudying.reduce(
+      (acc, deck) => {
+        acc.totalQuizzesTaken += deck["times-started"] || 0;
+        acc.totalCorrect += deck["total-correct"] || 0;
+        acc.totalIncorrect += deck["total-incorrect"] || 0;
+        acc.totalQuizzesFinished += deck["times-finished"] || 0;
+        return acc;
+      },
+      {
+        totalDecksStudied: userStudying.length,
+        totalQuizzesTaken: 0,
+        totalCorrect: 0,
+        totalIncorrect: 0,
+        totalQuizzesFinished: 0,
+      }
+    );
+
+    const totalAnswers = stats.totalCorrect + stats.totalIncorrect;
+    stats.overallAccuracy =
+      totalAnswers > 0
+        ? Math.round((stats.totalCorrect / totalAnswers) * 100)
+        : 0;
+    stats.completionRate =
+      stats.totalQuizzesTaken > 0
+        ? Math.round(
+            (stats.totalQuizzesFinished / stats.totalQuizzesTaken) * 100
+          )
+        : 0;
+
+    return res.json(stats);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpGetUserCategories(req, res) {
+  const { id: userId } = req.token;
+
+  try {
+    const user = await getUserProgress(userId);
+    const userStudying =
+      user?.[0]?.studying?.map((s) => ({
+        cardId: s.card_id,
+      })) ?? [];
+
+    if (!userStudying || userStudying.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const cards = await getCardsByIds(userStudying.map((s) => s.cardId));
+
+    // Extract unique categories
+    const categories = [
+      ...new Set(cards.map((card) => card.category).filter(Boolean)),
+    ];
+
+    return res.json(categories);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpGetQuizProgress(req, res) {
+  const { id: userId } = req.token;
+  const { skip, limit } = getPagination(req.query);
+  const { search } = req.query;
+
+  try {
+    const user = await getUserProgress(userId);
+    const userStudying = user?.[0]?.studying ?? [];
+
+    if (!userStudying || userStudying.length === 0) {
+      return res.status(200).json({
+        cards: [],
+        total: 0,
+        hasMore: false,
+        page: 1,
+        limit,
+      });
+    }
+
+    const cards = await getCardsByIds(userStudying.map((s) => s.card_id));
+
+    // Map cards with their progress data
+    let cardsWithProgress = userStudying
+      .map((progress) => {
+        const card = cards.find(
+          (c) => c._id.toString() === progress.card_id.toString()
+        );
+        if (!card) return null;
+
+        return {
+          _id: card._id,
+          "main-topic": card["main-topic"],
+          "sub-topic": card["sub-topic"],
+          category: card.category,
+          "times-started": progress["times-started"] || 0,
+          "times-finished": progress["times-finished"] || 0,
+          "total-correct": progress["total-correct"] || 0,
+          "total-incorrect": progress["total-incorrect"] || 0,
+          lastReviewedCardNo: progress.lastReviewedCardNo || 0,
+        };
+      })
+      .filter(Boolean);
+
+    // Apply search filter
+    if (search && search.trim()) {
+      const searchLower = search.toLowerCase();
+      cardsWithProgress = cardsWithProgress.filter(
+        (card) =>
+          card["main-topic"]?.toLowerCase().includes(searchLower) ||
+          card["sub-topic"]?.toLowerCase().includes(searchLower) ||
+          card.category?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    const total = cardsWithProgress.length;
+    const paginatedCards = cardsWithProgress.slice(skip, skip + limit);
+    const hasMore = skip + limit < total;
+
+    return res.json({
+      cards: paginatedCards,
+      total,
+      hasMore,
+      page: Math.floor(skip / limit) + 1,
+      limit,
+    });
+  } catch (error) {
+    res.status(500).json({ error });
   }
 }
 
