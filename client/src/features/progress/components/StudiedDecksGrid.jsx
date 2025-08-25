@@ -31,8 +31,8 @@ const StudiedDecksGrid = ({
 
   return (
     <>
-      {isFetching && paginatedCards.length === 0 ? (
-        <CardSkeleton />
+      {isFetching ? (
+        <CardSkeleton showHeader={false} />
       ) : (
         <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -58,12 +58,6 @@ const StudiedDecksGrid = ({
           itemsPerPage={itemsPerPage}
           activeColorClass="bg-green-600"
         />
-      )}
-
-      {isFetching && paginatedCards.length > 0 && (
-        <div className="text-center py-4">
-          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
-        </div>
       )}
     </>
   );

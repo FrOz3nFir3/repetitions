@@ -1,32 +1,36 @@
 import React from "react";
 
-const CardSkeleton = () => {
+const CardSkeleton = ({ showHeader = true }) => {
   return (
     <div className="relative z-10 container mx-auto px-4 animate-pulse">
       {/* Header Section Skeleton */}
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-          <div className="flex-1 max-w-xs">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
-            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+      {!!showHeader && (
+        <>
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
+              <div className="flex-1 max-w-xs">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-2"></div>
+                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+              </div>
+            </div>
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto mb-4"></div>
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mx-auto"></div>
           </div>
-        </div>
-        <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto mb-4"></div>
-        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-3/4 mx-auto"></div>
-      </div>
 
-      {/* Search and Action Bar Skeleton */}
-      <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-12 p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl">
-        <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl w-full lg:w-1/2"></div>
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-24"></div>
-            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-28"></div>
+          {/* Search and Action Bar Skeleton */}
+          <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-12 p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl">
+            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl w-full lg:w-1/2"></div>
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex items-center gap-4">
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-24"></div>
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-xl w-28"></div>
+              </div>
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-2xl w-36"></div>
+            </div>
           </div>
-          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-2xl w-36"></div>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Cards Grid Skeleton */}
       <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl sm:p-8 mb-8">

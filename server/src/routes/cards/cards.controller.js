@@ -1,18 +1,17 @@
 import {
-  cardsByCategory,
-  countCardsByCategory,
+  getCardsByCategoryPaginated,
   createNewCard,
   findExistingCard,
-  getAllCards,
   getAllCategoriesWithPagination,
-  countAllCategories,
-  getCardsByIds,
-  getCardsByAuthor,
-  countCardsByAuthor,
+  getCardsByAuthorPaginated,
 } from "../../models/cards/cards.model.js";
 import { getPublicUserByUsername } from "../../models/users/users.model.js";
 import { getPagination } from "../../services/query.js";
 import { getCategoriesPagination } from "../../services/categoryQuery.js";
+import {
+  normalizeWhitespace,
+  normalizeCategory,
+} from "../../utils/textNormalization.js";
 
 export async function httpGetCardsByAuthor(req, res) {
   const { username } = req.params;
@@ -21,18 +20,16 @@ export async function httpGetCardsByAuthor(req, res) {
   const authorId = user?._id;
   const { skip, limit } = getPagination(req.query);
   try {
-    const cards = await getCardsByAuthor(authorId, { skip, limit });
-    const total = await countCardsByAuthor(authorId);
+    const { cards, total } = await getCardsByAuthorPaginated(authorId, {
+      skip,
+      limit,
+    });
     const hasMore = skip + limit < total;
     res.json({ cards, total, hasMore });
   } catch (error) {
     res.status(500).json({ error });
   }
 }
-import {
-  normalizeWhitespace,
-  normalizeCategory,
-} from "../../utils/textNormalization.js";
 
 export async function httpGetCardsByCategory(req, res) {
   const { category } = req.params;
@@ -40,30 +37,27 @@ export async function httpGetCardsByCategory(req, res) {
   const { search } = req.query;
 
   try {
-    const cards = await cardsByCategory(category, { skip, limit, search });
-    const total = await countCardsByCategory(category, search);
+    const { cards, total } = await getCardsByCategoryPaginated(
+      category.trim(),
+      {
+        skip,
+        limit,
+        search,
+      }
+    );
     const hasMore = skip + limit < total;
+    const page = Math.floor(skip / limit) + 1;
 
     res.json({
       cards,
       total,
       hasMore,
-      page: Math.floor(skip / limit) + 1,
+      page,
       limit,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
-  }
-}
-export async function httpPostCardsByIds(req, res) {
-  var { cardsIds } = req.body;
-  try {
-    const cards = await getCardsByIds(cardsIds);
-    return res.json(cards);
-  } catch (error) {
-    console.log(error.message);
-    return res.status(400).json({ error: error.message });
   }
 }
 export async function httpPostCreateNewCard(req, res) {
@@ -72,7 +66,7 @@ export async function httpPostCreateNewCard(req, res) {
   if (token === null) {
     return res.status(401).json({ error: "Authentication / Login required" });
   }
-  var { mainTopic, subTopic, category } = req.body;
+  let { mainTopic, subTopic, category } = req.body;
   if (!mainTopic && !mainTopic.trim()) {
     return res.status(409).json({ error: "Main Topic name is required" });
   }
@@ -108,17 +102,12 @@ export async function httpPostCreateNewCard(req, res) {
     );
     return res.json(card);
   } catch (error) {
-    console.log(error);
-    return res.status(400).json({ error });
-  }
-}
-
-export async function httpGetAllCards(req, res) {
-  try {
-    const allCards = await getAllCards();
-    res.json(allCards);
-  } catch (error) {
-    res.status(500).json({ error });
+    if (error.message.includes("duplicate key error collection")) {
+      return res.status(409).json({
+        error: `A card with the same Main Topic "${mainTopic}", Sub Topic "${subTopic}", and Category "${category}" already exists. Please use different values to avoid confusion.`,
+      });
+    }
+    return res.status(400).json({ error: error.message });
   }
 }
 
@@ -127,19 +116,18 @@ export async function httpGetAllCategoriesPaginated(req, res) {
   const { search } = req.query;
 
   try {
-    const categories = await getAllCategoriesWithPagination({
+    const { categories, total } = await getAllCategoriesWithPagination({
       skip,
       limit,
       search,
     });
-    const total = await countAllCategories(search);
     const hasMore = skip + limit < total;
-
+    const page = Math.floor(skip / limit) + 1;
     res.json({
       categories,
       total,
       hasMore,
-      page: Math.floor(skip / limit) + 1,
+      page,
       limit,
     });
   } catch (error) {

@@ -2,31 +2,22 @@ import {
   createNewUser,
   findUserByEmail,
   findUserByGoogleId,
-  updateUserDetails,
+  updateUserQuizProgress,
   updateUser,
-  getUserProgress,
+  getDetailedReport,
+  getUserReviewProgress,
+  getUserStats,
+  getUserQuizProgress,
   getUserById,
   updateUserReviewProgress,
   findUserByUsername,
   findUserByEmailOrUsername,
   generateUniqueUsername,
   getPublicUserByUsername,
+  getUserStudyingCount,
+  getUserLastReviewedByCardProgress,
 } from "../../models/users/users.model.js";
 import { getPagination } from "../../services/query.js";
-
-export async function httpGetPublicUserByUsername(req, res) {
-  const { username } = req.params;
-  try {
-    const user = await getPublicUserByUsername(username);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    return res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-}
-import { getCardsByIds } from "../../models/cards/cards.model.js";
 import {
   setTokens,
   verifyRefreshToken,
@@ -40,6 +31,19 @@ const emailValidator = new EmailValidator({ timeout: 10000 });
 import { userDetailsProjection } from "../../utils/constants.js";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+export async function httpGetPublicUserByUsername(req, res) {
+  const { username } = req.params;
+  try {
+    const user = await getPublicUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 export async function httpRefreshToken(req, res) {
   const refreshTokenFromCookie = req.signedCookies.jwt_refresh;
@@ -214,7 +218,7 @@ export async function httpCreateNewUser(req, res) {
 
     const user = await createNewUser(newUser);
     const csrfToken = setTokens(res, user);
-    const { _id, password, __v, studying, ...userDetails } = user._doc;
+    const { _id, password, __v, studying, ...userDetails } = user._doc ?? user;
     res.status(200).json({
       user: userDetails,
       csrfToken,
@@ -297,11 +301,11 @@ export async function httpUpdateUser(req, res) {
   }
 }
 
-export async function httpUpdateUserProgress(req, res) {
+export async function httpUpdateUserQuizProgress(req, res) {
   const { id } = req.token;
 
   try {
-    await updateUserDetails(id, req.body);
+    await updateUserQuizProgress(id, req.body);
     res.status(200).json({ ok: true });
   } catch (error) {
     console.log(error);
@@ -352,7 +356,7 @@ export async function httpLoginUser(req, res) {
 
     const csrfToken = setTokens(res, user);
 
-    const { _id, password: p, studying, ...userDetails } = user._doc;
+    const { _id, password: p, studying, ...userDetails } = user;
     return res.status(200).json({
       user: userDetails,
       csrfToken,
@@ -390,7 +394,7 @@ export async function httpLoginGoogleUser(req, res) {
     }
 
     const csrfToken = setTokens(res, user);
-    const { _id, ...userDetails } = user._doc;
+    const { _id, ...userDetails } = user._doc ?? user;
     return res.status(200).json({
       user: userDetails,
       csrfToken,
@@ -429,103 +433,26 @@ export async function httpLogoutUser(req, res) {
   return res.status(200).json({ ok: true });
 }
 
-export async function httpGetUserProgress(req, res) {
-  const { id: userId } = req.token;
-
-  try {
-    const user = await getUserProgress(userId);
-    const userStudying =
-      user?.[0]?.studying?.map((s) => ({
-        cardId: s.card_id,
-        lastReviewedCardNo: s.lastReviewedCardNo,
-      })) ?? [];
-    if (!userStudying || userStudying.length === 0) {
-      return res.status(200).json([]);
-    }
-
-    const cards = await getCardsByIds(userStudying.map((s) => s.cardId));
-
-    // map back
-    const cardsWithProgress = userStudying.map((s) => {
-      const card = cards.find((c) => c._id.toString() === s.cardId.toString());
-      return {
-        ...(card?._doc ?? {}),
-        lastReviewedCardNo: s.lastReviewedCardNo,
-      };
-    });
-
-    return res.json(cardsWithProgress);
-  } catch (error) {
-    console.log(error, "erro");
-    res.status(500).json({ error });
-  }
-}
-
 export async function httpGetUserProgressPaginated(req, res) {
   const { id: userId } = req.token;
   const { skip, limit } = getPagination(req.query);
-  const { search, category } = req.query;
+  const { search } = req.query;
 
   try {
-    const user = await getUserProgress(userId);
-    const userStudying =
-      user?.[0]?.studying?.map((s) => ({
-        cardId: s.card_id,
-        lastReviewedCardNo: s.lastReviewedCardNo,
-      })) ?? [];
+    const { cards, total } = await getUserReviewProgress(userId, {
+      skip,
+      limit,
+      search,
+    });
 
-    if (!userStudying || userStudying.length === 0) {
-      return res.status(200).json({
-        cards: [],
-        total: 0,
-        hasMore: false,
-        page: 1,
-        limit,
-      });
-    }
-
-    const cards = await getCardsByIds(userStudying.map((s) => s.cardId));
-
-    // Map back with progress
-    let cardsWithProgress = userStudying
-      .map((s) => {
-        const card = cards.find(
-          (c) => c._id.toString() === s.cardId.toString()
-        );
-        return {
-          ...(card?._doc ?? {}),
-          lastReviewedCardNo: s.lastReviewedCardNo,
-        };
-      })
-      .filter((card) => card._id); // Filter out any cards that weren't found
-
-    // Apply category filter
-    if (category && category !== "All") {
-      cardsWithProgress = cardsWithProgress.filter(
-        (card) => card.category === category
-      );
-    }
-
-    // Apply search filter
-    if (search && search.trim()) {
-      const searchLower = search.toLowerCase();
-      cardsWithProgress = cardsWithProgress.filter(
-        (card) =>
-          card["main-topic"]?.toLowerCase().includes(searchLower) ||
-          card["sub-topic"]?.toLowerCase().includes(searchLower) ||
-          card.category?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    const total = cardsWithProgress.length;
-    const paginatedCards = cardsWithProgress.slice(skip, skip + limit);
     const hasMore = skip + limit < total;
+    const page = Math.floor(skip / limit) + 1;
 
     return res.json({
-      cards: paginatedCards,
+      cards,
       total,
       hasMore,
-      page: Math.floor(skip / limit) + 1,
+      page,
       limit,
     });
   } catch (error) {
@@ -543,11 +470,10 @@ export async function httpGetCardReviewProgress(req, res) {
   }
 
   try {
-    const user = await getUserProgress(userId);
-    const cardProgress = user?.[0]?.studying?.find(
-      (s) => s && s.card_id && s.card_id.toString() === card_id
-    );
-
+    const cardProgress = await getUserLastReviewedByCardProgress({
+      userId,
+      cardId: card_id,
+    });
     if (!cardProgress) {
       return res.status(200).json({ lastReviewedCardNo: 0 });
     }
@@ -565,80 +491,8 @@ export async function httpGetUserStats(req, res) {
   const { id: userId } = req.token;
 
   try {
-    const user = await getUserProgress(userId);
-    const userStudying = user?.[0]?.studying ?? [];
-
-    if (!userStudying || userStudying.length === 0) {
-      return res.status(200).json({
-        totalDecksStudied: 0,
-        totalQuizzesTaken: 0,
-        totalCorrect: 0,
-        totalIncorrect: 0,
-        totalQuizzesFinished: 0,
-        overallAccuracy: 0,
-        completionRate: 0,
-      });
-    }
-
-    // Calculate stats efficiently
-    const stats = userStudying.reduce(
-      (acc, deck) => {
-        acc.totalQuizzesTaken += deck["times-started"] || 0;
-        acc.totalCorrect += deck["total-correct"] || 0;
-        acc.totalIncorrect += deck["total-incorrect"] || 0;
-        acc.totalQuizzesFinished += deck["times-finished"] || 0;
-        return acc;
-      },
-      {
-        totalDecksStudied: userStudying.length,
-        totalQuizzesTaken: 0,
-        totalCorrect: 0,
-        totalIncorrect: 0,
-        totalQuizzesFinished: 0,
-      }
-    );
-
-    const totalAnswers = stats.totalCorrect + stats.totalIncorrect;
-    stats.overallAccuracy =
-      totalAnswers > 0
-        ? Math.round((stats.totalCorrect / totalAnswers) * 100)
-        : 0;
-    stats.completionRate =
-      stats.totalQuizzesTaken > 0
-        ? Math.round(
-            (stats.totalQuizzesFinished / stats.totalQuizzesTaken) * 100
-          )
-        : 0;
-
+    const stats = await getUserStats(userId);
     return res.json(stats);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: error.message });
-  }
-}
-
-export async function httpGetUserCategories(req, res) {
-  const { id: userId } = req.token;
-
-  try {
-    const user = await getUserProgress(userId);
-    const userStudying =
-      user?.[0]?.studying?.map((s) => ({
-        cardId: s.card_id,
-      })) ?? [];
-
-    if (!userStudying || userStudying.length === 0) {
-      return res.status(200).json([]);
-    }
-
-    const cards = await getCardsByIds(userStudying.map((s) => s.cardId));
-
-    // Extract unique categories
-    const categories = [
-      ...new Set(cards.map((card) => card.category).filter(Boolean)),
-    ];
-
-    return res.json(categories);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
@@ -651,63 +505,19 @@ export async function httpGetQuizProgress(req, res) {
   const { search } = req.query;
 
   try {
-    const user = await getUserProgress(userId);
-    const userStudying = user?.[0]?.studying ?? [];
-
-    if (!userStudying || userStudying.length === 0) {
-      return res.status(200).json({
-        cards: [],
-        total: 0,
-        hasMore: false,
-        page: 1,
-        limit,
-      });
-    }
-
-    const cards = await getCardsByIds(userStudying.map((s) => s.card_id));
-
-    // Map cards with their progress data
-    let cardsWithProgress = userStudying
-      .map((progress) => {
-        const card = cards.find(
-          (c) => c._id.toString() === progress.card_id.toString()
-        );
-        if (!card) return null;
-
-        return {
-          _id: card._id,
-          "main-topic": card["main-topic"],
-          "sub-topic": card["sub-topic"],
-          category: card.category,
-          "times-started": progress["times-started"] || 0,
-          "times-finished": progress["times-finished"] || 0,
-          "total-correct": progress["total-correct"] || 0,
-          "total-incorrect": progress["total-incorrect"] || 0,
-          lastReviewedCardNo: progress.lastReviewedCardNo || 0,
-        };
-      })
-      .filter(Boolean);
-
-    // Apply search filter
-    if (search && search.trim()) {
-      const searchLower = search.toLowerCase();
-      cardsWithProgress = cardsWithProgress.filter(
-        (card) =>
-          card["main-topic"]?.toLowerCase().includes(searchLower) ||
-          card["sub-topic"]?.toLowerCase().includes(searchLower) ||
-          card.category?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    const total = cardsWithProgress.length;
-    const paginatedCards = cardsWithProgress.slice(skip, skip + limit);
+    const { cards, total } = await getUserQuizProgress(userId, {
+      skip,
+      limit,
+      search,
+    });
     const hasMore = skip + limit < total;
+    const page = Math.floor(skip / limit) + 1;
 
     return res.json({
-      cards: paginatedCards,
+      cards,
       total,
       hasMore,
-      page: Math.floor(skip / limit) + 1,
+      page,
       limit,
     });
   } catch (error) {
@@ -720,22 +530,8 @@ export async function httpGetDetailedReport(req, res) {
   const { id: userId } = req.token;
 
   try {
-    const user = await getUserById(userId, { studying: 1 });
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const cardProgress = user.studying.find(
-      (s) => s && s.card_id && s.card_id.toString() === card_id
-    );
-
-    if (!cardProgress) {
-      return res
-        .status(404)
-        .json({ error: "Card progress not found for this user." });
-    }
-
-    res.status(200).json(cardProgress.quizAttempts || []);
+    const attempts = await getDetailedReport(userId, card_id);
+    res.status(200).json(attempts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

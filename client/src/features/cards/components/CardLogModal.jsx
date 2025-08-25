@@ -130,34 +130,47 @@ const CardLogModal = ({ isOpen, onClose, cardId }) => {
           ref={logContentRef}
           className="p-4 space-y-4 overflow-y-auto h-[calc(100%-180px)]"
         >
-          {logs.length > 0 &&
-            logs.map((log, index) => {
-              if (logs.length === index + 1) {
-                return (
-                  <div ref={lastLogElementRef} key={index} className="relative">
-                    {index < logs.length - 1 && (
-                      <div className="absolute left-6 top-16 w-0.5 h-8 bg-gradient-to-b from-orange-300 to-amber-300 dark:from-orange-600 dark:to-amber-600"></div>
-                    )}
-                    <LogItem log={log} />
-                  </div>
-                );
-              }
-              return (
-                <div key={index} className="relative">
-                  {index < logs.length - 1 && (
-                    <div className="absolute left-6 top-16 w-0.5 h-8 bg-gradient-to-b from-orange-300 to-amber-300 dark:from-orange-600 dark:to-amber-600"></div>
-                  )}
-                  <LogItem log={log} />
-                </div>
-              );
-            })}
+          {searchQuery && isFetching ? (
+            <CardLogSkeleton />
+          ) : (
+            <>
+              {logs.length > 0 &&
+                logs.map((log, index) => {
+                  if (logs.length === index + 1) {
+                    return (
+                      <div
+                        ref={lastLogElementRef}
+                        key={index}
+                        className="relative"
+                      >
+                        {index < logs.length - 1 && (
+                          <div className="absolute left-6 top-16 w-0.5 h-8 bg-gradient-to-b from-orange-300 to-amber-300 dark:from-orange-600 dark:to-amber-600"></div>
+                        )}
+                        <LogItem log={log} />
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={index} className="relative">
+                      {index < logs.length - 1 && (
+                        <div className="absolute left-6 top-16 w-0.5 h-8 bg-gradient-to-b from-orange-300 to-amber-300 dark:from-orange-600 dark:to-amber-600"></div>
+                      )}
+                      <LogItem log={log} />
+                    </div>
+                  );
+                })}
+            </>
+          )}
+
           {isFetching && (
             <>
               <CardLogSkeleton />
               <CardLogSkeleton />
               <CardLogSkeleton />
+              <CardLogSkeleton />
             </>
           )}
+
           {isError && (
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/50 rounded-full mb-4">

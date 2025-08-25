@@ -11,9 +11,9 @@ const ReportStats = ({ currentQuestion }) => {
   if (!currentQuestion) return null;
 
   const accuracy =
-    currentQuestion.attempts > 0
+    currentQuestion.answerAttempts > 0
       ? `${Math.round(
-          (currentQuestion.timesCorrect / currentQuestion.attempts) * 100
+          (currentQuestion.timesCorrect / currentQuestion.answerAttempts) * 100
         )}%`
       : "N/A";
 
@@ -32,7 +32,7 @@ const ReportStats = ({ currentQuestion }) => {
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-3 text-center border border-blue-200/50 dark:border-blue-700/50">
             <ClockIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 mx-auto mb-1" />
             <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              {currentQuestion.attempts}
+              {currentQuestion.answerAttempts}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400">Attempts</p>
           </div>

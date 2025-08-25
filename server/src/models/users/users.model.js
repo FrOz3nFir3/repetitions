@@ -4,50 +4,43 @@ import crypto from "crypto";
 import { escapeRegex } from "../../utils/textNormalization.js";
 
 export async function findUserByEmail(email, projection = {}) {
-  return Users.findOne(
-    { email: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") } },
-    projection
-  );
+  return Users.findOne({ email }, projection).lean();
 }
 
 export async function findUserByUsername(username, projection = {}) {
-  return Users.findOne(
-    { username: { $regex: new RegExp(`^${escapeRegex(username)}$`, "i") } },
-    projection
-  );
+  return Users.findOne({ username }, projection).lean();
 }
 
 export async function getPublicUserByUsername(username, excludeId = true) {
   return Users.findOne({
-    username: { $regex: new RegExp(`^${escapeRegex(username)}$`, "i") },
-  }).select(`name username ${excludeId ? "-_id" : ""}`);
+    username,
+  })
+    .select(`name username ${excludeId ? "-_id" : ""}`)
+    .lean();
 }
 
 export async function findUserByEmailOrUsername(
   loginIdentifier,
   projection = {}
 ) {
-  const escapedIdentifier = escapeRegex(loginIdentifier);
   return Users.findOne(
     {
-      $or: [
-        { email: { $regex: new RegExp(`^${escapedIdentifier}$`, "i") } },
-        { username: { $regex: new RegExp(`^${escapedIdentifier}$`, "i") } },
-      ],
+      $or: [{ email: loginIdentifier }, { username: loginIdentifier }],
     },
     projection
   );
 }
 
 export async function findUserByGoogleId(googleId, projection = {}) {
-  return Users.findOne({ googleId: { $eq: googleId } }, projection);
+  // test this as _.doc is been used
+  return Users.findOne({ googleId: { $eq: googleId } }, projection).lean();
 }
 
 export async function getUserById(userId, projection = {}) {
   if (userId === "null" || userId === "undefined") {
     return null;
   }
-  return Users.findOne({ _id: { $eq: userId } }, projection);
+  return Users.findOne({ _id: { $eq: userId } }, projection).lean();
 }
 
 export async function createNewUser(user) {
@@ -72,34 +65,379 @@ export async function generateUniqueUsername(email) {
   return username;
 }
 
-export async function getUserProgress(userId) {
+export async function getUserReviewProgress(
+  userId,
+  { skip, limit, search } = {}
+) {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return [];
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+  const pipeline = [
+    { $match: { _id: userObjectId } },
+    // probably projection before unwind will be more optimize - research about this
+    {
+      $project: {
+        studying: {
+          cardId: 1,
+          review: 1,
+        },
+      },
+    },
+    { $unwind: "$studying" },
+    // decide later to show review or  not
+    // { $match: { "studying.review": { $ne: null } } },
+    {
+      $lookup: {
+        from: "cards",
+        localField: "studying.cardId",
+        foreignField: "_id",
+        as: "cardDetails",
+      },
+    },
+    { $unwind: "$cardDetails" },
+  ];
+
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search), "i");
+    pipeline.push({
+      $match: {
+        $or: [
+          { "cardDetails.main-topic": searchRegex },
+          { "cardDetails.sub-topic": searchRegex },
+          { "cardDetails.category": searchRegex },
+        ],
+      },
+    });
+  }
+
+  const paginatedPipeline = [{ $sort: { "studying.review.updatedAt": -1 } }];
+
+  if (typeof skip === "number") {
+    paginatedPipeline.push({ $skip: skip });
+  }
+
+  if (typeof limit === "number") {
+    paginatedPipeline.push({ $limit: limit });
+  }
+  paginatedPipeline.push({
+    $project: {
+      _id: "$cardDetails._id",
+      "main-topic": "$cardDetails.main-topic",
+      "sub-topic": "$cardDetails.sub-topic",
+      category: "$cardDetails.category",
+      lastReviewedCardNo: {
+        $ifNull: ["$studying.review.lastReviewedCardNo", 0],
+      },
+      reviewLength: { $size: { $ifNull: ["$cardDetails.review", []] } },
+      cardUpdatedAt: "$cardDetails.updatedAt",
+      reviewUpdatedAt: "$studying.review.updatedAt",
+    },
+  });
+
+  pipeline.push({
+    $facet: {
+      paginatedResults: paginatedPipeline,
+      totalCount: [{ $count: "total" }],
+    },
+  });
+  const aggregationResult = await Users.aggregate(pipeline);
+
+  const cards = aggregationResult[0].paginatedResults;
+  const total = aggregationResult[0].totalCount[0]?.total || 0;
+
+  return { cards, total };
+}
+
+export async function getUserQuizProgress(
+  userId,
+  { skip, limit, search } = {}
+) {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return { cards: [], total: 0 };
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+
+  const pipeline = [
+    { $match: { _id: userObjectId } },
+    { $unwind: "$studying" },
+    // decide later to show the quiz or not
+    // { $match: { "studying.quiz": { $ne: null } } },
+    {
+      $lookup: {
+        from: "cards",
+        localField: "studying.cardId",
+        foreignField: "_id",
+        as: "cardDetails",
+      },
+    },
+    { $unwind: "$cardDetails" },
+  ];
+
+  if (search && search.trim()) {
+    const searchRegex = new RegExp(escapeRegex(search), "i");
+    pipeline.push({
+      $match: {
+        $or: [
+          { "cardDetails.main-topic": searchRegex },
+          { "cardDetails.sub-topic": searchRegex },
+          { "cardDetails.category": searchRegex },
+        ],
+      },
+    });
+  }
+
+  const paginatedPipeline = [{ $sort: { "studying.quiz.updatedAt": -1 } }];
+
+  if (typeof skip === "number") {
+    paginatedPipeline.push({ $skip: skip });
+  }
+
+  if (typeof limit === "number") {
+    paginatedPipeline.push({ $limit: limit });
+  }
+
+  paginatedPipeline.push({
+    $project: {
+      _id: "$cardDetails._id",
+      "main-topic": "$cardDetails.main-topic",
+      "sub-topic": "$cardDetails.sub-topic",
+      category: "$cardDetails.category",
+      // decided to sent whole quiz instead
+      timesStarted: "$studying.quiz.timesStarted",
+      timesFinished: "$studying.quiz.timesFinished",
+      totalCorrect: "$studying.quiz.totalCorrect",
+      totalIncorrect: "$studying.quiz.totalIncorrect",
+    },
+  });
+
+  pipeline.push({
+    $facet: {
+      paginatedResults: paginatedPipeline,
+      totalCount: [{ $count: "total" }],
+    },
+  });
+
+  const aggregationResult = await Users.aggregate(pipeline);
+
+  const cards = aggregationResult[0].paginatedResults;
+  const total = aggregationResult[0].totalCount[0]?.total || 0;
+
+  return { cards, total };
+}
+
+// later have the cardId data itself on here to optimize api call
+export async function getDetailedReport(userId, cardId) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId)
+  ) {
+    return [];
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+  const cardObjectId = new mongoose.Types.ObjectId(`${cardId}`);
+
+  const result = await Users.aggregate([
+    { $match: { _id: userObjectId } },
+    { $unwind: "$studying" },
+    { $match: { "studying.cardId": cardObjectId } },
+    {
+      $project: {
+        _id: 0,
+        attempts: { $ifNull: ["$studying.quiz.attempts", []] },
+      },
+    },
+  ]);
+
+  if (result.length > 0) {
+    return result[0].attempts;
+  } else {
+    return [];
+  }
+}
+
+export async function getUserStats(userId) {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return {
+      totalDecksStudied: 0,
+      totalQuizzesTaken: 0,
+      totalCorrect: 0,
+      totalIncorrect: 0,
+      totalQuizzesFinished: 0,
+      overallAccuracy: 0,
+      completionRate: 0,
+    };
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+
+  const result = await Users.aggregate([
+    { $match: { _id: userObjectId } },
+    { $unwind: "$studying" },
+    { $match: { "studying.quiz": { $ne: null } } },
+    {
+      $group: {
+        _id: null,
+        totalDecksStudied: { $sum: 1 },
+        totalQuizzesTaken: { $sum: "$studying.quiz.timesStarted" },
+        totalCorrect: { $sum: "$studying.quiz.totalCorrect" },
+        totalIncorrect: { $sum: "$studying.quiz.totalIncorrect" },
+        totalQuizzesFinished: { $sum: "$studying.quiz.timesFinished" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalDecksStudied: 1,
+        totalQuizzesTaken: 1,
+        totalCorrect: 1,
+        totalIncorrect: 1,
+        totalQuizzesFinished: 1,
+        totalAnswers: { $add: ["$totalCorrect", "$totalIncorrect"] },
+        overallAccuracy: {
+          $cond: {
+            if: { $gt: [{ $add: ["$totalCorrect", "$totalIncorrect"] }, 0] },
+            then: {
+              $round: [
+                {
+                  $multiply: [
+                    {
+                      $divide: [
+                        "$totalCorrect",
+                        { $add: ["$totalCorrect", "$totalIncorrect"] },
+                      ],
+                    },
+                    100,
+                  ],
+                },
+                0,
+              ],
+            },
+            else: 0,
+          },
+        },
+        completionRate: {
+          $cond: {
+            if: { $gt: ["$totalQuizzesTaken", 0] },
+            then: {
+              $round: [
+                {
+                  $multiply: [
+                    {
+                      $divide: ["$totalQuizzesFinished", "$totalQuizzesTaken"],
+                    },
+                    100,
+                  ],
+                },
+                0,
+              ],
+            },
+            else: 0,
+          },
+        },
+      },
+    },
+    {
+      $facet: {
+        stats: [{ $match: { totalDecksStudied: { $exists: true } } }],
+        defaultStats: [
+          {
+            $project: {
+              totalDecksStudied: 0,
+              totalQuizzesTaken: 0,
+              totalCorrect: 0,
+              totalIncorrect: 0,
+              totalQuizzesFinished: 0,
+              overallAccuracy: 0,
+              completionRate: 0,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        stats: {
+          $cond: {
+            if: { $eq: [{ $size: "$stats" }, 0] },
+            then: { $arrayElemAt: ["$defaultStats", 0] },
+            else: { $arrayElemAt: ["$stats", 0] },
+          },
+        },
+      },
+    },
+  ]);
+
+  return (
+    result[0]?.stats || {
+      totalDecksStudied: 0,
+      totalQuizzesTaken: 0,
+      totalCorrect: 0,
+      totalIncorrect: 0,
+      totalQuizzesFinished: 0,
+      overallAccuracy: 0,
+      completionRate: 0,
+    }
+  );
+}
+
+export async function getUserStudyingCount(userId) {
   if (
     !userId ||
     userId === "null" ||
     userId === "undefined" ||
     !mongoose.Types.ObjectId.isValid(userId)
   ) {
-    return [];
+    return 0;
   }
 
-  const userObjectId = new mongoose.Types.ObjectId(userId);
-  return Users.aggregate([
-    { $match: { _id: { $eq: userObjectId } } },
+  return Users.findOne(
     {
-      $lookup: {
-        from: "cards",
-        localField: "studying.card_id",
-        foreignField: "_id",
-        as: "cardName",
+      _id: { $eq: userId },
+    },
+    {
+      studyingCount: { $size: "$studying" },
+    }
+  ).lean();
+}
+
+export async function getUserLastReviewedByCardProgress({ userId, cardId }) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId)
+  ) {
+    return { lastReviewedCardNo: 0 };
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+  const cardObjectId = new mongoose.Types.ObjectId(`${cardId}`);
+
+  const result = await Users.aggregate([
+    { $match: { _id: userObjectId } },
+    { $unwind: "$studying" },
+    { $match: { "studying.cardId": cardObjectId } },
+    {
+      $project: {
+        _id: 0,
+        lastReviewedCardNo: { $ifNull: ["$studying.lastReviewedCardNo", 0] },
       },
     },
-  ]).exec();
+  ]);
+
+  if (result.length > 0) {
+    return result[0];
+  } else {
+    return { lastReviewedCardNo: 0 };
+  }
 }
 
 export async function updateUser(userId, userDetails) {
   return Users.findOneAndUpdate({ _id: { $eq: userId } }, userDetails, {
     new: true,
-  });
+  }).lean();
 }
 
 export async function updateUserReviewProgress(
@@ -107,107 +445,137 @@ export async function updateUserReviewProgress(
   card_id,
   lastReviewedCardNo
 ) {
-  const user = await Users.findOne({
-    _id: { $eq: userId },
-    "studying.card_id": { $eq: card_id },
-  });
+  const newReviewProgress = {
+    cardId: card_id,
+    quiz: null,
+    review: {
+      lastReviewedCardNo: lastReviewedCardNo,
+      updatedAt: new Date(),
+    },
+  };
 
-  if (user) {
-    // If the card is already in the studying array, update its lastReviewedCardNo
-    return Users.findOneAndUpdate(
-      { _id: { $eq: userId }, "studying.card_id": { $eq: card_id } },
-      { $set: { "studying.$.lastReviewedCardNo": lastReviewedCardNo } },
-      { new: true }
-    );
-  } else {
-    // If the card is not in the studying array, add it
-    const newReviewProgress = {
-      card_id,
-      lastReviewedCardNo,
-    };
-    return Users.findOneAndUpdate(
-      { _id: { $eq: userId } },
-      { $push: { studying: newReviewProgress } },
-      { new: true, upsert: true }
-    );
+  const updatedUser = await Users.findOneAndUpdate(
+    { _id: userId, "studying.cardId": { $ne: card_id } },
+    { $push: { studying: newReviewProgress } },
+    { new: true }
+  );
+
+  if (updatedUser) {
+    return updatedUser;
   }
+
+  return Users.findOneAndUpdate(
+    { _id: userId, "studying.cardId": card_id },
+    {
+      $set: {
+        "studying.$.review": {
+          lastReviewedCardNo: lastReviewedCardNo,
+          updatedAt: new Date(),
+        },
+      },
+    },
+    { new: true }
+  );
 }
 
-export async function updateUserDetails(userId, details) {
+export async function updateUserQuizProgress(userId, details) {
   const { card_id, quiz_id, correct, isFirstQuestion, isLastQuestion } =
     details;
-  const options = { new: true, upsert: true };
 
-  const user = await Users.findOne({
-    _id: { $eq: userId },
-    "studying.card_id": { $eq: card_id },
-  });
+  const firstQuizProgress = {
+    timesStarted: 1,
+    timesFinished: isLastQuestion ? 1 : 0,
+    totalCorrect: correct ? 1 : 0,
+    totalIncorrect: correct ? 0 : 1,
+    attempts: [
+      {
+        quizId: quiz_id,
+        answerAttempts: 1,
+        timesCorrect: correct ? 1 : 0,
+        timesIncorrect: correct ? 0 : 1,
+      },
+    ],
+    updatedAt: new Date(),
+  };
 
-  if (user) {
-    const updateQuery = { $inc: {} };
-    const cardProgress = user.studying.find(
-      (s) => s && s.card_id && s.card_id.toString() === card_id
-    );
+  // has reviewed before but giving quiz first time
+  const initializedUser = await Users.findOneAndUpdate(
+    { _id: userId, "studying.cardId": card_id, "studying.quiz": null },
+    { $set: { "studying.$.quiz": firstQuizProgress } },
+    { new: true }
+  ).lean();
 
-    const attemptIndex = cardProgress.quizAttempts.findIndex(
-      (qa) => qa && qa.quiz_id && qa.quiz_id.toString() === quiz_id
-    );
-
-    updateQuery.$inc[
-      `studying.$.${correct ? "total-correct" : "total-incorrect"}`
-    ] = 1;
-
-    if (isFirstQuestion) {
-      updateQuery.$inc[`studying.$.times-started`] = 1;
-    }
-    if (isLastQuestion) {
-      updateQuery.$inc[`studying.$.times-finished`] = 1;
-    }
-
-    if (attemptIndex > -1) {
-      updateQuery.$inc[`studying.$.quizAttempts.${attemptIndex}.attempts`] = 1;
-      updateQuery.$inc[
-        `studying.$.quizAttempts.${attemptIndex}.${
-          correct ? "timesCorrect" : "timesIncorrect"
-        }`
-      ] = 1;
-    } else {
-      updateQuery.$push = {
-        "studying.$.quizAttempts": {
-          quiz_id,
-          attempts: 1,
-          timesCorrect: correct ? 1 : 0,
-          timesIncorrect: correct ? 0 : 1,
-        },
-      };
-    }
-
-    return Users.findOneAndUpdate(
-      { _id: { $eq: userId }, "studying.card_id": { $eq: card_id } },
-      updateQuery,
-      options
-    );
-  } else {
-    const newUserProgress = {
-      card_id,
-      "times-started": 1,
-      "times-finished": isLastQuestion ? 1 : 0,
-      "total-correct": correct ? 1 : 0,
-      "total-incorrect": correct ? 0 : 1,
-      quizAttempts: [
-        {
-          quiz_id,
-          attempts: 1,
-          timesCorrect: correct ? 1 : 0,
-          timesIncorrect: correct ? 0 : 1,
-        },
-      ],
-    };
-
-    return Users.findOneAndUpdate(
-      { _id: { $eq: userId } },
-      { $push: { studying: newUserProgress } },
-      { ...options, upsert: true }
-    );
+  if (initializedUser) {
+    return initializedUser;
   }
+
+  // giving quiz first time and doesn't have reviewed before
+  const newCardUser = await Users.findOneAndUpdate(
+    { _id: userId, "studying.cardId": { $ne: card_id } },
+    {
+      $push: {
+        studying: { cardId: card_id, review: null, quiz: firstQuizProgress },
+      },
+    },
+    { new: true }
+  ).lean();
+
+  if (newCardUser) {
+    return newCardUser;
+  }
+
+  // If we reach here, we know quiz progress for this card already exists.
+  const updateQuery = {
+    $inc: {
+      [`studying.$.quiz.${correct ? "totalCorrect" : "totalIncorrect"}`]: 1,
+    },
+    $set: { "studying.$.quiz.updatedAt": new Date() },
+  };
+
+  if (isFirstQuestion) {
+    updateQuery.$inc["studying.$.quiz.timesStarted"] = 1;
+  }
+  if (isLastQuestion) {
+    updateQuery.$inc["studying.$.quiz.timesFinished"] = 1;
+  }
+
+  const result = await Users.updateOne(
+    {
+      _id: userId,
+      "studying.cardId": card_id,
+      "studying.quiz.attempts.quizId": quiz_id,
+    },
+    {
+      ...updateQuery,
+      $inc: {
+        ...updateQuery.$inc,
+        "studying.$.quiz.attempts.$[attempt].answerAttempts": 1,
+        [`studying.$.quiz.attempts.$[attempt].${
+          correct ? "timesCorrect" : "timesIncorrect"
+        }`]: 1,
+      },
+    },
+    { arrayFilters: [{ "attempt.quizId": quiz_id }] }
+  );
+
+  // quiz doesn't exist (probably taking for first time)
+  if (result.modifiedCount === 0) {
+    return Users.findOneAndUpdate(
+      { _id: userId, "studying.cardId": card_id },
+      {
+        ...updateQuery,
+        $push: {
+          "studying.$.quiz.attempts": {
+            quizId: quiz_id,
+            answerAttempts: 1,
+            timesCorrect: correct ? 1 : 0,
+            timesIncorrect: correct ? 0 : 1,
+          },
+        },
+      },
+      { new: true }
+    ).lean();
+  }
+
+  return Users.findOne({ _id: userId }).lean();
 }

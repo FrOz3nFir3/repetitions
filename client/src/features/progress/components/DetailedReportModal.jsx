@@ -40,7 +40,7 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
 
     return reportData
       .map((attempt) => {
-        const quizDetails = quizMap.get(attempt.quiz_id);
+        const quizDetails = quizMap.get(attempt.quizId);
         if (!quizDetails) return null;
 
         return {

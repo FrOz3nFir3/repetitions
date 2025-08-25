@@ -100,7 +100,7 @@ export const apiSlice = createApi({
         if (search.trim()) {
           params.append("search", search.trim());
         }
-        return `/cards/categories/paginated?${params.toString()}`;
+        return `/cards/categories?${params.toString()}`;
       },
       providesTags: ["Card"],
       // Keep separate cache entries for each page and search combination
@@ -188,14 +188,6 @@ export const apiSlice = createApi({
       providesTags: ["User"],
     }),
 
-    getUserProgress: builder.query({
-      query: () => `/user/progress`,
-      providesTags: (result) => [
-        { type: "Report", id: "LIST" },
-        ...(result?.map(({ _id }) => ({ type: "Report", id: _id })) ?? []),
-      ],
-    }),
-
     getUserProgressPaginated: builder.query({
       query: ({ page = 1, limit = 9, search = "", category = "All" }) => {
         const params = new URLSearchParams({
@@ -208,7 +200,7 @@ export const apiSlice = createApi({
         if (category && category !== "All") {
           params.append("category", category);
         }
-        return `/user/progress/paginated?${params.toString()}`;
+        return `/user/progress?${params.toString()}`;
       },
       providesTags: (result) => [
         { type: "Report", id: "LIST" },
@@ -227,10 +219,6 @@ export const apiSlice = createApi({
     getUserStats: builder.query({
       query: () => `/user/stats`,
       providesTags: ["Report"],
-    }),
-
-    getUserCategories: builder.query({
-      query: () => `/user/categories`,
     }),
 
     getQuizProgress: builder.query({
@@ -261,7 +249,7 @@ export const apiSlice = createApi({
     }),
 
     getCardReviewProgress: builder.query({
-      query: (card_id) => `/user/card-progress/${card_id}`,
+      query: (card_id) => `/user/review-progress/${card_id}`,
     }),
 
     getDetailedReport: builder.query({
@@ -309,9 +297,9 @@ export const apiSlice = createApi({
       invalidatesTags: (result, error, arg) => (!error ? ["User"] : null),
     }),
 
-    patchUpdateUserProgress: builder.mutation({
+    patchUpdateUserQuizProgress: builder.mutation({
       query: (user) => ({
-        url: "/user/progress",
+        url: "/user/quiz-progress",
         method: "PATCH",
         body: user,
       }),
@@ -396,7 +384,6 @@ export const apiSlice = createApi({
 });
 
 export const {
-  useGetAllCardsQuery,
   useGetCategoriesPaginatedQuery,
   useGetCardsByCategoryQuery,
   useGetCardsByCategoryPaginatedQuery,
@@ -407,14 +394,12 @@ export const {
   usePostLoginUserMutation,
   usePostAuthDetailsMutation,
   usePatchUpdateUserProfileMutation,
-  usePatchUpdateUserProgressMutation,
+  usePatchUpdateUserQuizProgressMutation,
   useUpdateUserReviewProgressMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
-  useGetUserProgressQuery,
   useGetUserProgressPaginatedQuery,
   useGetUserStatsQuery,
-  useGetUserCategoriesQuery,
   useGetQuizProgressQuery,
   useGetCardReviewProgressQuery,
   useGetDetailedReportQuery,

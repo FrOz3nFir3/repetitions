@@ -26,5 +26,5 @@ export function normalizeCategory(category) {
 
 export function escapeRegex(string) {
   // Escape special regex characters
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return normalizeWhitespace(string).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

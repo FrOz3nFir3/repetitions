@@ -20,11 +20,12 @@ import StatBadge from "../../../components/ui/StatBadge";
 
 const DeckProgressCard = ({ card, onViewReport, index }) => {
   const progress = {
+    // TODO: change this later (key names)
     card_id: card._id,
-    "times-started": card["times-started"],
-    "times-finished": card["times-finished"],
-    "total-correct": card["total-correct"],
-    "total-incorrect": card["total-incorrect"],
+    "times-started": card.timesStarted,
+    "times-finished": card.timesFinished,
+    "total-correct": card.totalCorrect,
+    "total-incorrect": card.totalIncorrect,
   };
 
   const cardDetails = {
@@ -32,7 +33,6 @@ const DeckProgressCard = ({ card, onViewReport, index }) => {
     "main-topic": card["main-topic"],
     "sub-topic": card["sub-topic"],
     category: card.category,
-    lastReviewedCardNo: card.lastReviewedCardNo,
   };
 
   // not valid data

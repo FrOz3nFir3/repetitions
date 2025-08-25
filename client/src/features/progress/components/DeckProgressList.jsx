@@ -10,6 +10,8 @@ import { useGetUserStatsQuery } from "../../../api/apiSlice";
 import useQuizProgressWithSearch from "../../../hooks/useQuizProgressWithSearch";
 import EmptyState from "./ui/EmptyState";
 import { RocketLaunchIcon } from "@heroicons/react/24/solid";
+import ProgressPageSkeleton from "../../../components/ui/skeletons/ProgressPageSkeleton";
+import ProgressIndividualDeckListSkeleton from "../../../components/ui/skeletons/ProgressIndividualDeckListSkeleton";
 
 const DeckProgressList = ({ user, onViewReport }) => {
   const CARDS_PER_PAGE = 6;
@@ -36,6 +38,11 @@ const DeckProgressList = ({ user, onViewReport }) => {
 
   const totalDecksStudied = stats?.totalDecksStudied || 0;
   const totalQuizzesCompleted = stats?.totalQuizzesFinished || 0;
+
+  // need to break this skeleton later
+  if (isLoading) {
+    return <ProgressPageSkeleton />;
+  }
 
   if (!totalDecksStudied) {
     return (
@@ -119,40 +126,46 @@ const DeckProgressList = ({ user, onViewReport }) => {
       </div>
 
       <div className="bg-white/40 dark:bg-gray-800/40 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl sm:p-8 mb-8">
-        {currentCards.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpenIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              {isSearching ? "No cards found" : "No study cards yet"}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {isSearching
-                ? `No cards match "${searchQuery}". Try a different search term.`
-                : "Start studying some cards to see your progress here."}
-            </p>
-            {isSearching && (
-              <button
-                onClick={resetSearch}
-                className="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
-              >
-                Clear Search
-              </button>
-            )}
-          </div>
+        {isFetching ? (
+          <ProgressIndividualDeckListSkeleton />
         ) : (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-            {currentCards.map((card, index) => {
-              return (
-                <DeckProgressCard
-                  // TODO: make this card._id later
-                  key={index}
-                  card={card}
-                  index={index}
-                  onViewReport={onViewReport}
-                />
-              );
-            })}
-          </div>
+          <>
+            {currentCards.length === 0 ? (
+              <div className="text-center py-12">
+                <BookOpenIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  {isSearching ? "No cards found" : "No study cards yet"}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  {isSearching
+                    ? `No cards match "${searchQuery}". Try a different search term.`
+                    : "Start studying some cards to see your progress here."}
+                </p>
+                {isSearching && (
+                  <button
+                    onClick={resetSearch}
+                    className="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+                {currentCards.map((card, index) => {
+                  return (
+                    <DeckProgressCard
+                      // TODO: make this card._id later
+                      key={index}
+                      card={card}
+                      index={index}
+                      onViewReport={onViewReport}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 

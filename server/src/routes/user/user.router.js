@@ -6,13 +6,11 @@ import {
   httpLogoutUser,
   httpUpdateUser,
   httpGetDetailedReport,
-  httpGetUserProgress,
   httpGetUserProgressPaginated,
   httpGetUserStats,
-  httpGetUserCategories,
   httpGetQuizProgress,
   httpGetCardReviewProgress,
-  httpUpdateUserProgress,
+  httpUpdateUserQuizProgress,
   httpUpdateUserReviewProgress,
   httpRefreshToken,
   httpGetCSRFToken,
@@ -42,13 +40,6 @@ userRouter.get(
   "/progress",
   apiLimiter,
   requireAuthenticationWithCSRF,
-  httpGetUserProgress
-);
-
-userRouter.get(
-  "/progress/paginated",
-  apiLimiter,
-  requireAuthenticationWithCSRF,
   httpGetUserProgressPaginated
 );
 
@@ -60,13 +51,6 @@ userRouter.get(
 );
 
 userRouter.get(
-  "/categories",
-  apiLimiter,
-  requireAuthenticationWithCSRF,
-  httpGetUserCategories
-);
-
-userRouter.get(
   "/quiz-progress",
   apiLimiter,
   requireAuthenticationWithCSRF,
@@ -74,7 +58,7 @@ userRouter.get(
 );
 
 userRouter.get(
-  "/card-progress/:card_id",
+  "/review-progress/:card_id",
   apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetCardReviewProgress
@@ -115,10 +99,10 @@ userRouter.patch(
   httpUpdateUser
 );
 userRouter.patch(
-  "/progress",
+  "/quiz-progress",
   apiLimiter,
   requireAuthenticationWithCSRF,
-  httpUpdateUserProgress
+  httpUpdateUserQuizProgress
 );
 userRouter.patch(
   "/review-progress",

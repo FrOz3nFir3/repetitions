@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Outlet, useParams, useNavigate } from "react-router-dom";
 import CategorySkeleton from "../../../components/ui/skeletons/CategoryPageSkeleton";
 import PreviouslyStudied from "../../progress/components/PreviouslyStudied";
@@ -18,7 +18,8 @@ function CategoryPage() {
   let { name: categoryName } = useParams();
   categoryName = normalizeCategory(categoryName);
   const [showCreateForm, setShowCreateForm] = useState(false);
-
+  const categoryGridItemsRef = useRef(null);
+  const clickedOnCategory = useRef(false);
   const {
     searchQuery,
     setSearchQuery,
@@ -34,21 +35,26 @@ function CategoryPage() {
 
   const filteredItemsCount = currentCategories.length;
 
+  useEffect(() => {
+    if ((!isFetching && !isLoading) || !clickedOnCategory.current) return;
+
+    categoryGridItemsRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
+    return () => {
+      clickedOnCategory.current = false;
+    };
+  }, [isFetching, isLoading]);
+
   const handleCategoryClick = (category) => {
     if (categoryName) {
       navigate(`../${category}`);
     } else {
       navigate(category);
     }
-    setTimeout(() => {
-      const cardListElement = document.querySelector("[data-cardlist]");
-      if (cardListElement) {
-        cardListElement.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    }, 100);
+    clickedOnCategory.current = true;
   };
 
   const handleCreateCategory = (newCategoryName) => {
@@ -107,7 +113,7 @@ function CategoryPage() {
             </div>
           ) : (
             <>
-              {isFetching && currentCategories.length === 0 ? (
+              {isFetching ? (
                 <CategoryGridSkeleton count={12} />
               ) : (
                 <CategoryGrid
@@ -127,12 +133,6 @@ function CategoryPage() {
                   activeColorClass="bg-indigo-600"
                 />
               )}
-
-              {isFetching && currentCategories.length > 0 && (
-                <div className="text-center py-4">
-                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -146,7 +146,7 @@ function CategoryPage() {
             onCancel={() => setShowCreateForm(false)}
           />
         </Modal>
-        <div className="mt-16">
+        <div className="mt-16" ref={categoryGridItemsRef}>
           <Outlet />
         </div>
       </div>

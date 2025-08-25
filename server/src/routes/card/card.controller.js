@@ -43,6 +43,7 @@ export async function httpPatchUpdateCard(req, res) {
     return res.status(401).json({ error: "Authentication / Login required" });
   }
 
+  // have this extracted ? like is authorOptions?
   if (req.body.deleteCard || req.body.deleteQuiz || req.body.deleteOption) {
     const authorObjectId = await getAuthorOfCard(req.body._id);
     if (!authorObjectId) {
@@ -242,6 +243,12 @@ export async function httpPatchUpdateCard(req, res) {
     return res.json({ ok: true });
   } catch (error) {
     console.log(error);
+    if (error.message.includes("duplicate key error collection")) {
+      // fix later with actual values
+      return res.status(409).json({
+        error: `A card with the same Main Topic, Sub Topic, and Category already exists. Please use different values to avoid confusion.`,
+      });
+    }
     return res.status(400).json({ error: error.message });
   }
 }

@@ -1,37 +1,56 @@
 import { getTextFromHTML } from "../../utils/dom.js";
 import {
   normalizeWhitespace,
-  normalizeTextForComparison,
   normalizeCategory,
   escapeRegex,
 } from "../../utils/textNormalization.js";
 import Card from "./cards.mongo.js";
 import { Types } from "mongoose";
 
-export async function cardsByCategory(category, { skip, limit, search } = {}) {
-  let filter = { category: { $eq: category } };
+export async function getCardsByCategoryPaginated(
+  category,
+  { skip, limit, search } = {}
+) {
+  const pipeline = [];
 
-  // Add search filter if provided
   if (search && search.trim()) {
-    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
-    filter.$or = [{ "main-topic": searchRegex }, { "sub-topic": searchRegex }];
+    // text search doesn't allow prefix look into this ? or allow prefix ?
+    pipeline.push({
+      $match: { $text: { $search: search.trim() }, category: category },
+    });
+  } else {
+    pipeline.push({ $match: { category: category } });
   }
 
-  const query = Card.find(filter, {
-    "main-topic": 1,
-    "sub-topic": 1,
-    category: 1,
-    createdAt: 1,
-    updatedAt: 1,
-    reviewLength: { $size: "$review" },
-    quizzesLength: { $size: "$quizzes" },
-  }).sort({ updatedAt: -1 });
+  pipeline.push({
+    $facet: {
+      paginatedResults: [
+        { $sort: { updatedAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $project: {
+            "main-topic": 1,
+            "sub-topic": 1,
+            category: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            reviewLength: { $size: "$review" },
+            quizzesLength: { $size: "$quizzes" },
+          },
+        },
+      ],
+      totalCount: [{ $count: "total" }],
+    },
+  });
 
-  if (skip !== undefined && limit !== undefined) {
-    return query.skip(skip).limit(limit);
-  }
+  const aggregationResult = await Card.aggregate(pipeline);
 
-  return query;
+  // Safely extract the results
+  const cards = aggregationResult[0]?.paginatedResults || [];
+  const total = aggregationResult[0]?.totalCount[0]?.total || 0;
+
+  return { cards, total };
 }
 
 export async function countCardsByCategory(category, search) {
@@ -39,8 +58,7 @@ export async function countCardsByCategory(category, search) {
 
   // Add search filter if provided
   if (search && search.trim()) {
-    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
-    filter.$or = [{ "main-topic": searchRegex }, { "sub-topic": searchRegex }];
+    filter.$text = { $search: search.trim() };
   }
 
   return Card.countDocuments(filter);
@@ -51,7 +69,19 @@ export async function getAllCards() {
 }
 
 export async function getAllCategoriesWithPagination({ skip, limit, search }) {
-  const pipeline = [
+  const pipeline = [];
+
+  if (search && search.trim()) {
+    // this performance an index scan with prefix search
+    const searchRegex = new RegExp("^" + escapeRegex(search), "i");
+    pipeline.push({
+      $match: {
+        category: searchRegex,
+      },
+    });
+  }
+
+  const paginatedPipeline = [
     {
       $group: {
         _id: "$category",
@@ -59,72 +89,93 @@ export async function getAllCategoriesWithPagination({ skip, limit, search }) {
         lastUpdated: { $max: "$updatedAt" },
       },
     },
+    { $sort: { lastUpdated: -1 } },
   ];
 
-  // Add search filter if provided
-  if (search && search.trim()) {
-    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
-    pipeline.push({
-      $match: {
-        _id: searchRegex,
-      },
-    });
+  // --- Conditionally add pagination stages ---
+  if (typeof skip === "number") {
+    paginatedPipeline.push({ $skip: skip });
+  }
+  if (typeof limit === "number") {
+    paginatedPipeline.push({ $limit: limit });
   }
 
-  // Add sorting, skip, and limit
-  pipeline.push(
-    { $sort: { lastUpdated: -1 } },
-    { $skip: skip },
-    { $limit: limit }
-  );
+  // Project a cleaner final shape for the client
+  paginatedPipeline.push({
+    $project: {
+      _id: 0,
+      category: "$_id",
+      cardCount: "$count",
+      lastUpdated: "$lastUpdated",
+    },
+  });
 
-  const categories = await Card.aggregate(pipeline);
-  return categories.map((cat) => cat._id);
+  pipeline.push({
+    $facet: {
+      paginatedResults: paginatedPipeline,
+      totalCount: [
+        // To count unique categories, we must group before counting
+        { $group: { _id: "$category" } },
+        { $count: "total" },
+      ],
+    },
+  });
+
+  const aggregationResult = await Card.aggregate(pipeline);
+
+  const categories = aggregationResult[0]?.paginatedResults || [];
+  const total = aggregationResult[0]?.totalCount[0]?.total || 0;
+
+  return { categories, total };
 }
 
 export async function countAllCategories(search) {
-  const pipeline = [
-    {
-      $group: {
-        _id: "$category",
-      },
-    },
-  ];
+  const pipeline = [];
 
-  // Add search filter if provided
   if (search && search.trim()) {
-    const searchRegex = new RegExp(escapeRegex(search.trim()), "i");
+    // this performance an index scan with prefix search
+    const searchRegex = new RegExp("^" + escapeRegex(search), "i");
     pipeline.push({
       $match: {
-        _id: searchRegex,
+        category: searchRegex,
       },
     });
   }
 
+  // projection
   pipeline.push({
-    $count: "total",
+    $project: {
+      category: 1,
+    },
+  });
+
+  pipeline.push({
+    $group: {
+      _id: "$category",
+    },
   });
 
   const result = await Card.aggregate(pipeline);
-  return result.length > 0 ? result[0].total : 0;
+  return result.length;
 }
 
 export async function findExistingCard(mainTopic, subTopic, category) {
   const normalizedCategory = normalizeCategory(category);
 
   // Normalize all fields for comparison
-  const normalizedMainTopic = normalizeTextForComparison(mainTopic);
-  const normalizedSubTopic = normalizeTextForComparison(subTopic);
+  const normalizedMainTopic = normalizeWhitespace(mainTopic);
+  const normalizedSubTopic = normalizeWhitespace(subTopic);
 
-  return Card.findOne({
-    "main-topic": {
-      $regex: new RegExp(`^${escapeRegex(normalizedMainTopic)}$`, "i"),
+  return Card.findOne(
+    {
+      category: normalizedCategory,
+      "main-topic": normalizedMainTopic,
+      "sub-topic": normalizedSubTopic,
     },
-    "sub-topic": {
-      $regex: new RegExp(`^${escapeRegex(normalizedSubTopic)}$`, "i"),
-    },
-    category: normalizedCategory,
-  });
+    {
+      _id: 1,
+    }
+  );
 }
 
 export async function createNewCard(card, userId) {
@@ -169,7 +220,7 @@ export async function getCardById(id, view = "overview") {
     }).lean();
   }
 
-  const cardId = new Types.ObjectId(id);
+  const cardId = new Types.ObjectId(`${id}`);
 
   const pipeline = [
     { $match: { _id: cardId } },
@@ -320,10 +371,6 @@ export async function getCardById(id, view = "overview") {
     card.logs = [];
   }
 
-  if (card.logs) {
-    card.logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  }
-
   // optimizing the payload upfront
   if (view === "edit_quizzes") {
     card.review = card.review.map((item) => {
@@ -335,19 +382,6 @@ export async function getCardById(id, view = "overview") {
   }
 
   return card;
-}
-
-export async function getCardsByIds(ids) {
-  if (!ids || ids.length === 0 || !Array.isArray(ids)) return [];
-  return Card.find(
-    { _id: { $in: ids } },
-    {
-      "main-topic": 1,
-      "sub-topic": 1,
-      category: 1,
-      reviewLength: { $size: "$review" },
-    }
-  );
 }
 
 export async function updateCard(details) {
@@ -369,7 +403,8 @@ export async function updateCard(details) {
     ...otherDetails
   } = details;
 
-  const card = await Card.findOne({ _id: { $eq: _id } });
+  // can optimize the projection based on conditions if alot of queries are been made
+  const card = await Card.findOne({ _id: { $eq: _id } }).lean();
   if (!card) return null;
 
   let updateQuery = {};
@@ -460,7 +495,7 @@ export async function updateCard(details) {
     } else {
       const changedFields = [];
       if (cardId !== undefined && oldQuiz.flashcardId?.toString() !== cardId) {
-        const newFlashcardId = cardId ? new Types.ObjectId(cardId) : null;
+        const newFlashcardId = cardId ? new Types.ObjectId(`${cardId}`) : null;
         updateQuery.$set = {
           ...updateQuery.$set,
           [`${quizPath}.flashcardId`]: newFlashcardId,
@@ -796,7 +831,7 @@ export async function updateCard(details) {
 
 export async function getCardLogs(cardId, page = 1, limit = 10, search = "") {
   if (!Types.ObjectId.isValid(cardId)) return { logs: [], hasMore: false };
-  const id = new Types.ObjectId(cardId);
+  const id = new Types.ObjectId(`${cardId}`);
   const skip = (page - 1) * limit;
 
   const result = await Card.aggregate([
@@ -818,8 +853,8 @@ export async function getCardLogs(cardId, page = 1, limit = 10, search = "") {
           {
             $match: {
               "logs.summary": {
-                $regex: search.trim(),
-                $options: "i", // Case insensitive
+                $regex: normalizeWhitespace(search),
+                $options: "i",
               },
             },
           },
@@ -836,6 +871,7 @@ export async function getCardLogs(cardId, page = 1, limit = 10, search = "") {
       },
     },
     { $unwind: { path: "$logs.user", preserveNullAndEmptyArrays: true } },
+    { $sort: { "logs.timestamp": -1 } },
     {
       $group: {
         _id: "$_id",
@@ -871,15 +907,12 @@ export async function getCardLogs(cardId, page = 1, limit = 10, search = "") {
   if (!result || result.length === 0) return { logs: [], hasMore: false };
 
   const data = result[0];
-  if (data.logs) {
-    data.logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  }
 
   return data;
 }
 
 export async function getQuizAnswer(cardId, quizId) {
-  const card = await Card.findOne({ _id: { $eq: cardId } });
+  const card = await Card.findOne({ _id: { $eq: cardId } }, "quizzes").lean();
   if (!card) return null;
 
   const quiz = card.quizzes.find((q) => q._id.toString() === quizId);
@@ -892,30 +925,50 @@ export async function getAuthorOfCard(cardId) {
 }
 
 export async function getQuizById(cardId, quizId) {
-  const card = await Card.findOne({ _id: { $eq: cardId } }).lean();
+  const card = await Card.findOne({ _id: { $eq: cardId } }, "quizzes").lean();
   if (!card) return null;
 
   return card.quizzes.find((q) => q._id.toString() === quizId);
 }
 
-export async function getCardsByAuthor(authorId, { skip, limit }) {
+export async function getCardsByAuthorPaginated(authorId, { skip, limit }) {
   if (!Types.ObjectId.isValid(authorId)) {
     return [];
   }
-  return Card.find(
-    { author: { $eq: authorId } },
+  if (!Types.ObjectId.isValid(authorId)) {
+    return { cards: [], total: 0 };
+  }
+
+  const authorIdObject = new Types.ObjectId(`${authorId}`);
+  const aggregationResult = await Card.aggregate([
+    { $match: { author: authorIdObject } },
     {
-      "main-topic": 1,
-      "sub-topic": 1,
-      category: 1,
-      createdAt: 1,
-      updatedAt: 1,
-      reviewLength: { $size: "$review" },
-      quizzesLength: { $size: "$quizzes" },
-    }
-  )
-    .skip(skip)
-    .limit(limit);
+      $facet: {
+        paginatedResults: [
+          { $sort: { updatedAt: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              "main-topic": 1,
+              "sub-topic": 1,
+              category: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              reviewLength: { $size: "$review" },
+              quizzesLength: { $size: "$quizzes" },
+            },
+          },
+        ],
+        totalCount: [{ $count: "total" }],
+      },
+    },
+  ]);
+
+  const cards = aggregationResult[0].paginatedResults;
+  const total = aggregationResult[0].totalCount[0]?.total || 0;
+
+  return { cards, total };
 }
 
 export async function countCardsByAuthor(authorId) {

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
-import ProgressPageSkeleton from "../../../components/ui/skeletons/ProgressPageSkeleton";
 import DetailedReportModal from "../components/DetailedReportModal";
 import RestrictedAccess from "../../../components/ui/RestrictedAccess";
 import OverallStats from "../components/OverallStats";

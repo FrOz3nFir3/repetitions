@@ -90,5 +90,4 @@ const cardsSchema = new Schema(
   { timestamps: true }
 );
 
-// Connects planetSchema with the "planets" collection
 export default model("Card", cardsSchema);

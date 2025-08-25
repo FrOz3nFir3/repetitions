@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { usePatchUpdateUserProgressMutation } from "../../../api/apiSlice";
+import { usePatchUpdateUserQuizProgressMutation } from "../../../api/apiSlice";
 import {
   selectCurrentUser,
   modifyUser,
@@ -9,7 +9,7 @@ import {
 export const useQuizSession = (card, onFinish) => {
   const dispatch = useDispatch();
   const user = useSelector(selectCurrentUser);
-  const [updateUser] = usePatchUpdateUserProgressMutation();
+  const [updateUser] = usePatchUpdateUserQuizProgressMutation();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);

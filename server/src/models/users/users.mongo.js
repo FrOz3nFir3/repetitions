@@ -3,11 +3,11 @@ import { genSalt, hash } from "bcrypt";
 
 const quizAttemptSchema = new Schema(
   {
-    quiz_id: {
+    quizId: {
       type: Schema.Types.ObjectId,
       required: true,
     },
-    attempts: {
+    answerAttempts: {
       type: Number,
       default: 0,
     },
@@ -23,33 +23,63 @@ const quizAttemptSchema = new Schema(
   { _id: false }
 );
 
+const reviewSchema = new Schema(
+  {
+    lastReviewedCardNo: {
+      type: Number,
+      default: 0,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+const quizSchema = new Schema(
+  {
+    timesStarted: {
+      type: Number,
+      default: 0,
+    },
+    timesFinished: {
+      type: Number,
+      default: 0,
+    },
+    totalCorrect: {
+      type: Number,
+      default: 0,
+    },
+    totalIncorrect: {
+      type: Number,
+      default: 0,
+    },
+    attempts: [quizAttemptSchema],
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false, timestamps: true }
+);
+
 const studyingSchema = new Schema(
   {
-    card_id: {
+    cardId: {
       type: Schema.Types.ObjectId,
       ref: "Card",
       required: true,
     },
-    "times-started": {
-      type: Number,
-      default: 0,
+    review: {
+      type: reviewSchema,
+      default: {},
     },
-    "times-finished": {
-      type: Number,
-      default: 0,
-    },
-    "total-correct": {
-      type: Number,
-      default: 0,
-    },
-    "total-incorrect": {
-      type: Number,
-      default: 0,
-    },
-    quizAttempts: [quizAttemptSchema],
-    lastReviewedCardNo: {
-      type: Number,
-      default: 0,
+    quiz: {
+      type: quizSchema,
+      default: {},
     },
   },
   { _id: false }
