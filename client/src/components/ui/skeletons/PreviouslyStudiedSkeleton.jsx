@@ -11,7 +11,7 @@ const PreviouslyStudiedSkeleton = () => {
       </div>
 
       {/* Search and Filter Bar Skeleton */}
-      <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-8 p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl">
+      <div className="flex flex-col lg:flex-row gap-6 justify-between items-center p-4 sm:p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl">
         <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl w-full lg:w-1/2"></div>
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-4">

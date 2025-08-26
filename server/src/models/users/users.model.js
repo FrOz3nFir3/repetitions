@@ -100,7 +100,7 @@ export async function getUserReviewProgress(
   ];
 
   if (search && search.trim()) {
-    const searchRegex = new RegExp(escapeRegex(search), "i");
+    const searchRegex = new RegExp("^" + escapeRegex(search), "i");
     pipeline.push({
       $match: {
         $or: [
@@ -177,13 +177,13 @@ export async function getUserQuizProgress(
   ];
 
   if (search && search.trim()) {
-    const searchRegex = new RegExp(escapeRegex(search), "i");
+    const searchRegex = new RegExp("^" + escapeRegex(search), "i");
     pipeline.push({
       $match: {
         $or: [
+          { "cardDetails.category": searchRegex },
           { "cardDetails.main-topic": searchRegex },
           { "cardDetails.sub-topic": searchRegex },
-          { "cardDetails.category": searchRegex },
         ],
       },
     });
@@ -422,7 +422,9 @@ export async function getUserLastReviewedByCardProgress({ userId, cardId }) {
     {
       $project: {
         _id: 0,
-        lastReviewedCardNo: { $ifNull: ["$studying.lastReviewedCardNo", 0] },
+        lastReviewedCardNo: {
+          $ifNull: ["$studying.review.lastReviewedCardNo", 0],
+        },
       },
     },
   ]);

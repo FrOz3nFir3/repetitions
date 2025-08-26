@@ -16,6 +16,8 @@ export const useReviewSession = (initialCards, card_id) => {
   const [reviewCards, setReviewCards] = useState([]);
   const [completedCards, setCompletedCards] = useState(new Set());
   const [showCompletion, setShowCompletion] = useState(false);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
+  const [isInitialSetupComplete, setIsInitialSetupComplete] = useState(false);
   const touchStartX = useRef(0);
   const isSwiping = useRef(false);
   const user = useSelector(selectCurrentUser);
@@ -29,9 +31,6 @@ export const useReviewSession = (initialCards, card_id) => {
   const lastSavedProgress = useRef(0);
   const progressUpdateTimeout = useRef(null);
   const hasCompletedSession = useRef(false);
-  const isInitialSetupComplete = useRef(false);
-  const userHasInteracted = useRef(false);
-  const currentProgressRef = useRef(0);
 
   const cardNoQuery = useMemo(
     () => parseInt(searchParams.get("cardNo"), 10),
@@ -70,7 +69,7 @@ export const useReviewSession = (initialCards, card_id) => {
     if (!user) return;
     // Only run initial setup once when we first get cardProgress
 
-    if (cardProgress && card_id && !isInitialSetupComplete.current) {
+    if (cardProgress && card_id && !isInitialSetupComplete) {
       const lastReviewedCardNo = cardProgress.lastReviewedCardNo;
 
       if (lastReviewedCardNo && lastReviewedCardNo > 0) {
@@ -90,7 +89,7 @@ export const useReviewSession = (initialCards, card_id) => {
       }
 
       // Mark initial setup as complete after this effect runs
-      isInitialSetupComplete.current = true;
+      setIsInitialSetupComplete(true);
     }
   }, [cardProgress, card_id, initialCards.length, user]);
 
@@ -114,7 +113,7 @@ export const useReviewSession = (initialCards, card_id) => {
           });
           lastSavedProgress.current = cardNo;
         }
-      }, 2000); // 2 second debounce
+      }, 4000); // 4 second debounce
     },
     [updateReviewProgress, user]
   );
@@ -144,26 +143,10 @@ export const useReviewSession = (initialCards, card_id) => {
     initialCards.length,
   ]);
 
-  // Update current progress ref whenever index changes
-  useEffect(() => {
-    const currentCard = sessionCards[currentIndex];
-    if (!currentCard?.isReview && currentIndex < initialCards.length) {
-      currentProgressRef.current = currentIndex + 1;
-    }
-
-    return () => {
-      isInitialSetupComplete.current = false;
-    };
-  }, [currentIndex, sessionCards, initialCards.length]);
-
   // Debounced progress tracking on index change - only after user interaction
   useEffect(() => {
     // Skip if initial setup is not complete or user hasn't interacted
-    if (
-      !isInitialSetupComplete.current ||
-      !userHasInteracted.current ||
-      !user
-    ) {
+    if (!isInitialSetupComplete || !userHasInteracted || !user) {
       return;
     }
 
@@ -183,39 +166,18 @@ export const useReviewSession = (initialCards, card_id) => {
     debouncedProgressUpdate,
     sessionCards,
     user,
+    userHasInteracted,
+    isInitialSetupComplete,
   ]);
 
-  // Cleanup effect - only save if we haven't completed and haven't saved recently
+  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (progressUpdateTimeout.current) {
         clearTimeout(progressUpdateTimeout.current);
       }
-
-      // Only save on unmount if:
-      // 1. We have a card_id
-      // 2. Session wasn't completed
-      // 3. User has actually interacted (to avoid saving on initial mount/unmount)
-      // 4. The progress is actually different from what was last saved
-      // 5. The current position is valid (> 0)
-
-      const progressToSave = currentProgressRef.current;
-
-      if (
-        card_id &&
-        user &&
-        !hasCompletedSession.current &&
-        userHasInteracted.current &&
-        progressToSave !== lastSavedProgress.current &&
-        progressToSave > 0
-      ) {
-        updateReviewProgress({
-          card_id,
-          lastReviewedCardNo: progressToSave,
-        });
-      }
     };
-  }, []); // Empty dependency array - only run on unmount
+  }, []);
 
   useEffect(() => {
     if (typeof cardNoQuery === "undefined" || Number.isNaN(cardNoQuery)) return;
@@ -234,7 +196,7 @@ export const useReviewSession = (initialCards, card_id) => {
       if (sessionCards.length === 0) return;
 
       // Mark that user has interacted
-      userHasInteracted.current = true;
+      setUserHasInteracted(true);
 
       // Mark as started if navigating from first card and haven't started yet
       if (currentIndex === 0 && card_id && lastSavedProgress.current === 0) {
@@ -286,7 +248,7 @@ export const useReviewSession = (initialCards, card_id) => {
     }
 
     // Mark that user has interacted
-    userHasInteracted.current = true;
+    setUserHasInteracted(true);
 
     setIsFlipped(false);
     setShowConfidenceRating(false);
@@ -308,7 +270,7 @@ export const useReviewSession = (initialCards, card_id) => {
         card_id &&
         (lastSavedProgress.current === 0 || lastSavedProgress.current === 1)
       ) {
-        userHasInteracted.current = true;
+        setUserHasInteracted(true);
         debouncedProgressUpdate(card_id, 1);
       }
     }
@@ -338,9 +300,8 @@ export const useReviewSession = (initialCards, card_id) => {
     // Reset tracking refs
     hasCompletedSession.current = false;
     lastSavedProgress.current = 0;
-    isInitialSetupComplete.current = false;
-    userHasInteracted.current = false;
-    currentProgressRef.current = 1;
+    setIsInitialSetupComplete(false);
+    setUserHasInteracted(false);
 
     // Clear any pending updates
     if (progressUpdateTimeout.current) {

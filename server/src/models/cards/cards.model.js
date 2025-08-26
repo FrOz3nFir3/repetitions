@@ -14,9 +14,13 @@ export async function getCardsByCategoryPaginated(
   const pipeline = [];
 
   if (search && search.trim()) {
-    // text search doesn't allow prefix look into this ? or allow prefix ?
+    // this performs faster search due to index
+    const searchRegex = new RegExp("^" + escapeRegex(search), "i");
     pipeline.push({
-      $match: { $text: { $search: search.trim() }, category: category },
+      $match: {
+        category: category,
+        $or: [{ "main-topic": searchRegex }, { "sub-topic": searchRegex }],
+      },
     });
   } else {
     pipeline.push({ $match: { category: category } });
@@ -72,7 +76,7 @@ export async function getAllCategoriesWithPagination({ skip, limit, search }) {
   const pipeline = [];
 
   if (search && search.trim()) {
-    // this performance an index scan with prefix search
+    // this performs faster search due to index
     const searchRegex = new RegExp("^" + escapeRegex(search), "i");
     pipeline.push({
       $match: {

@@ -13,6 +13,7 @@ import {
   QuestionMarkCircleIcon,
   LightBulbIcon,
   EyeIcon,
+  BookOpenIcon,
 } from "@heroicons/react/24/solid";
 import Modal from "../../../../components/ui/Modal";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
@@ -70,7 +71,7 @@ export function NewFlashcardModal({ flashcardId }) {
           <PlusIcon className="h-5 w-5" />
         </div>
         Create Flashcard
-        <SparklesIcon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity duration-200" />
+        <BookOpenIcon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity duration-200" />
       </button>
 
       <Modal isOpen={isOpen} onClose={onClose} maxWidth="7xl">
@@ -86,7 +87,7 @@ export function NewFlashcardModal({ flashcardId }) {
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
-                  <SparklesIcon className="h-8 w-8 text-white" />
+                  <BookOpenIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
                   <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-600 dark:from-white dark:via-blue-200 dark:to-indigo-300 bg-clip-text text-transparent">

@@ -1,5 +1,6 @@
 import React from "react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
+import { BookOpenIcon } from "@heroicons/react/24/solid";
 
 const FlashcardTips = ({ className = "" }) => {
   return (
@@ -9,7 +10,7 @@ const FlashcardTips = ({ className = "" }) => {
       <div className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
-            <SparklesIcon className="h-5 w-5 text-white" />
+            <BookOpenIcon className="h-5 w-5 text-white" />
           </div>
           <h4 className="text-lg font-bold bg-gradient-to-r from-blue-700 to-indigo-700 dark:from-blue-300 dark:to-indigo-300 bg-clip-text text-transparent">
             Flashcard Best Practices

@@ -7,9 +7,9 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import {
-  SparklesIcon,
   LightBulbIcon,
   QuestionMarkCircleIcon,
+  BookOpenIcon,
 } from "@heroicons/react/24/solid";
 
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
@@ -96,7 +96,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
-              <SparklesIcon className="h-6 w-6 text-white" />
+              <BookOpenIcon className="h-6 w-6 text-white" />
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-indigo-600 dark:from-white dark:to-indigo-300 bg-clip-text text-transparent">

@@ -18,8 +18,8 @@ function CategoryPage() {
   let { name: categoryName } = useParams();
   categoryName = normalizeCategory(categoryName);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [shouldScrollToOutlet, setShouldScrollToOutlet] = useState(false);
   const categoryGridItemsRef = useRef(null);
-  const clickedOnCategory = useRef(false);
   const {
     searchQuery,
     setSearchQuery,
@@ -35,27 +35,29 @@ function CategoryPage() {
 
   const filteredItemsCount = currentCategories.length;
 
-  useEffect(() => {
-    if ((!isFetching && !isLoading) || !clickedOnCategory.current) return;
-
-    categoryGridItemsRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-
-    return () => {
-      clickedOnCategory.current = false;
-    };
-  }, [isFetching, isLoading]);
-
   const handleCategoryClick = (category) => {
     if (categoryName) {
       navigate(`../${category}`);
     } else {
       navigate(category);
     }
-    clickedOnCategory.current = true;
+    setShouldScrollToOutlet(true);
   };
+
+  // Scroll to outlet when category changes and content is ready
+  useEffect(() => {
+    if (shouldScrollToOutlet && categoryName) {
+      const scrollTimer = setTimeout(() => {
+        categoryGridItemsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        setShouldScrollToOutlet(false);
+      }, 150);
+
+      return () => clearTimeout(scrollTimer);
+    }
+  }, [categoryName, shouldScrollToOutlet]);
 
   const handleCreateCategory = (newCategoryName) => {
     if (categoryName) {

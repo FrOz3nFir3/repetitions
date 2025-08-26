@@ -9,8 +9,8 @@ const CategorySearch = ({
   totalCount,
 }) => {
   return (
-    <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-8 p-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
-      <div className="relative flex-1 max-w-2xl">
+    <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-8 p-4 sm:p-8 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
+      <div className="self-stretch relative flex-1 max-w-2xl">
         <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
             <MagnifyingGlassIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />

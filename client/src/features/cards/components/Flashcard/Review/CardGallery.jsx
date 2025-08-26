@@ -21,18 +21,62 @@ const CardGallery = ({
   const { searchTerm, filteredReview, handleSearchChange, handleSearchReset } =
     useCardGallerySearch(review);
 
+  // Memoized index mapping to avoid findIndex calls
+  const reviewIndexMap = React.useMemo(() => {
+    const map = new Map();
+    review.forEach((item, index) => {
+      map.set(item._id, index);
+    });
+    return map;
+  }, [review]);
+
   const updateScrollButtons = React.useCallback(() => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } =
         scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1); // -1 for rounding
+      setCanScrollLeft(scrollLeft > 5); // Small threshold for better UX
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5); // Small threshold
     }
   }, []);
 
   React.useEffect(() => {
     updateScrollButtons();
   }, [filteredReview, updateScrollButtons]);
+
+  // Auto-scroll to selected card when currentFlashcard changes
+  React.useEffect(() => {
+    if (scrollContainerRef.current && currentFlashcard) {
+      const selectedIndex = filteredReview.findIndex(
+        (item) => item._id === currentFlashcard._id
+      );
+
+      if (selectedIndex !== -1) {
+        const container = scrollContainerRef.current;
+        const cardElements = container.children;
+        const selectedCard = cardElements[selectedIndex];
+
+        if (selectedCard) {
+          const containerRect = container.getBoundingClientRect();
+          const cardRect = selectedCard.getBoundingClientRect();
+
+          // Check if card is not fully visible
+          if (
+            cardRect.left < containerRect.left ||
+            cardRect.right > containerRect.right
+          ) {
+            const scrollLeft =
+              selectedCard.offsetLeft -
+              container.clientWidth / 2 +
+              selectedCard.clientWidth / 2;
+            container.scrollTo({
+              left: Math.max(0, scrollLeft),
+              behavior: "smooth",
+            });
+          }
+        }
+      }
+    }
+  }, [currentFlashcard, filteredReview]);
 
   React.useEffect(() => {
     const container = scrollContainerRef.current;
@@ -142,15 +186,19 @@ const CardGallery = ({
                     className="flex overflow-x-auto gap-4 sm:gap-4 gap-3 p-6 sm:p-6 p-4 scrollbar-hide scroll-smooth"
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
-                    {filteredReview.map((item) => {
-                      const isSelected =
-                        item.question === currentFlashcard?.question;
+                    {filteredReview.map((item, index) => {
+                      let isSelected = item._id === currentFlashcard._id;
 
                       const handleOnClick = () => {
-                        const originalIndex = review.findIndex(
-                          (i) => i.question === item.question
-                        );
-                        handleCardSelect(originalIndex);
+                        if (!searchTerm?.trim()) {
+                          handleCardSelect(index);
+                        } else {
+                          // Use memoized index map instead of findIndex
+                          const reviewIndex = reviewIndexMap.get(item._id);
+                          if (reviewIndex !== undefined) {
+                            handleCardSelect(reviewIndex);
+                          }
+                        }
                       };
 
                       return (
@@ -168,13 +216,14 @@ const CardGallery = ({
                 </div>
 
                 {/* Scroll Hint - Responsive */}
-                <div className="px-6 sm:px-6 px-4 pb-3">
-                  <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400 sm:block hidden">
-                    <span>• Click cards to select</span>
-                    <span>• Scroll horizontally or use arrow buttons</span>
-                  </div>
-                  <div className="text-center text-xs text-gray-500 dark:text-gray-400 sm:hidden">
-                    • Tap cards to select • Swipe to scroll
+                <div className="px-6 pb-3">
+                  <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                    <span className="hidden sm:inline">
+                      Click cards to select • Use arrow buttons to scroll
+                    </span>
+                    <span className="sm:hidden">
+                      Tap cards to select • Swipe to scroll
+                    </span>
                   </div>
                 </div>
               </>
