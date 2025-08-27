@@ -129,98 +129,95 @@ export function NewFlashcardModal({ flashcardId }) {
             </div>
 
             {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Side - Editors */}
-              <div className="space-y-6">
-                {/* Question Section */}
-                <div className="group">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
-                      <QuestionMarkCircleIcon className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <label
-                        onClick={() => questionEditorRef.current?.focus()}
-                        className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer"
-                      >
-                        Front Side (Question)
-                      </label>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        What you want to learn or remember
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-md border-2 border-blue-500 dark:border-blue-600 shadow-lg hover:shadow-xl">
-                    <RichTextEditor
-                      ref={questionEditorRef}
-                      initialContent={question}
-                      onChange={(newContent) => {
-                        setQuestion(newContent);
-                        setIsFlipped(false);
-                      }}
-                      editable={!isLoading}
-                      className="!mt-0"
-                    />
-                  </div>
-                </div>
-
-                {/* Answer Section */}
-                <div className="group">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
-                      <LightBulbIcon className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <label
-                        onClick={() => answerEditorRef.current?.focus()}
-                        className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent cursor-pointer"
-                      >
-                        Back Side (Answer)
-                      </label>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        The answer or explanation
-                      </p>
-                    </div>
-                  </div>
-                  <div className="rounded-md border-2 border-emerald-500 dark:border-emerald-600 shadow-lg hover:shadow-xl">
-                    <RichTextEditor
-                      ref={answerEditorRef}
-                      initialContent={answer}
-                      onChange={(newContent) => {
-                        setAnswer(newContent);
-                        setIsFlipped(true);
-                      }}
-                      editable={!isLoading}
-                      className="!mt-0"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Side - Live Preview */}
-              <div className="lg:sticky lg:top-8 lg:self-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Question Section */}
+              <div className="group">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
-                    <EyeIcon className="h-5 w-5 text-white" />
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      Live Preview
-                    </h4>
+                    <label
+                      onClick={() => questionEditorRef.current?.focus()}
+                      className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent cursor-pointer"
+                    >
+                      Front Side (Question)
+                    </label>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Click the card to flip between sides
+                      What you want to learn or remember
                     </p>
                   </div>
                 </div>
-
-                <Flashcard
-                  currentFlashcard={previewData}
-                  isFlipped={isFlipped}
-                  setIsFlipped={setIsFlipped}
-                />
-                <div className="mt-4">
-                  <FlashcardTips />
+                <div className="rounded-md border-2 border-blue-500 dark:border-blue-600 shadow-lg hover:shadow-xl">
+                  <RichTextEditor
+                    ref={questionEditorRef}
+                    initialContent={question}
+                    onChange={(newContent) => {
+                      setQuestion(newContent);
+                      setIsFlipped(false);
+                    }}
+                    editable={!isLoading}
+                    className="!mt-0"
+                  />
                 </div>
+              </div>
+
+              {/* Answer Section */}
+              <div className="group">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl">
+                    <LightBulbIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <label
+                      onClick={() => answerEditorRef.current?.focus()}
+                      className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent cursor-pointer"
+                    >
+                      Back Side (Answer)
+                    </label>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      The answer or explanation
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-md border-2 border-emerald-500 dark:border-emerald-600 shadow-lg hover:shadow-xl">
+                  <RichTextEditor
+                    ref={answerEditorRef}
+                    initialContent={answer}
+                    onChange={(newContent) => {
+                      setAnswer(newContent);
+                      setIsFlipped(true);
+                    }}
+                    editable={!isLoading}
+                    className="!mt-0"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Live Preview */}
+            <div className="mt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+                  <EyeIcon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Live Preview
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Click the card to flip between sides
+                  </p>
+                </div>
+              </div>
+
+              <Flashcard
+                currentFlashcard={previewData}
+                isFlipped={isFlipped}
+                setIsFlipped={setIsFlipped}
+              />
+              <div className="mt-4">
+                <FlashcardTips />
               </div>
             </div>
 

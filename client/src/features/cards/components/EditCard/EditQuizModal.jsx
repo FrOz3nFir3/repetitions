@@ -12,7 +12,6 @@ import {
 
 import {
   AcademicCapIcon,
-  SparklesIcon,
   QuestionMarkCircleIcon,
   LightBulbIcon,
   ListBulletIcon,
@@ -125,7 +124,19 @@ const EditQuizModal = ({
   };
 
   const handleAddOption = () => {
-    setOptions([...options, { value: "", tempId: `temp_${tempIdCounter++}` }]);
+    const newOptions = [
+      ...options,
+      { value: "", tempId: `temp_${tempIdCounter++}` },
+    ];
+    setOptions(newOptions);
+    setMinimumOptions(() => {
+      let newLength = newOptions.length + 1;
+      if (newLength > 2) {
+        return newLength;
+      } else {
+        return 2;
+      }
+    });
   };
 
   const handleRemoveOption = () => {
@@ -156,7 +167,16 @@ const EditQuizModal = ({
       setSelectedOptionId(option._id);
       setIsDeleteModalOpen(true);
     } else {
-      setOptions(options.filter((opt) => opt.tempId !== id));
+      const newOptions = options.filter((opt) => opt.tempId !== id);
+      setOptions(newOptions);
+      setMinimumOptions(() => {
+        let newLength = newOptions.length + 1;
+        if (newLength > 2) {
+          return newLength;
+        } else {
+          return 2;
+        }
+      });
     }
   };
 
@@ -245,10 +265,10 @@ const EditQuizModal = ({
               )}
             </div>
 
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Left Side - Form Fields */}
-              <div className="space-y-6">
+            {/* Main Content - Improved Flow Layout */}
+            <div className="space-y-8">
+              {/* Core Content Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Question Section */}
                 <div className="group">
                   <div className="flex items-center gap-3 mb-4">
@@ -300,10 +320,10 @@ const EditQuizModal = ({
                 </div>
               </div>
 
-              {/* Right Side - Settings and Tips */}
-              <div className="lg:sticky lg:top-8 lg:self-start space-y-6">
+              {/* Settings Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Flashcard Association */}
-                <div className="group">
+                <div className="lg:col-span-2 group">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
                       <FunnelIcon className="h-5 w-5 text-white" />
@@ -356,9 +376,6 @@ const EditQuizModal = ({
                     />
                   </div>
                 </div>
-
-                {/* Quiz Tips */}
-                <QuizTips />
               </div>
             </div>
 
@@ -401,7 +418,7 @@ const EditQuizModal = ({
                   <div key={option.tempId} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Option {index + 1}
+                        Option {index + 2}
                       </span>
                       <button
                         type="button"
@@ -412,7 +429,7 @@ const EditQuizModal = ({
                         <TrashIcon className="h-4 w-4 text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300" />
                       </button>
                     </div>
-                    <div className="p-4 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div>
                       <RichTextEditor
                         initialContent={option.value}
                         onChange={(value) =>
@@ -425,19 +442,20 @@ const EditQuizModal = ({
                 ))}
 
                 {/* Add Option Button */}
-                {options.length < minimumOptions - 1 && (
-                  <button
-                    type="button"
-                    onClick={handleAddOption}
-                    disabled={isLoading}
-                    className="cursor-pointer w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-dashed border-purple-300 dark:border-purple-600 bg-purple-50/50 dark:bg-purple-900/10 hover:bg-purple-100/50 dark:hover:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-all duration-200 disabled:opacity-50"
-                  >
-                    <PlusIcon className="h-5 w-5" />
-                    <span className="font-medium">Add Another Option</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handleAddOption}
+                  disabled={isLoading || !user}
+                  className="cursor-pointer disabled:cursor-not-allowed w-full flex items-center justify-center gap-3 p-4 rounded-xl border-2 border-dashed border-purple-300 dark:border-purple-600 bg-purple-50/50 dark:bg-purple-900/10 hover:bg-purple-100/50 dark:hover:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-all duration-200 disabled:opacity-50"
+                >
+                  <PlusIcon className="h-5 w-5" />
+                  <span className="font-medium">Add Another Option</span>
+                </button>
               </div>
             </div>
+
+            {/* Quiz Tips */}
+            <QuizTips />
 
             {/* Footer Actions */}
             <div className="flex gap-4 flex-wrap items-center justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">

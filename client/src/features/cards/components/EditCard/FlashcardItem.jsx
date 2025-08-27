@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
-import { CardField } from "../CardField";
+import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 import {
   TrashIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import {
   LightBulbIcon,
@@ -13,6 +14,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
+import EditFlashcardModal from "./EditFlashcardModal";
 import FlashcardTips from "./FlashcardTips";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
@@ -20,6 +22,7 @@ import { selectCurrentUser } from "../../../authentication/state/authSlice";
 const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
   const [updateCard, { error, isSuccess }] = usePatchUpdateCardMutation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const errorRef = React.useRef(null);
   const user = useSelector(selectCurrentUser);
 
@@ -105,18 +108,35 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
             </div>
           </div>
 
-          <button
-            onClick={() => setIsDeleteModalOpen(true)}
-            className="group cursor-pointer relative p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-            aria-label="Delete flashcard"
-          >
-            <TrashIcon className="h-6 w-6 text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200" />
-            <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <span className="whitespace-nowrap z-99 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-red-200 dark:border-red-700">
-                Delete Card
-              </span>
-            </div>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="flex items-center gap-2 group cursor-pointer relative px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600  backdrop-blur-sm  rounded-xl hover:border-blue-300 dark:hover:border-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white"
+              aria-label="Edit flashcard"
+            >
+              <PencilIcon className="h-4 w-4" />
+              <span className="text-sm font-medium">Edit</span>
+
+              <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <span className="whitespace-nowrap z-99 text-xs font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-blue-200 dark:border-blue-700">
+                  Edit flashcard
+                </span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="group cursor-pointer relative p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+              aria-label="Delete flashcard"
+            >
+              <TrashIcon className="h-6 w-6 text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200" />
+              <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <span className="whitespace-nowrap z-99 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-red-200 dark:border-red-700">
+                  Delete Card
+                </span>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Card Content - Single Column Layout */}
@@ -137,15 +157,10 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-blue-600 dark:border-blue-700 shadow-lg hover:shadow-xl ">
-              <CardField
-                _id={cardId}
-                text="question"
-                value={flashcard.question}
-                cardId={flashcard._id}
-                showFlashcardPreview={true}
-                flashcardData={flashcard}
-              />
+            <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-blue-600 dark:border-blue-700 shadow-lg hover:shadow-xl">
+              <div className="text-gray-900 dark:text-gray-100">
+                <HtmlRenderer htmlContent={flashcard.question} />
+              </div>
             </div>
           </div>
 
@@ -165,15 +180,10 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-emerald-500 dark:border-emerald-600 shadow-lg hover:shadow-xl ">
-              <CardField
-                _id={cardId}
-                text="answer"
-                value={flashcard.answer}
-                cardId={flashcard._id}
-                showFlashcardPreview={true}
-                flashcardData={flashcard}
-              />
+            <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-emerald-500 dark:border-emerald-600 shadow-lg hover:shadow-xl">
+              <div className="text-gray-900 dark:text-gray-100">
+                <HtmlRenderer htmlContent={flashcard.answer} />
+              </div>
             </div>
           </div>
         </div>
@@ -181,6 +191,14 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
         {/* Enhanced Tips Section */}
         <FlashcardTips className="mt-8" />
       </div>
+
+      <EditFlashcardModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        flashcard={flashcard}
+        cardId={cardId}
+        key={isEditModalOpen}
+      />
 
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}

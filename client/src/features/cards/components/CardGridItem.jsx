@@ -32,7 +32,7 @@ const CardGridItem = ({ card, showCategory = false }) => {
                 <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">
                   Category
                 </span>
-                <span className="text-sm font-semibold text-green-700 dark:text-green-300">
+                <span className="text-sm font-semibold text-green-700 dark:text-green-300 break-word line-clamp-4">
                   {card.category}
                 </span>
               </div>
@@ -61,7 +61,7 @@ const CardGridItem = ({ card, showCategory = false }) => {
                 Main Topic
               </span>
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white  break-word line-clamp-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
               {card["main-topic"]}
             </h3>
           </div>
@@ -88,7 +88,7 @@ const CardGridItem = ({ card, showCategory = false }) => {
                 Sub Topic
               </span>
             </div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 line-clamp-2">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 break-word line-clamp-4">
               {card["sub-topic"]}
             </p>
           </div>

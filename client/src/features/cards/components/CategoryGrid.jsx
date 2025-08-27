@@ -10,7 +10,7 @@ const CategoryGrid = ({ categories, onCategoryClick, activeCategory }) => {
           <div
             key={category}
             onClick={() => onCategoryClick(category)}
-            className={`group relative overflow-hidden rounded-2xl shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-2xl h-[180px] ${
+            className={`group relative overflow-hidden rounded-2xl shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-2xl h-68 ${
               activeCategory === category
                 ? "bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-600 text-white ring-4 ring-indigo-300 dark:ring-indigo-500 shadow-2xl"
                 : "bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800"
@@ -24,7 +24,7 @@ const CategoryGrid = ({ categories, onCategoryClick, activeCategory }) => {
             )}
             <div className="relative z-10 p-6 h-full flex flex-col justify-center items-center text-center">
               <h3
-                className={`text-xl font-bold mb-4 transition-colors duration-300 line-clamp-2 ${
+                className={`text-xl break-word font-bold mb-4 transition-colors duration-300 line-clamp-5 ${
                   activeCategory === category
                     ? "text-white drop-shadow-sm"
                     : "text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400"

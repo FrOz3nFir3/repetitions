@@ -89,6 +89,7 @@ function IndividualCardPage() {
           {!isFocusedActivity && (
             <div className="lg:col-span-1 space-y-6">
               <CardInfo card={cardData} />
+              {/* TODO: position this better or have better visual  */}
               <CardLogs logs={cardData.logs || []} cardId={cardData._id} />
             </div>
           )}

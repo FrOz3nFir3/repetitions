@@ -6,12 +6,15 @@ import {
   XMarkIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
-import RichTextEditor from "../../../components/ui/RichTextEditor";
-import HtmlRenderer from "../../../components/ui/HtmlRenderer";
-import Flashcard from "./Flashcard/Review/Flashcard";
+
 import { selectCurrentUser } from "../../authentication/state/authSlice";
 import { useSelector } from "react-redux";
-
+const RichTextEditor = React.lazy(() =>
+  import("../../../components/ui/RichTextEditor")
+);
+const HtmlRenderer = React.lazy(() =>
+  import("../../../components/ui/HtmlRenderer")
+);
 export function CardField({
   _id,
   text,
@@ -19,7 +22,6 @@ export function CardField({
   cardId,
   quizId,
   optionId,
-  showFlashcardPreview,
   flashcardData,
 }) {
   const user = useSelector(selectCurrentUser);
@@ -33,12 +35,6 @@ export function CardField({
   useEffect(() => {
     setInputValue(value);
   }, [value]);
-
-  useEffect(() => {
-    if (showFlashcardPreview) {
-      setPreviewData((prev) => ({ ...prev, [text]: inputValue }));
-    }
-  }, [inputValue, text, showFlashcardPreview]);
 
   useEffect(() => {
     if (error && errorRef.current) {
@@ -76,11 +72,7 @@ export function CardField({
   };
 
   const isUnchanged = inputValue === value;
-  const isRichTextField =
-    text === "question" ||
-    text === "answer" ||
-    text === "option" ||
-    text === "description";
+  const isRichTextField = text === "description";
 
   return (
     <div className="card-field group relative">
@@ -106,25 +98,12 @@ export function CardField({
               type={text === "minimumOptions" ? "number" : "text"}
               value={inputValue}
               onChange={(e) => handleValueChange(e.target.value)}
-              className="bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10"
+              className="bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10 break-word "
               min={text === "minimumOptions" ? 2 : undefined}
               max={text === "minimumOptions" ? 4 : undefined}
               required
               disabled={isLoading}
             />
-          )}
-          {showFlashcardPreview && (
-            <div className="mt-4 ">
-              <h4 className="text-md font-bold text-gray-700 dark:text-white mb-2">
-                Live Preview
-              </h4>
-              <Flashcard
-                currentFlashcard={previewData}
-                isFlipped={isFlipped}
-                setIsFlipped={() => {}}
-                viewOnly
-              />
-            </div>
           )}
 
           <div className="text-sm text-gray-500 dark:text-gray-400 text-right">
@@ -155,13 +134,13 @@ export function CardField({
       ) : (
         <div className="flex items-start justify-between group">
           <div className="flex-1 min-w-0 pr-4">
-            {isRichTextField ? (
+            {isRichTextField && value.trim() ? (
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <HtmlRenderer htmlContent={value} />
               </div>
             ) : (
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                <p className="text-gray-900 dark:text-white whitespace-pre-wrap text-sm leading-relaxed">
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600 w-full max-w-full">
+                <p className="text-gray-900 dark:text-white break-word max-h-96 overflow-y-auto text-sm leading-relaxed ">
                   {value || (
                     <span className="text-gray-400 italic">No value set</span>
                   )}

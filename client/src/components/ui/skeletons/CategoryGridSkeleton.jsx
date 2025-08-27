@@ -6,7 +6,7 @@ const CategoryGridSkeleton = ({ count = 12 }) => {
       {[...Array(count)].map((_, i) => (
         <div
           key={i}
-          className="h-[180px] bg-white dark:bg-gray-800 rounded-2xl animate-pulse"
+          className="h-68 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse"
         ></div>
       ))}
     </div>

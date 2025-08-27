@@ -50,10 +50,16 @@ const QuizDetail = ({
           {/* Edit Button */}
           <button
             onClick={() => onEdit(quiz)}
-            className="cursor-pointer flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            className="relative group cursor-pointer flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            aria-label="Edit Quiz"
           >
             <PencilIcon className="h-4 w-4" />
             <span className="text-sm font-medium">Edit</span>
+            <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="whitespace-nowrap z-99 text-xs font-medium text-pink-600 dark:text-pink-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-blue-200 dark:border-blue-700">
+                Edit quiz
+              </span>
+            </div>
           </button>
           <button
             onClick={() => onDelete(quiz)}

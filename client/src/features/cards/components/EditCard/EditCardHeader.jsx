@@ -8,9 +8,6 @@ const EditCardHeader = ({ flashcardId, view, card }) => (
       <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
         Edit {view}
       </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-        {card?.["main-topic"]} / {card?.["sub-topic"]} / {card?.category}
-      </p>
     </div>
     <div className="flex items-center">
       {view === "flashcards" ? (

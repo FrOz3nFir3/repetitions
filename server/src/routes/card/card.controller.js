@@ -158,6 +158,12 @@ export async function httpPatchUpdateCard(req, res) {
   }
 
   if (minimumOptions) {
+    let optionsLength = newOptions?.length;
+    if (newOptions && optionsLength < minimumOptions - 1) {
+      return res.status(400).json({
+        error: "Add more options as per the minimum options.",
+      });
+    }
     if (typeof minimumOptions !== "number" || minimumOptions < 2) {
       return res.status(400).json({
         error: "Minimum options must be a number greater than or equal to 2",
@@ -166,7 +172,7 @@ export async function httpPatchUpdateCard(req, res) {
 
     const quiz = await getQuizById(
       otherBody._id,
-      otherBody.cardId,
+      otherBody.quizId,
       otherBody.quizId
     );
     if (quiz && quiz.options.length > minimumOptions - 1) {
@@ -174,6 +180,11 @@ export async function httpPatchUpdateCard(req, res) {
         error: `Please remove existing options manually before reducing the minimum options below ${
           quiz.options.length + 1
         }.`,
+      });
+    }
+    if (quiz && quiz.options.length < minimumOptions - 1) {
+      return res.status(400).json({
+        error: `Add more options as per minimum options.`,
       });
     }
   }

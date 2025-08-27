@@ -4,7 +4,7 @@ import { AcademicCapIcon } from "@heroicons/react/24/outline";
 const QuizTips = ({ className = "" }) => {
   return (
     <div
-      className={`bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/10 dark:via-pink-900/10 dark:to-indigo-900/10 rounded-2xl border border-purple-200 dark:border-purple-700/50 overflow-hidden ${className}`}
+      className={`mt-4 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/10 dark:via-pink-900/10 dark:to-indigo-900/10 rounded-2xl border border-purple-200 dark:border-purple-700/50 overflow-hidden ${className}`}
     >
       <div className="p-6">
         <div className="flex items-center gap-3 mb-4">

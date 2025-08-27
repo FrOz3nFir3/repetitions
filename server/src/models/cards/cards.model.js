@@ -417,7 +417,19 @@ export async function updateCard(details) {
 
   // Case 1: Add a new quiz (distinguished by the absence of quizId)
   if (quizQuestion && quizAnswer && !quizId) {
-    const newQuiz = { quizQuestion, quizAnswer, options: [] };
+    const newQuiz = {
+      quizQuestion,
+      quizAnswer,
+      options: newOptions
+        ? newOptions
+            .filter((opt) => opt && opt.trim())
+            .map((opt) => ({
+              _id: new Types.ObjectId(),
+              value: opt,
+            }))
+        : [],
+      minimumOptions: minimumOptions || 2,
+    };
     if (cardId) {
       newQuiz.flashcardId = cardId;
     }
@@ -446,6 +458,30 @@ export async function updateCard(details) {
       newValue: quizAnswer,
       cardId,
     });
+
+    // Log minimum options if provided
+    if (minimumOptions && minimumOptions !== 2) {
+      changes.push({
+        field: "New Quiz Minimum Options",
+        oldValue: "",
+        newValue: minimumOptions.toString(),
+        cardId,
+      });
+    }
+
+    // Log additional options if provided
+    if (newOptions && newOptions.length > 0) {
+      newOptions
+        .filter((opt) => opt && opt.trim())
+        .forEach((option, index) => {
+          changes.push({
+            field: `New Quiz Option ${index + 2}`,
+            oldValue: "",
+            newValue: option,
+            cardId,
+          });
+        });
+    }
   }
   // Case 2: Add a new flashcard (distinguished by question and answer, but not for a quiz)
   else if (otherDetails.question && otherDetails.answer && !cardId) {
@@ -711,40 +747,59 @@ export async function updateCard(details) {
         newValue: "",
         cardId,
       });
-    } else if (
-      otherDetails.question !== undefined &&
-      oldReview.question !== otherDetails.question
-    ) {
-      updateQuery.$set = {
-        ...updateQuery.$set,
-        [`${reviewPath}.question`]: otherDetails.question,
-      };
-      changes.push({
-        field: "Flashcard Question",
-        oldValue: oldReview.question || "",
-        newValue: otherDetails.question,
-        cardId,
-      });
-      summary = `Updated question in Flashcard: "${getTextFromHTML(
-        otherDetails.question
-      ).slice(0, 250)}"`;
-    } else if (
-      otherDetails.answer !== undefined &&
-      oldReview.answer !== otherDetails.answer
-    ) {
-      updateQuery.$set = {
-        ...updateQuery.$set,
-        [`${reviewPath}.answer`]: otherDetails.answer,
-      };
-      changes.push({
-        field: "Flashcard Answer",
-        oldValue: oldReview.answer || "",
-        newValue: otherDetails.answer,
-        cardId,
-      });
-      summary = `Updated answer in Flashcard: "${getTextFromHTML(
-        oldReview.question
-      ).slice(0, 250)}"`;
+    } else {
+      // Handle flashcard updates (question and/or answer)
+      const changedFields = [];
+      let hasChanges = false;
+
+      if (
+        otherDetails.question !== undefined &&
+        oldReview.question !== otherDetails.question
+      ) {
+        updateQuery.$set = {
+          ...updateQuery.$set,
+          [`${reviewPath}.question`]: otherDetails.question,
+        };
+        changes.push({
+          field: "Flashcard Question",
+          oldValue: oldReview.question || "",
+          newValue: otherDetails.question,
+          cardId,
+        });
+        changedFields.push("question");
+        hasChanges = true;
+      }
+
+      if (
+        otherDetails.answer !== undefined &&
+        oldReview.answer !== otherDetails.answer
+      ) {
+        updateQuery.$set = {
+          ...updateQuery.$set,
+          [`${reviewPath}.answer`]: otherDetails.answer,
+        };
+        changes.push({
+          field: "Flashcard Answer",
+          oldValue: oldReview.answer || "",
+          newValue: otherDetails.answer,
+          cardId,
+        });
+        changedFields.push("answer");
+        hasChanges = true;
+      }
+
+      if (hasChanges) {
+        const questionText = otherDetails.question || oldReview.question;
+        if (changedFields.length === 1) {
+          summary = `Updated ${
+            changedFields[0]
+          } in Flashcard: "${getTextFromHTML(questionText).slice(0, 250)}"`;
+        } else {
+          summary = `Updated ${changedFields.join(
+            " and "
+          )} in Flashcard: "${getTextFromHTML(questionText).slice(0, 250)}"`;
+        }
+      }
     }
   }
   // Case 4: Update main card fields

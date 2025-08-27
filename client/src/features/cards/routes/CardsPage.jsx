@@ -59,11 +59,12 @@ const CardsPage = () => {
             {/* Enhanced Header Section */}
             <div className="text-center mb-12">
               {/* Category Badge */}
-              <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
                 <div className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg">
                   <FolderIcon className="h-6 w-6 text-white" />
                 </div>
-                <div className="flex flex-col items-start">
+
+                <div className="flex flex-col items-center">
                   <span className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">
                     Category
                   </span>
@@ -73,9 +74,9 @@ const CardsPage = () => {
                 </div>
               </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent pb-4">
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-800 dark:from-white dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent pb-4">
                 Study Sets
-              </h1>
+              </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                 {isFetching ? (
                   <span className="bg-gray-200 h-6 animate-pulse"></span>

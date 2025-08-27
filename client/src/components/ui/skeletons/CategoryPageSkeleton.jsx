@@ -24,7 +24,7 @@ const CategoryPageSkeleton = () => {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="h-[180px] bg-gray-300 dark:bg-gray-800 rounded-2xl"
+                className="h-68 bg-gray-300 dark:bg-gray-800 rounded-2xl"
               ></div>
             ))}
           </div>
