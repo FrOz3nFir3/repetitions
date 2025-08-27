@@ -187,7 +187,7 @@ const CardGallery = ({
                     style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
                   >
                     {filteredReview.map((item, index) => {
-                      let isSelected = item._id === currentFlashcard._id;
+                      let isSelected = item?._id === currentFlashcard?._id;
 
                       const handleOnClick = () => {
                         if (!searchTerm?.trim()) {

@@ -65,7 +65,6 @@ const CardActions = ({
           hoverGradient="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30"
           color="blue"
           layout={layout}
-          scrollToTop={true}
           stats={[
             {
               value: reviewLength,
@@ -86,7 +85,6 @@ const CardActions = ({
           hoverGradient="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/30"
           color="purple"
           layout={layout}
-          scrollToTop={true}
           stats={[
             {
               value: quizzesLength,
@@ -107,7 +105,6 @@ const CardActions = ({
           hoverGradient="bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/30"
           color="emerald"
           layout={layout}
-          scrollToTop={true}
         />
 
         <ActionCard
@@ -121,7 +118,6 @@ const CardActions = ({
           hoverGradient="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/30"
           color="amber"
           layout={layout}
-          scrollToTop={true}
         />
       </div>
     </div>

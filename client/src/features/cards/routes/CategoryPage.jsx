@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Outlet, useParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CategorySkeleton from "../../../components/ui/skeletons/CategoryPageSkeleton";
 import PreviouslyStudied from "../../progress/components/PreviouslyStudied";
 import CreateCategoryCard from "../components/CreateCategoryCard";
@@ -11,15 +11,10 @@ import CategoryGridSkeleton from "../../../components/ui/skeletons/CategoryGridS
 import Pagination from "../../../components/ui/Pagination";
 import useCategoriesWithSearch from "../../../hooks/useCategoriesWithSearch";
 import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { normalizeCategory } from "../../../utils/textNormalization";
 
 function CategoryPage() {
   const navigate = useNavigate();
-  let { name: categoryName } = useParams();
-  categoryName = normalizeCategory(categoryName);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [shouldScrollToOutlet, setShouldScrollToOutlet] = useState(false);
-  const categoryGridItemsRef = useRef(null);
   const {
     searchQuery,
     setSearchQuery,
@@ -36,35 +31,11 @@ function CategoryPage() {
   const filteredItemsCount = currentCategories.length;
 
   const handleCategoryClick = (category) => {
-    if (categoryName) {
-      navigate(`../${category}`);
-    } else {
-      navigate(category);
-    }
-    setShouldScrollToOutlet(true);
+    navigate(`/category/${category}`);
   };
 
-  // Scroll to outlet when category changes and content is ready
-  useEffect(() => {
-    if (shouldScrollToOutlet && categoryName) {
-      const scrollTimer = setTimeout(() => {
-        categoryGridItemsRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        setShouldScrollToOutlet(false);
-      }, 150);
-
-      return () => clearTimeout(scrollTimer);
-    }
-  }, [categoryName, shouldScrollToOutlet]);
-
   const handleCreateCategory = (newCategoryName) => {
-    if (categoryName) {
-      navigate(`../${newCategoryName}`);
-    } else {
-      navigate(newCategoryName);
-    }
+    navigate(`/category/${newCategoryName}`);
     setShowCreateForm(false);
   };
 
@@ -121,7 +92,6 @@ function CategoryPage() {
                 <CategoryGrid
                   categories={currentCategories}
                   onCategoryClick={handleCategoryClick}
-                  activeCategory={categoryName}
                 />
               )}
 
@@ -148,9 +118,6 @@ function CategoryPage() {
             onCancel={() => setShowCreateForm(false)}
           />
         </Modal>
-        <div className="mt-16" ref={categoryGridItemsRef}>
-          <Outlet />
-        </div>
       </div>
     </div>
   );

@@ -14,7 +14,6 @@ const ActionCard = ({
   layout = "vertical",
   stats,
   color,
-  scrollToTop = false,
 }) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -31,21 +30,9 @@ const ActionCard = ({
     location.pathname.includes(toName) ||
     (toName?.startsWith("edit") && toName?.includes(view));
 
-  const handleClick = () => {
-    if (scrollToTop) {
-      // Small delay to ensure navigation happens first
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      }, 100);
-    }
-  };
-
   if (layout === "horizontal") {
     return (
-      <Link to={to} onClick={handleClick} className="group block">
+      <Link to={to} className="group block">
         <div
           className={`
           relative overflow-hidden rounded-2xl p-6 h-full
@@ -161,7 +148,7 @@ const ActionCard = ({
 
   // Vertical layout - Big, Bold, Beautiful
   return (
-    <Link to={to} onClick={handleClick} className="group block">
+    <Link to={to} className="group block">
       <div
         className={`
         relative overflow-hidden rounded-3xl p-8 text-center h-full min-h-[280px]

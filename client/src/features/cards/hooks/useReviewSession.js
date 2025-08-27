@@ -17,13 +17,16 @@ export const useReviewSession = (initialCards, card_id) => {
   const [completedCards, setCompletedCards] = useState(new Set());
   const [showCompletion, setShowCompletion] = useState(false);
   const [userHasInteracted, setUserHasInteracted] = useState(false);
-  const [isInitialSetupComplete, setIsInitialSetupComplete] = useState(false);
   const touchStartX = useRef(0);
   const isSwiping = useRef(false);
   const user = useSelector(selectCurrentUser);
 
+  // Skip flag to prevent unnecessary GET calls after PATCH updates
+  const [skipGetCall, setSkipGetCall] = useState(false);
+
+  console.log(card_id, "cardid");
   const { data: cardProgress } = useGetCardReviewProgressQuery(card_id, {
-    skip: !card_id || !user,
+    skip: !card_id || !user || skipGetCall,
   });
   const [updateReviewProgress] = useUpdateUserReviewProgressMutation();
 
@@ -31,6 +34,7 @@ export const useReviewSession = (initialCards, card_id) => {
   const lastSavedProgress = useRef(0);
   const progressUpdateTimeout = useRef(null);
   const hasCompletedSession = useRef(false);
+  const isInitialSetupComplete = useRef(false);
 
   const cardNoQuery = useMemo(
     () => parseInt(searchParams.get("cardNo"), 10),
@@ -58,40 +62,58 @@ export const useReviewSession = (initialCards, card_id) => {
   const currentFlashcard = sessionCards[currentIndex];
 
   const handleSetSearchParams = (key, value) => {
-    setSearchParams((prev) => {
-      if (value) prev.set(key, value);
-      else prev.delete(key);
-      return prev;
-    });
+    setSearchParams(
+      (prev) => {
+        const newParams = new URLSearchParams(prev);
+        if (value) {
+          newParams.set(key, value);
+        } else {
+          newParams.delete(key);
+        }
+        return newParams;
+      },
+      { replace: true }
+    ); // Use replace instead of push
   };
 
+  // Handle initial setup from cardProgress
   useEffect(() => {
-    if (!user) return;
-    // Only run initial setup once when we first get cardProgress
-
-    if (cardProgress && card_id && !isInitialSetupComplete) {
-      const lastReviewedCardNo = cardProgress.lastReviewedCardNo;
-
-      if (lastReviewedCardNo && lastReviewedCardNo > 0) {
-        // If user completed the entire deck, start from beginning
-        if (lastReviewedCardNo >= initialCards.length) {
-          setCurrentIndex(0);
-          handleSetSearchParams("cardNo", "1");
-          lastSavedProgress.current = 0; // Reset to 0 so they can "start" again
-        } else {
-          // Otherwise, resume from where they left off
-          const newIndex = lastReviewedCardNo - 1;
-
-          setCurrentIndex(newIndex);
-          handleSetSearchParams("cardNo", lastReviewedCardNo.toString());
-          lastSavedProgress.current = lastReviewedCardNo;
-        }
-      }
-
-      // Mark initial setup as complete after this effect runs
-      setIsInitialSetupComplete(true);
+    if (!user || !cardProgress || !card_id || isInitialSetupComplete.current) {
+      return;
     }
+
+    const lastReviewedCardNo = cardProgress.lastReviewedCardNo;
+
+    if (lastReviewedCardNo && lastReviewedCardNo > 0) {
+      // If user completed the entire deck, start from beginning
+      if (lastReviewedCardNo >= initialCards.length) {
+        setCurrentIndex(0);
+        lastSavedProgress.current = 0;
+      } else {
+        // Otherwise, resume from where they left off
+        const newIndex = lastReviewedCardNo - 1;
+        setCurrentIndex(newIndex);
+        lastSavedProgress.current = lastReviewedCardNo;
+      }
+    } else {
+      // No previous progress, start from beginning
+      setCurrentIndex(0);
+      lastSavedProgress.current = 0;
+    }
+
+    // Mark initial setup as complete
+    isInitialSetupComplete.current = true;
   }, [cardProgress, card_id, initialCards.length, user]);
+
+  // Sync URL with currentIndex (after initial setup is complete)
+  useEffect(() => {
+    if (!isInitialSetupComplete.current) {
+      return;
+    }
+
+    const cardNo = currentIndex + 1;
+    handleSetSearchParams("cardNo", cardNo.toString());
+  }, [currentIndex]);
 
   // Debounced progress update function
   const debouncedProgressUpdate = useCallback(
@@ -107,6 +129,7 @@ export const useReviewSession = (initialCards, card_id) => {
       progressUpdateTimeout.current = setTimeout(() => {
         // Double-check the progress hasn't been saved already and user is still logged in
         if (cardNo !== lastSavedProgress.current && user) {
+          setSkipGetCall(true); // Skip GET call after this update
           updateReviewProgress({
             card_id: cardId,
             lastReviewedCardNo: cardNo,
@@ -129,6 +152,7 @@ export const useReviewSession = (initialCards, card_id) => {
 
       // Calculate the actual number of original cards (not including review cards)
       const originalCardsCount = initialCards.length;
+      setSkipGetCall(true); // Skip GET call after this update
       updateReviewProgress({
         card_id,
         lastReviewedCardNo: originalCardsCount,
@@ -146,7 +170,7 @@ export const useReviewSession = (initialCards, card_id) => {
   // Debounced progress tracking on index change - only after user interaction
   useEffect(() => {
     // Skip if initial setup is not complete or user hasn't interacted
-    if (!isInitialSetupComplete || !userHasInteracted || !user) {
+    if (!isInitialSetupComplete.current || !userHasInteracted || !user) {
       return;
     }
 
@@ -167,7 +191,6 @@ export const useReviewSession = (initialCards, card_id) => {
     sessionCards,
     user,
     userHasInteracted,
-    isInitialSetupComplete,
   ]);
 
   // Cleanup timeout on unmount
@@ -179,15 +202,23 @@ export const useReviewSession = (initialCards, card_id) => {
     };
   }, []);
 
+  // Handle URL cardNo changes (but only after initial setup is complete)
   useEffect(() => {
-    if (typeof cardNoQuery === "undefined" || Number.isNaN(cardNoQuery)) return;
+    if (
+      !isInitialSetupComplete.current ||
+      typeof cardNoQuery === "undefined" ||
+      Number.isNaN(cardNoQuery)
+    ) {
+      return;
+    }
 
     const targetIndex = cardNoQuery - 1;
+
     if (targetIndex >= 0 && targetIndex < initialCards.length) {
       setCurrentIndex(targetIndex);
     } else {
       setCurrentIndex(0);
-      // handleSetSearchParams("cardNo", "1");
+      handleSetSearchParams("cardNo", "1");
     }
   }, [cardNoQuery, initialCards.length]);
 
@@ -300,7 +331,7 @@ export const useReviewSession = (initialCards, card_id) => {
     // Reset tracking refs
     hasCompletedSession.current = false;
     lastSavedProgress.current = 0;
-    setIsInitialSetupComplete(false);
+    isInitialSetupComplete.current = false;
     setUserHasInteracted(false);
 
     // Clear any pending updates
@@ -309,6 +340,7 @@ export const useReviewSession = (initialCards, card_id) => {
     }
 
     if (card_id && user) {
+      setSkipGetCall(true); // Skip GET call after this update
       updateReviewProgress({ card_id, lastReviewedCardNo: 0 });
       lastSavedProgress.current = 0;
     }

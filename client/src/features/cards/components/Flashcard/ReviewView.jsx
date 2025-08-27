@@ -1,14 +1,10 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { selectCurrentCard } from "../../state/cardSlice";
 import { useReviewSession } from "../../hooks/useReviewSession";
 import ReviewEmptyState from "./Review/ReviewEmptyState";
 import ReviewSession from "./Review/ReviewSession";
 
-function Review() {
-  const card = useSelector(selectCurrentCard);
+function Review({ card }) {
   const { review = [] } = card ?? {};
-
   const session = useReviewSession(review, card?._id);
 
   useEffect(() => {

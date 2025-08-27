@@ -16,8 +16,10 @@ export const useEditCardManager = (card) => {
     if (!review) return [];
     return review.filter(
       (flashcard) =>
-        flashcard.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        flashcard.answer.toLowerCase().includes(searchTerm.toLowerCase())
+        flashcard?.question
+          ?.toLowerCase()
+          .includes(searchTerm?.toLowerCase()) ||
+        flashcard?.answer?.toLowerCase().includes(searchTerm?.toLowerCase())
     );
   }, [review, searchTerm]);
 

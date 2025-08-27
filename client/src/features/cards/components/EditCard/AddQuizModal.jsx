@@ -33,7 +33,7 @@ const AddQuizModal = ({ cardId, flashcards }) => {
 
   const flashcardOptions = useMemo(
     () =>
-      flashcards.map((fc, index) => {
+      flashcards?.map((fc, index) => {
         const plainText = getTextFromHtml(fc.question);
         const truncatedText =
           plainText.length > 40

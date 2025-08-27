@@ -16,25 +16,12 @@ const CardDetails = (data) => {
     reviewLength = 0,
     showCategory,
     showContinue,
-    scrollToTop = true,
   } = data;
-
-  const handleClick = () => {
-    if (scrollToTop) {
-      // Small delay to ensure navigation happens first
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      }, 100);
-    }
-  };
 
   const flashcardCount = review?.length || reviewLength;
 
   return (
-    <Link to={`/card/${_id}`} onClick={handleClick} className="block group">
+    <Link to={`/card/${_id}`} className="block group">
       <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 p-6 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] hover:bg-white dark:hover:bg-gray-800 h-full flex flex-col overflow-hidden">
         {/* Background decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 rounded-full blur-2xl transition-all duration-300 group-hover:from-blue-500/10 group-hover:to-indigo-600/10"></div>

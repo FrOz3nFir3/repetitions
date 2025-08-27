@@ -83,7 +83,7 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "cards",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Card", "IndividualCard", "Report", "User"],
+  tagTypes: ["Card", "IndividualCard", "Report", "User", "CardReviewProgress"],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({
     getAllCards: builder.query({
@@ -250,6 +250,12 @@ export const apiSlice = createApi({
 
     getCardReviewProgress: builder.query({
       query: (card_id) => `/user/review-progress/${card_id}`,
+      providesTags: (result, error, card_id) => [
+        { type: "CardReviewProgress", id: card_id },
+      ],
+      serializeQueryArgs: ({ queryArgs }) => {
+        return queryArgs; // Each card_id gets its own cache entry
+      },
     }),
 
     getDetailedReport: builder.query({
@@ -320,32 +326,14 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: progress,
       }),
-      invalidatesTags: (result, error) => {
+      invalidatesTags: (result, error, { card_id }) => {
         if (!error) {
-          return [{ type: "Report", id: "LIST" }]; // Only invalidate the progress list
+          return [
+            { type: "Report", id: "LIST" },
+            { type: "CardReviewProgress", id: card_id },
+          ];
         }
         return [];
-      },
-      onQueryStarted: async (
-        { card_id, lastReviewedCardNo },
-        { dispatch, queryFulfilled }
-      ) => {
-        try {
-          await queryFulfilled;
-
-          // Manually update the card progress cache without triggering a refetch
-          dispatch(
-            apiSlice.util.updateQueryData(
-              "getCardReviewProgress",
-              card_id,
-              (draft) => {
-                draft.lastReviewedCardNo = lastReviewedCardNo;
-              }
-            )
-          );
-        } catch {
-          // Handle error if needed
-        }
       },
     }),
 

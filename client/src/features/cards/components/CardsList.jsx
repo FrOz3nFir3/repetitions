@@ -67,7 +67,7 @@ const CardList = () => {
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             {isFetching ? (
-              <div className="bg-gray-200 h-6 animate-pulse"></div>
+              <span className="bg-gray-200 h-6 animate-pulse"></span>
             ) : (
               <>
                 {totalItemsCount === 0

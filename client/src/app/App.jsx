@@ -1,5 +1,10 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+  ScrollRestoration,
+} from "react-router-dom";
 
 import Header from "../components/layout/Header/Header";
 
@@ -9,6 +14,9 @@ const LandingPageRoute = lazy(() =>
 );
 const CategoryPageRoute = lazy(() =>
   import("../features/cards/routes/CategoryPageRoute")
+);
+const CardsPageRoute = lazy(() =>
+  import("../features/cards/routes/CardsPageRoute")
 );
 const IndividualCardPageRoute = lazy(() =>
   import("../features/cards/routes/IndividualCardPageRoute")
@@ -29,24 +37,77 @@ const NotFoundRoute = lazy(() =>
   import("../features/not-found/routes/NotFoundRoute")
 );
 
+// Root layout component
+const RootLayout = () => (
+  <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <Header />
+    <Outlet />
+    <ScrollRestoration
+      getKey={(location, matches) => {
+        // probably look into this later
+        if (
+          location.search.includes("cardNo") ||
+          location.search.includes("quizNo") ||
+          location.pathname === "/categories" ||
+          location.pathname.startsWith("/category")
+        ) {
+          return location.pathname;
+        }
+        return location.key;
+      }}
+    />
+  </div>
+);
+
+// Create the router
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: <LandingPageRoute />,
+      },
+      {
+        path: "categories",
+        element: <CategoryPageRoute />,
+      },
+      {
+        path: "category/:name",
+        element: <CardsPageRoute />,
+      },
+      {
+        path: "card/:id/*",
+        element: <IndividualCardPageRoute />,
+      },
+      {
+        path: "progress",
+        element: <ProgressPageRoute />,
+      },
+      {
+        path: "profile",
+        element: <ProfilePageRoute />,
+      },
+      {
+        path: "profile/:username",
+        element: <PublicPageRoute />,
+      },
+      {
+        path: "authenticate",
+        element: <AuthenticationRoute />,
+      },
+      {
+        path: "*",
+        element: <NotFoundRoute />,
+      },
+    ],
+  },
+]);
+
 function App() {
-  return (
-    <BrowserRouter>
-      <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <Header />
-        <Routes>
-          <Route path="/" element={<LandingPageRoute />} />
-          <Route path="/category/*" element={<CategoryPageRoute />} />
-          <Route path="/card/:id/*" element={<IndividualCardPageRoute />} />
-          <Route path="/progress" element={<ProgressPageRoute />} />
-          <Route path="/profile" element={<ProfilePageRoute />} />
-          <Route path="/profile/:username" element={<PublicPageRoute />} />
-          <Route path="/authenticate" element={<AuthenticationRoute />} />
-          <Route path="*" element={<NotFoundRoute />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
-  );
+  // have error boundary later
+  return <RouterProvider router={router} />;
 }
 
 export default App;

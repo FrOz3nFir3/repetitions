@@ -34,7 +34,7 @@ function Header() {
 
   const navigation = [
     { name: "Home", href: "/" },
-    { name: "Categories", href: "/category" },
+    { name: "Categories", href: "/categories" },
   ];
 
   return (
