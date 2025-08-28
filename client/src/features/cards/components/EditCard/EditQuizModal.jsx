@@ -70,15 +70,12 @@ const EditQuizModal = ({
 
   const flashcardOptions = useMemo(
     () =>
-      flashcards.map((fc, index) => {
-        const plainText = getTextFromHtml(fc.question);
-        const truncatedText =
-          plainText.length > 40
-            ? `${plainText.substring(0, 40)}...`
-            : plainText;
+      flashcards.map((flashcard, index) => {
+        const plainText = flashcard.question;
         return {
-          value: fc._id,
-          label: `${index + 1}. ${truncatedText}`,
+          value: flashcard._id,
+          label: `Flashcard ${index + 1}`,
+          description: plainText,
         };
       }),
     [flashcards]

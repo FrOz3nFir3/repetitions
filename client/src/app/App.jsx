@@ -48,6 +48,8 @@ const RootLayout = () => (
         if (
           location.search.includes("cardNo") ||
           location.search.includes("quizNo") ||
+          location.search.includes("flashcardFilter") ||
+          location.search.includes("search") ||
           location.pathname === "/categories" ||
           location.pathname.startsWith("/category")
         ) {

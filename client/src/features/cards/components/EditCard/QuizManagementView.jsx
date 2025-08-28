@@ -21,6 +21,7 @@ const QuizManagementView = ({
   handlePrev,
   review,
   initialFilteredQuizzes,
+  quizMap = new Map(),
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -66,14 +67,11 @@ const QuizManagementView = ({
   const flashcardDropdownOptions = useMemo(
     () =>
       review?.map((flashcard, index) => {
-        const plainText = getTextFromHtml(flashcard.question);
-        const truncatedText =
-          plainText.length > 50
-            ? `${plainText.substring(0, 50)}...`
-            : plainText;
+        const plainText = flashcard.question;
         return {
           value: flashcard._id,
-          label: `${index + 1}. ${truncatedText}`,
+          label: `Flashcard ${index + 1}`,
+          description: plainText,
         };
       }),
     [review]
@@ -81,18 +79,17 @@ const QuizManagementView = ({
 
   const handleFlashcardSelect = (value) => {
     const newFilter = value;
+    handleIndexChange(0); // Reset index when filter changes
     setSelectedFlashcardId(newFilter);
     setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
       if (newFilter) {
-        newParams.set("flashcardFilter", newFilter);
+        prev.set("flashcardFilter", newFilter);
       } else {
-        newParams.delete("flashcardFilter");
+        prev.delete("flashcardFilter");
       }
-      newParams.delete("quizNo");
-      return newParams;
+      prev.delete("quizNo");
+      return prev;
     });
-    handleIndexChange(0); // Reset index when filter changes
   };
 
   const handleJump = (e) => {
@@ -114,7 +111,7 @@ const QuizManagementView = ({
   return (
     <div className="relative z-10 max-w-7xl mx-auto">
       {/* Controls Section */}
-      <div className="space-y-4">
+      <div className="relative z-1 space-y-4">
         <QuizControls
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
@@ -136,6 +133,11 @@ const QuizManagementView = ({
             disabled={filteredQuizzes.length <= 1}
             searchTerm={searchTerm}
             selectedFlashcardId={selectedFlashcardId}
+            quizzes={filteredQuizzes}
+            onQuizSelect={(index) => {
+              handleIndexChange(index);
+            }}
+            quizMap={quizMap}
           />
         )}
       </div>

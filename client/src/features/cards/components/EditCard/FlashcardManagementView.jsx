@@ -17,11 +17,14 @@ const FlashcardManagementView = ({
   cardId,
   animationDirection,
   originalFlashcardIndex,
+  filteredFlashcards = [],
+  handleIndexChange,
+  reviewMap = new Map(),
 }) => {
   return (
     <div className="relative z-10 max-w-7xl mx-auto ">
       {/* Combined Search + Navigation Controls */}
-      <div className=" ">
+      <div className="relative z-1 ">
         <div className="space-y-4">
           {/* Search Section */}
           <FlashcardControls
@@ -40,9 +43,15 @@ const FlashcardManagementView = ({
               onJump={handleJump}
               currentIndex={currentIndex}
               totalCount={totalCount}
-              handleJump={handleJump}
               disabled={totalCount <= 1}
               searchTerm={searchTerm}
+              flashcards={filteredFlashcards}
+              reviewMap={reviewMap}
+              onFlashcardSelect={(index) => {
+                if (handleIndexChange) {
+                  handleIndexChange(index);
+                }
+              }}
             />
           )}
         </div>
@@ -51,7 +60,7 @@ const FlashcardManagementView = ({
       {/* Flashcard Content */}
       {totalCount > 0 ? (
         <div
-          className={`transition-all duration-500 ${
+          className={`transition-all duration-500  ${
             animationDirection === "left"
               ? "animate-slide-in-left"
               : animationDirection === "right"

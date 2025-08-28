@@ -49,16 +49,33 @@ export const useEditCardManager = (card) => {
     () => parseInt(searchParams.get("quizNo"), 10),
     [searchParams]
   );
+  const handleSetMultiParams = (keys = [], value) => {
+    // used for deletion or setting same values for key names
+    let finalObj = {};
+    for (let key of keys) {
+      finalObj[key] = value;
+    }
+
+    setSearchParams((prev) => {
+      for (let key in finalObj) {
+        if (!value) {
+          prev.delete(key);
+        } else {
+          prev.set(key, value);
+        }
+      }
+      return prev;
+    });
+  };
 
   const handleSetSearchParams = (key, value) => {
     setSearchParams((prev) => {
-      const newParams = new URLSearchParams(prev);
       if (value) {
-        newParams.set(key, value);
+        prev.set(key, value);
       } else {
-        newParams.delete(key);
+        prev.delete(key);
       }
-      return newParams;
+      return prev;
     });
   };
 
@@ -130,15 +147,15 @@ export const useEditCardManager = (card) => {
 
   const handleSearchChange = (e) => {
     const newSearchTerm = e.target.value;
+    handleIndexChange(0);
     setSearchTerm(newSearchTerm);
     handleSetSearchParams("search", newSearchTerm);
-    handleIndexChange(0);
   };
 
   const handleReset = () => {
-    setSearchTerm("");
-    handleSetSearchParams("search", "");
     handleIndexChange(0);
+    setSearchTerm("");
+    handleSetMultiParams(["flashcardFilter", "search", "quizNo", "cardNo"], "");
   };
 
   const handleJump = (e) => {

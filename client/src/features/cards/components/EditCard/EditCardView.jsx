@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentCard } from "../../state/cardSlice";
 import EditCardHeader from "./EditCardHeader";
@@ -28,6 +28,22 @@ const EditCardView = () => {
     handleJump,
     handleIndexChange,
   } = useEditCardManager(card);
+
+  const reviewMap = useMemo(() => {
+    const map = new Map();
+    review.forEach((item, index) => {
+      map.set(item._id, index);
+    });
+    return map;
+  }, [review]);
+
+  const quizMap = useMemo(() => {
+    const map = new Map();
+    quizzes.forEach((item, index) => {
+      map.set(item._id, index);
+    });
+    return map;
+  }, [quizzes]);
 
   if (!card) {
     return null; // Or a loading state
@@ -62,6 +78,9 @@ const EditCardView = () => {
           cardId={_id}
           animationDirection={animationDirection}
           originalFlashcardIndex={originalFlashcardIndex}
+          filteredFlashcards={filteredFlashcards}
+          handleIndexChange={handleIndexChange}
+          reviewMap={reviewMap}
         />
       ) : (
         <QuizManagementView
@@ -76,6 +95,7 @@ const EditCardView = () => {
           handleNext={handleNext}
           handlePrev={handlePrev}
           review={review}
+          quizMap={quizMap}
         />
       )}
     </div>

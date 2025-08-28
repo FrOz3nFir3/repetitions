@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import NavigationDropdown from "./NavigationDropdown";
+import { getTextFromHtml } from "../../../../utils/dom";
 
 const QuizNavigation = ({
   onPrev,
@@ -10,13 +12,19 @@ const QuizNavigation = ({
   disabled,
   searchTerm,
   selectedFlashcardId,
+  quizzes = [],
+  onQuizSelect,
+  quizMap = new Map(),
 }) => {
-  const [jumpValue, setJumpValue] = useState("");
+  const getQuizLabel = (quiz, index) => {
+    const originalIndex = quizMap.get(quiz._id);
+    return `Quiz ${originalIndex + 1}`;
+  };
 
-  const handleJumpSubmit = (e) => {
-    e.preventDefault();
-    onJump(e);
-    setJumpValue("");
+  const getQuizDescription = (quiz) => {
+    if (!quiz?.quizQuestion) return "";
+    const plainText = getTextFromHtml(quiz.quizQuestion);
+    return plainText;
   };
 
   return (
@@ -62,31 +70,21 @@ const QuizNavigation = ({
           </button>
         </div>
 
-        {/* Right: Jump to Quiz */}
-        <form
-          onSubmit={handleJumpSubmit}
-          className="flex flex-wrap items-center gap-3"
-        >
+        {/* Right: Go to Quiz Dropdown */}
+        <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Jump to:
+            Go to:
           </span>
-          <input
-            type="number"
-            name="jumpToIndex"
-            value={jumpValue}
-            onChange={(e) => setJumpValue(e.target.value)}
-            min="1"
-            max={totalCount}
-            className="w-20 px-3 py-2 text-sm text-center border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-500/20 transition-all duration-200"
-            placeholder={`${totalCount}`}
+          <NavigationDropdown
+            items={quizzes}
+            currentIndex={currentIndex}
+            onItemSelect={onQuizSelect}
+            placeholder="Select quiz..."
+            getItemLabel={getQuizLabel}
+            getItemDescription={getQuizDescription}
+            type="quiz"
           />
-          <button
-            type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
-          >
-            Go
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

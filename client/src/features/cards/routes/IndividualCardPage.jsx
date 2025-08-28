@@ -54,8 +54,10 @@ function IndividualCardPage() {
     const view = searchParams.get("view");
     const inValidView = view !== "flashcards" && view !== "quizzes";
     if (pathname.includes("/edit") && inValidView) {
-      searchParams.set("view", "flashcards");
-      setSearchParams(searchParams);
+      setSearchParams((prev) => {
+        prev.set("view", "flashcards");
+        return prev;
+      });
     }
   }, [cardData, dispatch]);
 
