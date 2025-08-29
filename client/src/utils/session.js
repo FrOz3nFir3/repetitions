@@ -28,6 +28,6 @@ export function setSessionStatus(isActive) {
       window.localStorage.removeItem(SESSION_STATUS_KEY);
     }
   } catch (error) {
-    console.error("Could not write to localStorage", error);
+    // console.error("Could not write to localStorage", error);
   }
 }

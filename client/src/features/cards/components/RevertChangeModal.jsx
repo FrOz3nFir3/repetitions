@@ -88,7 +88,6 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
   }, [error]);
 
   const changeDate = new Date(change.timestamp);
-  console.log(change, "changes");
 
   return (
     <Modal

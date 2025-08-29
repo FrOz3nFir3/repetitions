@@ -13,7 +13,7 @@ export function getFavoriteLanguages() {
     const stored = localStorage.getItem(FAVORITES_KEY);
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.warn("Failed to load favorite languages from localStorage:", error);
+    // console.warn("Failed to load favorite languages from localStorage:", error);
     return [];
   }
 }
@@ -36,7 +36,7 @@ export function addToFavoriteLanguages(languageValue) {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(trimmedFavorites));
     return trimmedFavorites;
   } catch (error) {
-    console.warn("Failed to save favorite language to localStorage:", error);
+    // console.warn("Failed to save favorite language to localStorage:", error);
     return getFavoriteLanguages();
   }
 }
@@ -49,10 +49,10 @@ export function removeFromFavoriteLanguages(languageValue) {
     localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
     return newFavorites;
   } catch (error) {
-    console.warn(
-      "Failed to remove favorite language from localStorage:",
-      error
-    );
+    // console.warn(
+    //   "Failed to remove favorite language from localStorage:",
+    //   error
+    // );
     return getFavoriteLanguages();
   }
 }

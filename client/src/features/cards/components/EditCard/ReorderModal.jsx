@@ -25,11 +25,20 @@ import {
   AdjustmentsHorizontalIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
 const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
   const [orderedItems, setOrderedItems] = useState(items || []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [updateCard] = usePatchUpdateCardMutation();
+  const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
+  const user = useSelector(selectCurrentUser);
+  const errorRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (error && errorRef.current) {
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
 
   // Reset items when modal opens or items change
   React.useEffect(() => {
@@ -130,27 +139,22 @@ const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
     });
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!cardId || orderedItems.length === 0 || !hasOrderChanged) return;
 
-    setIsLoading(true);
-    try {
-      const itemIds = orderedItems.map((item) => item._id);
-      const updateData = {
-        _id: cardId,
-        ...(contentType === "flashcards"
-          ? { reorderFlashcards: itemIds }
-          : { reorderQuizzes: itemIds }),
-      };
+    const itemIds = orderedItems.map((item) => item._id);
+    const updateData = {
+      _id: cardId,
+      ...(contentType === "flashcards"
+        ? { reorderFlashcards: itemIds }
+        : { reorderQuizzes: itemIds }),
+    };
 
-      await updateCard(updateData).unwrap();
-      onClose();
-    } catch (error) {
-      console.error("Failed to reorder items:", error);
-      // Error will be handled by RTK Query
-    } finally {
-      setIsLoading(false);
-    }
+    updateCard(updateData).then((res) => {
+      if (res.data) {
+        onClose();
+      }
+    });
   };
 
   const isFlashcards = contentType === "flashcards";
@@ -178,6 +182,14 @@ const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div ref={errorRef}>
+          {error && (
+            <div className="my-4 rounded-md bg-red-100 dark:bg-red-900 p-4 text-sm text-red-700 dark:text-red-200 border border-red-300 dark:border-red-700">
+              Reordering failed: {error.data?.error || "Unknown error"}
+            </div>
+          )}
         </div>
 
         {/* Content Area */}
@@ -238,7 +250,7 @@ const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {hasOrderChanged ? (
                 <span className="text-orange-600 dark:text-orange-400 font-medium">
-                  Changes detected
+                  Changes detected {!user && "- Login to Save"}
                 </span>
               ) : (
                 <span>No changes made</span>
@@ -257,7 +269,10 @@ const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
                 type="button"
                 onClick={handleSave}
                 disabled={
-                  isLoading || orderedItems.length === 0 || !hasOrderChanged
+                  isLoading ||
+                  orderedItems.length === 0 ||
+                  !hasOrderChanged ||
+                  !user
                 }
                 className="cursor-pointer flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >

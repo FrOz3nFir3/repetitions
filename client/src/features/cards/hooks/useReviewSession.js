@@ -24,7 +24,6 @@ export const useReviewSession = (initialCards, card_id) => {
   // Skip flag to prevent unnecessary GET calls after PATCH updates
   const [skipGetCall, setSkipGetCall] = useState(false);
 
-  console.log(card_id, "cardid");
   const { data: cardProgress } = useGetCardReviewProgressQuery(card_id, {
     skip: !card_id || !user || skipGetCall,
   });
