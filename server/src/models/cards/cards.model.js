@@ -404,6 +404,8 @@ export async function updateCard(details) {
     deleteQuiz,
     deleteOption,
     reverted,
+    reorderFlashcards,
+    reorderQuizzes,
     ...otherDetails
   } = details;
 
@@ -414,6 +416,100 @@ export async function updateCard(details) {
   let updateQuery = {};
   const changes = [];
   let summary = "";
+
+  if (reorderFlashcards) {
+    const validIds = reorderFlashcards.filter((id) =>
+      card.review.some((r) => r._id.toString() === id)
+    );
+
+    if (validIds.length === card.review.length) {
+      // Create a reordered array based on the provided order
+      const reviewMap = new Map();
+
+      // fill with review data
+      for (let flashcardItem of card.review) {
+        reviewMap.set(flashcardItem._id.toString(), flashcardItem);
+      }
+
+      const reorderedReview = validIds.map((id) => reviewMap.get(id));
+
+      updateQuery.$set = { review: reorderedReview };
+      summary = "Reordered Flashcards";
+
+      const oldDisplayText = card.review
+        .map((item, index) => {
+          let plainText = getTextFromHTML(item.question);
+          if (plainText.length > 100) {
+            plainText = plainText.slice(0, 100) + "...";
+          }
+          return `#${index + 1} - ${plainText}`;
+        })
+        .join("\n");
+
+      const newDisplayText = reorderedReview
+        .map((item, index) => {
+          let plainText = getTextFromHTML(item.question);
+          if (plainText.length > 100) {
+            plainText = plainText.slice(0, 100) + "...";
+          }
+          return `#${index + 1} - ${plainText}`;
+        })
+        .join("\n");
+
+      changes.push({
+        field: "Flashcard Order",
+        oldValue: card.review.map((r) => r._id.toString()),
+        newValue: validIds,
+        oldDisplayText,
+        newDisplayText,
+      });
+    }
+  } else if (reorderQuizzes) {
+    const validIds = reorderQuizzes.filter((id) =>
+      card.quizzes.some((q) => q._id.toString() === id)
+    );
+
+    if (validIds.length === card.quizzes.length) {
+      const quizMap = new Map();
+      // fill the map with current data
+      for (let quizItem of card.quizzes) {
+        quizMap.set(quizItem._id.toString(), quizItem);
+      }
+
+      // Create a reordered array based on the provided order
+      const reorderedQuizzes = validIds.map((id) => quizMap.get(id.toString()));
+
+      updateQuery.$set = { quizzes: reorderedQuizzes };
+      summary = "Reordered quizzes";
+
+      const oldDisplayText = card.quizzes
+        .map((item, index) => {
+          let plainText = getTextFromHTML(item.quizQuestion);
+          if (plainText.length > 100) {
+            plainText = plainText.slice(0, 100) + "...";
+          }
+          return `#${index + 1} - ${plainText}`;
+        })
+        .join("\n");
+      const newDisplayText = reorderedQuizzes
+        .map((item, index) => {
+          let plainText = getTextFromHTML(item.quizQuestion);
+          if (plainText.length > 100) {
+            plainText = plainText.slice(0, 100) + "...";
+          }
+          return `#${index + 1} - ${plainText}`;
+        })
+        .join("\n");
+
+      changes.push({
+        field: "Quiz Order",
+        oldValue: card.quizzes.map((q) => q._id.toString()),
+        newValue: validIds,
+        oldDisplayText,
+        newDisplayText,
+      });
+    }
+  }
 
   // Case 1: Add a new quiz (distinguished by the absence of quizId)
   if (quizQuestion && quizAnswer && !quizId) {

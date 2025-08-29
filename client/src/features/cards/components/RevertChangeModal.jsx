@@ -59,6 +59,12 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
       case "Description":
         updateDetails.description = oldValue;
         break;
+      case "Quiz Order":
+        updateDetails.reorderQuizzes = oldValue;
+        break;
+      case "Flashcard Order":
+        updateDetails.reorderFlashcards = oldValue;
+        break;
       default:
         if (field.startsWith("Quiz Option")) {
           updateDetails.quizId = quizId;
@@ -82,6 +88,7 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
   }, [error]);
 
   const changeDate = new Date(change.timestamp);
+  console.log(change, "changes");
 
   return (
     <Modal
@@ -180,10 +187,17 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
                 </p>
               </div>
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg p-3">
-                <RichTextEditor
-                  initialContent={change.newValue}
-                  editable={false}
-                />
+                {/* have proper renderer for this later? */}
+                {change.newDisplayText ? (
+                  <pre className="whitespace-pre-wrap max-h-96 overflow-y-auto">
+                    {change.newDisplayText}
+                  </pre>
+                ) : (
+                  <RichTextEditor
+                    initialContent={change.newValue}
+                    editable={false}
+                  />
+                )}
               </div>
             </div>
 
@@ -195,10 +209,17 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
                 </p>
               </div>
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg p-3">
-                <RichTextEditor
-                  initialContent={change.oldValue}
-                  editable={false}
-                />
+                {/* have proper renderer for this later? */}
+                {change.oldDisplayText ? (
+                  <pre className="whitespace-pre-wrap max-h-96 overflow-y-auto">
+                    {change.oldDisplayText}
+                  </pre>
+                ) : (
+                  <RichTextEditor
+                    initialContent={change.oldValue}
+                    editable={false}
+                  />
+                )}
               </div>
             </div>
           </div>

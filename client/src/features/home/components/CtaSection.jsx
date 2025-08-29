@@ -82,7 +82,7 @@ const CtaSection = () => {
                   <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
                 <Link
-                  to="/category"
+                  to="/categories"
                   className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl hover:bg-white/20 transition-all duration-300 min-w-[200px]"
                 >
                   <RocketLaunchIcon className="w-5 h-5 mr-2" />
@@ -99,7 +99,7 @@ const CtaSection = () => {
                   <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
                 <Link
-                  to="/category"
+                  to="/categories"
                   className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-2xl hover:bg-white/20 transition-all duration-300 min-w-[200px]"
                 >
                   <RocketLaunchIcon className="w-5 h-5 mr-2" />

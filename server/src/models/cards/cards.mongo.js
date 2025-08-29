@@ -5,6 +5,8 @@ const changeSchema = new Schema(
     field: { type: String, required: true },
     oldValue: { type: Schema.Types.Mixed },
     newValue: { type: Schema.Types.Mixed },
+    oldDisplayText: { type: Schema.Types.Mixed },
+    newDisplayText: { type: Schema.Types.Mixed },
     cardId: { type: String },
     quizId: { type: String },
     optionId: { type: String },

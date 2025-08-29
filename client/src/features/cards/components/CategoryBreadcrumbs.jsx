@@ -75,7 +75,7 @@ const CategoryBreadcrumbs = ({ categoryName }) => {
           <li aria-current="page" className="flex-shrink-0">
             <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 dark:from-indigo-900/40 dark:to-purple-900/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700/50">
               <FolderIconSolid className="w-4 h-4 flex-shrink-0" />
-              <span className="font-medium truncate max-w-[120px] sm:max-w-none">
+              <span className="font-medium truncate max-w-[120px] sm:max-w-xs">
                 {categoryName}
               </span>
             </div>

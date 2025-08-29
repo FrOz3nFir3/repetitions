@@ -6,8 +6,10 @@ const QuizList = ({
   quiz,
   onEdit,
   onDelete,
+  onReorder,
   originalQuizIndex,
   currentIndex,
+  hasMultipleQuizzes = false,
 }) => {
   if (!quiz) {
     return (
@@ -33,8 +35,10 @@ const QuizList = ({
         quiz={quiz}
         onEdit={onEdit}
         onDelete={onDelete}
+        onReorder={onReorder}
         originalQuizIndex={originalQuizIndex}
         currentIndex={currentIndex}
+        hasMultipleQuizzes={hasMultipleQuizzes}
       />
     </div>
   );

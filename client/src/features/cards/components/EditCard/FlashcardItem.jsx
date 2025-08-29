@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   PencilIcon,
+  AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 import {
   LightBulbIcon,
@@ -15,16 +16,20 @@ import {
 
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
 import EditFlashcardModal from "./EditFlashcardModal";
+import ReorderModal from "./ReorderModal";
 import FlashcardTips from "./FlashcardTips";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
+import { selectCurrentCard } from "../../state/cardSlice";
 
 const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
   const [updateCard, { error, isSuccess }] = usePatchUpdateCardMutation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
   const errorRef = React.useRef(null);
   const user = useSelector(selectCurrentUser);
+  const card = useSelector(selectCurrentCard);
 
   const handleDeleteFlashcard = () => {
     const updateDetails = {
@@ -124,6 +129,23 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
               </div>
             </button>
 
+            {card?.review?.length > 1 && (
+              <button
+                onClick={() => setIsReorderModalOpen(true)}
+                className="flex items-center gap-2 group cursor-pointer relative px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 backdrop-blur-sm rounded-xl hover:border-emerald-300 dark:hover:border-emerald-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white"
+                aria-label="Reorder flashcards"
+              >
+                <AdjustmentsHorizontalIcon className="h-4 w-4" />
+                <span className="text-sm font-medium">Reorder</span>
+
+                <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <span className="whitespace-nowrap z-99 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-emerald-200 dark:border-emerald-700">
+                    Reorder flashcards
+                  </span>
+                </div>
+              </button>
+            )}
+
             <button
               onClick={() => setIsDeleteModalOpen(true)}
               className="group cursor-pointer relative p-3 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
@@ -198,6 +220,14 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
         flashcard={flashcard}
         cardId={cardId}
         key={isEditModalOpen}
+      />
+
+      <ReorderModal
+        isOpen={isReorderModalOpen}
+        onClose={() => setIsReorderModalOpen(false)}
+        cardId={cardId}
+        contentType="flashcards"
+        items={card?.review || []}
       />
 
       <DeleteConfirmationModal

@@ -4,6 +4,7 @@ import QuizControls from "./QuizControls";
 import QuizNavigation from "./QuizNavigation";
 import QuizList from "./QuizList";
 import EditQuizModal from "./EditQuizModal";
+import ReorderModal from "./ReorderModal";
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
 import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import { getTextFromHtml } from "../../../../utils/dom";
@@ -26,6 +27,7 @@ const QuizManagementView = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [selectedFlashcardId, setSelectedFlashcardId] = useState(
     searchParams.get("flashcardFilter") || null
@@ -50,6 +52,10 @@ const QuizManagementView = ({
   const handleDeleteClick = (quiz) => {
     setSelectedQuiz(quiz);
     setIsDeleteModalOpen(true);
+  };
+
+  const handleReorderClick = () => {
+    setIsReorderModalOpen(true);
   };
 
   const confirmDelete = async () => {
@@ -148,8 +154,10 @@ const QuizManagementView = ({
           quiz={currentQuiz}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onReorder={handleReorderClick}
           originalQuizIndex={originalQuizIndex}
           currentIndex={currentIndex}
+          hasMultipleQuizzes={quizzes?.length > 1}
         />
       ) : (
         <div className="text-center py-12">
@@ -180,6 +188,15 @@ const QuizManagementView = ({
           flashcards={review}
         />
       )}
+      
+      <ReorderModal
+        isOpen={isReorderModalOpen}
+        onClose={() => setIsReorderModalOpen(false)}
+        cardId={cardId}
+        contentType="quizzes"
+        items={quizzes || []}
+      />
+      
       {isDeleteModalOpen && selectedQuiz && (
         <DeleteConfirmationModal
           isOpen={isDeleteModalOpen}

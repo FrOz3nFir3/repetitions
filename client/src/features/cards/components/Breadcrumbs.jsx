@@ -97,7 +97,7 @@ const Breadcrumbs = ({ card, cardData }) => {
               } category`}
             >
               <FolderIcon className="w-4 h-4 flex-shrink-0" />
-              <span className="font-medium truncate max-w-[120px] sm:max-w-none">
+              <span className="font-medium truncate max-w-[120px] sm:max-w-xs">
                 {cardData.categoryName || `Category ${cardData.category}`}
               </span>
             </Link>

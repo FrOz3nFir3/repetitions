@@ -8,6 +8,11 @@ const LogItemChange = ({ change }) => {
   const [theme] = useDarkMode();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Use displayText for order changes when available, fallback to original values
+  const displayOldValue = change.oldDisplayText ?? change.oldValue;
+  const displayNewValue = change.newDisplayText ?? change.newValue;
+  const hasRevertButton = change.oldValue && change.newValue;
+
   return (
     <li className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3 border border-orange-200/50 dark:border-orange-700/50">
       <div className="flex flex-wrap justify-between items-center mb-3">
@@ -16,7 +21,7 @@ const LogItemChange = ({ change }) => {
             {change.field}
           </strong>
         </div>
-        {change.oldValue && change.newValue && (
+        {hasRevertButton && (
           <button
             onClick={() => setIsModalOpen(true)}
             className="shrink-0 cursor-pointer flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800/50 transition-all duration-200 text-xs font-medium group"
@@ -30,8 +35,8 @@ const LogItemChange = ({ change }) => {
       <div className="rounded-lg overflow-hidden border border-orange-200/30 dark:border-orange-700/30">
         <LazyDiffViewer
           className="max-w-full"
-          oldValue={change.oldValue}
-          newValue={change.newValue}
+          oldValue={displayOldValue}
+          newValue={displayNewValue}
           splitView={false}
           hideLineNumbers
           useDarkTheme={theme === "dark"}
@@ -54,4 +59,3 @@ const LogItemChange = ({ change }) => {
 };
 
 export default LogItemChange;
-

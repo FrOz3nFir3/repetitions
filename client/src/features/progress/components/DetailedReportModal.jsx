@@ -38,6 +38,7 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
 
     const quizMap = new Map(cardData.quizzes.map((quiz) => [quiz._id, quiz]));
 
+    // when the ordering of quizzes has change user still has old data probably fix this later
     return reportData
       .map((attempt) => {
         const quizDetails = quizMap.get(attempt.quizId);
