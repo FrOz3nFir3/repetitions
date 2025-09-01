@@ -1,4 +1,5 @@
 import Users from "../users/users.mongo.js";
+import Card from "../cards/cards.mongo.js";
 import mongoose from "mongoose";
 import crypto from "crypto";
 import { escapeRegex } from "../../utils/textNormalization.js";
@@ -82,6 +83,7 @@ export async function getUserReviewProgress(
         studying: {
           cardId: 1,
           review: 1,
+          quiz: 1,
         },
       },
     },
@@ -112,7 +114,12 @@ export async function getUserReviewProgress(
     });
   }
 
-  const paginatedPipeline = [{ $sort: { "studying.review.updatedAt": -1 } }];
+  // need to update this to properly filter based on quiz and review both
+  const paginatedPipeline = [
+    {
+      $sort: { "studying.review.updatedAt": -1, "studying.quiz.updatedAt": -1 },
+    },
+  ];
 
   if (typeof skip === "number") {
     paginatedPipeline.push({ $skip: skip });
@@ -133,6 +140,17 @@ export async function getUserReviewProgress(
       reviewLength: { $size: { $ifNull: ["$cardDetails.review", []] } },
       cardUpdatedAt: "$cardDetails.updatedAt",
       reviewUpdatedAt: "$studying.review.updatedAt",
+      weakCardsCount: {
+        $size: { $ifNull: ["$studying.review.weakCards", []] },
+      },
+      strugglingQuizCount: {
+        $size: {
+          $filter: {
+            input: { $ifNull: ["$studying.quiz.attempts", []] },
+            cond: { $eq: ["$$this.struggling", true] },
+          },
+        },
+      },
     },
   });
 
@@ -210,6 +228,14 @@ export async function getUserQuizProgress(
       timesFinished: "$studying.quiz.timesFinished",
       totalCorrect: "$studying.quiz.totalCorrect",
       totalIncorrect: "$studying.quiz.totalIncorrect",
+      strugglingQuizCount: {
+        $size: {
+          $filter: {
+            input: { $ifNull: ["$studying.quiz.attempts", []] },
+            cond: { $eq: ["$$this.struggling", true] },
+          },
+        },
+      },
     },
   });
 
@@ -409,7 +435,7 @@ export async function getUserLastReviewedByCardProgress({ userId, cardId }) {
     !mongoose.Types.ObjectId.isValid(userId) ||
     !mongoose.Types.ObjectId.isValid(cardId)
   ) {
-    return { lastReviewedCardNo: 0 };
+    return { lastReviewedCardNo: 0, weakCards: [] };
   }
 
   const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
@@ -425,6 +451,9 @@ export async function getUserLastReviewedByCardProgress({ userId, cardId }) {
         lastReviewedCardNo: {
           $ifNull: ["$studying.review.lastReviewedCardNo", 0],
         },
+        weakCards: {
+          $ifNull: ["$studying.review.weakCards", []],
+        },
       },
     },
   ]);
@@ -432,7 +461,44 @@ export async function getUserLastReviewedByCardProgress({ userId, cardId }) {
   if (result.length > 0) {
     return result[0];
   } else {
-    return { lastReviewedCardNo: 0 };
+    return { lastReviewedCardNo: 0, weakCards: [] };
+  }
+}
+
+export async function getUserQuizProgressByCard({ userId, cardId }) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId)
+  ) {
+    return { strugglingQuizCount: 0 };
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+  const cardObjectId = new mongoose.Types.ObjectId(`${cardId}`);
+
+  const result = await Users.aggregate([
+    { $match: { _id: userObjectId } },
+    { $unwind: "$studying" },
+    { $match: { "studying.cardId": cardObjectId } },
+    {
+      $project: {
+        _id: 0,
+        strugglingQuizCount: {
+          $size: {
+            $filter: {
+              input: { $ifNull: ["$studying.quiz.attempts", []] },
+              cond: { $eq: ["$$this.struggling", true] },
+            },
+          },
+        },
+      },
+    },
+  ]);
+
+  if (result.length > 0) {
+    return result[0];
+  } else {
+    return { strugglingQuizCount: 0 };
   }
 }
 
@@ -449,9 +515,10 @@ export async function updateUserReviewProgress(
 ) {
   const newReviewProgress = {
     cardId: card_id,
-    quiz: null,
+    quiz: {},
     review: {
       lastReviewedCardNo: lastReviewedCardNo,
+      weakCards: [],
       updatedAt: new Date(),
     },
   };
@@ -470,19 +537,423 @@ export async function updateUserReviewProgress(
     { _id: userId, "studying.cardId": card_id },
     {
       $set: {
-        "studying.$.review": {
-          lastReviewedCardNo: lastReviewedCardNo,
-          updatedAt: new Date(),
-        },
+        "studying.$.review.lastReviewedCardNo": lastReviewedCardNo,
+        "studying.$.review.updatedAt": new Date(),
       },
     },
     { new: true }
   );
 }
 
+export async function updateUserWeakCards(userId, cardId, flashcardId, action) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId) ||
+    !mongoose.Types.ObjectId.isValid(flashcardId)
+  ) {
+    throw new Error("Invalid ObjectId provided");
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const cardObjectId = new mongoose.Types.ObjectId(cardId);
+  const flashcardObjectId = new mongoose.Types.ObjectId(flashcardId);
+
+  if (action === "add") {
+    // First, ensure the card exists in studying array with review object
+    const ensureCardExists = await Users.findOneAndUpdate(
+      { _id: userObjectId, "studying.cardId": { $ne: cardObjectId } },
+      {
+        $push: {
+          studying: {
+            cardId: cardObjectId,
+            review: {
+              lastReviewedCardNo: 0,
+              weakCards: [],
+              updatedAt: new Date(),
+            },
+            quiz: {},
+          },
+        },
+      },
+      { new: true }
+    );
+
+    // Now add the weak card if it doesn't already exist
+    const result = await Users.findOneAndUpdate(
+      {
+        _id: userObjectId,
+        "studying.cardId": cardObjectId,
+        "studying.review.weakCards.flashcardId": { $ne: flashcardObjectId },
+      },
+      {
+        $push: {
+          "studying.$.review.weakCards": {
+            flashcardId: flashcardObjectId,
+            addedAt: new Date(),
+            reviewCount: 1,
+          },
+        },
+        $set: { "studying.$.review.updatedAt": new Date() },
+      },
+      { new: true }
+    );
+
+    // If the card already exists in weak cards, update the timestamp and increment review count
+    if (!result) {
+      await Users.findOneAndUpdate(
+        {
+          _id: userObjectId,
+          "studying.cardId": cardObjectId,
+          "studying.review.weakCards.flashcardId": flashcardObjectId,
+        },
+        {
+          $set: {
+            "studying.$.review.weakCards.$[weakCard].addedAt": new Date(),
+            "studying.$.review.updatedAt": new Date(),
+          },
+          $inc: { "studying.$.review.weakCards.$[weakCard].reviewCount": 1 },
+        },
+        {
+          arrayFilters: [{ "weakCard.flashcardId": flashcardObjectId }],
+          new: true,
+        }
+      );
+    }
+  } else if (action === "remove") {
+    // Remove the weak card from the array
+    await Users.findOneAndUpdate(
+      {
+        _id: userObjectId,
+        "studying.cardId": cardObjectId,
+      },
+      {
+        $pull: {
+          "studying.$.review.weakCards": { flashcardId: flashcardObjectId },
+        },
+        $set: { "studying.$.review.updatedAt": new Date() },
+      },
+      { new: true }
+    );
+  }
+
+  return true;
+}
+
+// Optimized with aggregation pipeline to avoid Card model queries and client-side filtering
+export async function getFocusReviewData(userId, cardId) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId)
+  ) {
+    throw new Error("Invalid ObjectId provided");
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+  const cardObjectId = new mongoose.Types.ObjectId(`${cardId}`);
+
+  const result = await Users.aggregate([
+    // Match the specific user
+    { $match: { _id: userObjectId } },
+
+    // Unwind studying array to work with individual studying entries
+    { $unwind: { path: "$studying", preserveNullAndEmptyArrays: true } },
+
+    // Match the specific card
+    { $match: { "studying.cardId": cardObjectId } },
+
+    // Lookup card data from cards collection
+    {
+      $lookup: {
+        from: "cards",
+        localField: "studying.cardId",
+        foreignField: "_id",
+        as: "cardDetails",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              "main-topic": 1,
+              "sub-topic": 1,
+              category: 1,
+              review: 1,
+              quizzes: 1,
+            },
+          },
+        ],
+      },
+    },
+
+    // Unwind card details
+    { $unwind: { path: "$cardDetails", preserveNullAndEmptyArrays: true } },
+
+    // Project the final result structure with proper default values
+    {
+      $project: {
+        _id: "$cardDetails._id",
+        "main-topic": "$cardDetails.main-topic",
+        "sub-topic": "$cardDetails.sub-topic",
+        category: "$cardDetails.category",
+        reviewLength: {
+          $size: { $ifNull: ["$cardDetails.review", []] },
+        },
+        quizzesLength: {
+          $size: { $ifNull: ["$cardDetails.quizzes", []] },
+        },
+        weakCards: {
+          $map: {
+            input: { $ifNull: ["$studying.review.weakCards", []] },
+            as: "weakCard",
+            in: {
+              $let: {
+                vars: {
+                  matchedReview: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: { $ifNull: ["$cardDetails.review", []] },
+                          as: "review",
+                          cond: {
+                            $eq: ["$$review._id", "$$weakCard.flashcardId"],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+                in: {
+                  $cond: {
+                    if: { $ne: ["$$matchedReview", null] },
+                    then: {
+                      _id: "$$matchedReview._id",
+                      question: "$$matchedReview.question",
+                      answer: "$$matchedReview.answer",
+                      flashcardId: "$$weakCard.flashcardId",
+                      addedAt: "$$weakCard.addedAt",
+                      reviewCount: "$$weakCard.reviewCount",
+                    },
+                    else: null,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    // Filter out null weak cards
+    {
+      $addFields: {
+        weakCards: {
+          $filter: {
+            input: "$weakCards",
+            as: "card",
+            cond: { $ne: ["$$card", null] },
+          },
+        },
+      },
+    },
+  ]);
+
+  // Handle case where no matching user/card combination is found
+  if (!result || result.length === 0) {
+    // Check if card exists at all
+    const cardExists = await Card.findById(cardObjectId, { _id: 1 }).lean();
+    if (!cardExists) {
+      return null;
+    }
+
+    // Return card data with empty weak cards if user hasn't studied this card
+    const cardData = await Card.findById(cardObjectId, {
+      _id: 1,
+      "main-topic": 1,
+      "sub-topic": 1,
+      category: 1,
+      review: 1,
+      quizzes: 1,
+    }).lean();
+
+    return {
+      _id: cardData._id,
+      "main-topic": cardData["main-topic"],
+      "sub-topic": cardData["sub-topic"],
+      category: cardData.category,
+      reviewLength: cardData.review ? cardData.review.length : 0,
+      quizzesLength: cardData.quizzes ? cardData.quizzes.length : 0,
+      weakCards: [],
+    };
+  }
+
+  return result[0];
+}
+
+export async function getFocusQuizData(userId, cardId) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId)
+  ) {
+    throw new Error("Invalid ObjectId provided");
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
+  const cardObjectId = new mongoose.Types.ObjectId(`${cardId}`);
+
+  const result = await Users.aggregate([
+    // Match the specific user
+    { $match: { _id: userObjectId } },
+
+    // Unwind studying array to work with individual studying entries
+    { $unwind: { path: "$studying", preserveNullAndEmptyArrays: true } },
+
+    // Match the specific card
+    { $match: { "studying.cardId": cardObjectId } },
+
+    // Lookup card data from cards collection
+    {
+      $lookup: {
+        from: "cards",
+        localField: "studying.cardId",
+        foreignField: "_id",
+        as: "cardDetails",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+              "main-topic": 1,
+              "sub-topic": 1,
+              category: 1,
+              review: 1,
+              quizzes: 1,
+            },
+          },
+        ],
+      },
+    },
+
+    // Unwind card details
+    { $unwind: { path: "$cardDetails", preserveNullAndEmptyArrays: true } },
+
+    // Project the final result structure with proper default values
+    {
+      $project: {
+        _id: "$cardDetails._id",
+        "main-topic": "$cardDetails.main-topic",
+        "sub-topic": "$cardDetails.sub-topic",
+        category: "$cardDetails.category",
+        reviewLength: {
+          $size: { $ifNull: ["$cardDetails.review", []] },
+        },
+        quizzesLength: {
+          $size: { $ifNull: ["$cardDetails.quizzes", []] },
+        },
+        strugglingQuizzes: {
+          $map: {
+            input: {
+              $filter: {
+                input: { $ifNull: ["$studying.quiz.attempts", []] },
+                as: "attempt",
+                cond: { $eq: ["$$attempt.struggling", true] },
+              },
+            },
+            as: "strugglingAttempt",
+            in: {
+              $let: {
+                vars: {
+                  matchedQuiz: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: { $ifNull: ["$cardDetails.quizzes", []] },
+                          as: "quiz",
+                          cond: {
+                            $eq: ["$$quiz._id", "$$strugglingAttempt.quizId"],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+                in: {
+                  $cond: {
+                    if: { $ne: ["$$matchedQuiz", null] },
+                    then: {
+                      _id: "$$matchedQuiz._id",
+                      quizQuestion: "$$matchedQuiz.quizQuestion",
+                      quizAnswer: "$$matchedQuiz.quizAnswer",
+                      options: { $ifNull: ["$$matchedQuiz.options", []] },
+                      minimumOptions: {
+                        $ifNull: ["$$matchedQuiz.minimumOptions", 2],
+                      },
+                      quizId: "$$strugglingAttempt.quizId",
+                      addedAt: "$$strugglingAttempt.addedAt",
+                    },
+                    else: null,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
+    // Filter out null struggling quizzes
+    {
+      $addFields: {
+        strugglingQuizzes: {
+          $filter: {
+            input: "$strugglingQuizzes",
+            as: "quiz",
+            cond: { $ne: ["$$quiz", null] },
+          },
+        },
+      },
+    },
+  ]);
+
+  // Handle case where no matching user/card combination is found
+  if (!result || result.length === 0) {
+    // Check if card exists at all
+    const cardExists = await Card.findById(cardObjectId, { _id: 1 }).lean();
+    if (!cardExists) {
+      return null;
+    }
+
+    // Return card data with empty struggling quizzes if user hasn't studied this card
+    const cardData = await Card.findById(cardObjectId, {
+      _id: 1,
+      "main-topic": 1,
+      "sub-topic": 1,
+      category: 1,
+      review: 1,
+      quizzes: 1,
+    }).lean();
+
+    return {
+      _id: cardData._id,
+      "main-topic": cardData["main-topic"],
+      "sub-topic": cardData["sub-topic"],
+      category: cardData.category,
+      reviewLength: cardData.review ? cardData.review.length : 0,
+      quizzesLength: cardData.quizzes ? cardData.quizzes.length : 0,
+      strugglingQuizzes: [],
+    };
+  }
+
+  return result[0];
+}
+
 export async function updateUserQuizProgress(userId, details) {
-  const { card_id, quiz_id, correct, isFirstQuestion, isLastQuestion } =
-    details;
+  const {
+    card_id,
+    quiz_id,
+    correct,
+    struggling,
+    isFirstQuestion,
+    isLastQuestion,
+  } = details;
 
   const firstQuizProgress = {
     timesStarted: 1,
@@ -495,6 +966,7 @@ export async function updateUserQuizProgress(userId, details) {
         answerAttempts: 1,
         timesCorrect: correct ? 1 : 0,
         timesIncorrect: correct ? 0 : 1,
+        struggling: struggling || false,
       },
     ],
     updatedAt: new Date(),
@@ -516,7 +988,7 @@ export async function updateUserQuizProgress(userId, details) {
     { _id: userId, "studying.cardId": { $ne: card_id } },
     {
       $push: {
-        studying: { cardId: card_id, review: null, quiz: firstQuizProgress },
+        studying: { cardId: card_id, review: {}, quiz: firstQuizProgress },
       },
     },
     { new: true }
@@ -556,6 +1028,10 @@ export async function updateUserQuizProgress(userId, details) {
           correct ? "timesCorrect" : "timesIncorrect"
         }`]: 1,
       },
+      $set: {
+        ...updateQuery.$set,
+        "studying.$.quiz.attempts.$[attempt].struggling": struggling || false,
+      },
     },
     { arrayFilters: [{ "attempt.quizId": quiz_id }] }
   );
@@ -572,6 +1048,7 @@ export async function updateUserQuizProgress(userId, details) {
             answerAttempts: 1,
             timesCorrect: correct ? 1 : 0,
             timesIncorrect: correct ? 0 : 1,
+            struggling: struggling || false,
           },
         },
       },
@@ -580,4 +1057,62 @@ export async function updateUserQuizProgress(userId, details) {
   }
 
   return Users.findOne({ _id: userId }).lean();
+}
+
+export async function updateUserStrugglingQuiz(userId, cardId, quizId, action) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId) ||
+    !mongoose.Types.ObjectId.isValid(quizId)
+  ) {
+    throw new Error("Invalid ObjectId provided");
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const cardObjectId = new mongoose.Types.ObjectId(cardId);
+  const quizObjectId = new mongoose.Types.ObjectId(quizId);
+
+  if (action === "add") {
+    // Mark quiz as struggling (set struggling: true)
+    const result = await Users.findOneAndUpdate(
+      {
+        _id: userObjectId,
+        "studying.cardId": cardObjectId,
+        "studying.quiz.attempts.quizId": quizObjectId,
+      },
+      {
+        $set: {
+          "studying.$.quiz.attempts.$[attempt].struggling": true,
+        },
+      },
+      {
+        arrayFilters: [{ "attempt.quizId": quizObjectId }],
+        new: true,
+      }
+    ).lean();
+
+    return result;
+  } else if (action === "remove") {
+    // Mark quiz as not struggling (set struggling: false)
+    const result = await Users.findOneAndUpdate(
+      {
+        _id: userObjectId,
+        "studying.cardId": cardObjectId,
+        "studying.quiz.attempts.quizId": quizObjectId,
+      },
+      {
+        $set: {
+          "studying.$.quiz.attempts.$[attempt].struggling": false,
+        },
+      },
+      {
+        arrayFilters: [{ "attempt.quizId": quizObjectId }],
+        new: true,
+      }
+    ).lean();
+
+    return result;
+  }
+
+  throw new Error(`Invalid action: ${action}. Must be 'add' or 'remove'`);
 }

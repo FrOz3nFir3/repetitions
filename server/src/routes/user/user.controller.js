@@ -16,6 +16,10 @@ import {
   getPublicUserByUsername,
   getUserStudyingCount,
   getUserLastReviewedByCardProgress,
+  updateUserWeakCards,
+  getFocusReviewData,
+  getFocusQuizData,
+  updateUserStrugglingQuiz,
 } from "../../models/users/users.model.js";
 import { getPagination } from "../../services/query.js";
 import {
@@ -533,6 +537,104 @@ export async function httpGetDetailedReport(req, res) {
     const attempts = await getDetailedReport(userId, card_id);
     res.status(200).json(attempts);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpUpdateWeakCards(req, res) {
+  const { id: userId } = req.token;
+  const { cardId, flashcardId, rating, action } = req.body;
+
+  if (!cardId || !flashcardId || !rating || !action) {
+    return res.status(400).json({
+      error: "cardId, flashcardId, rating, and action are required",
+    });
+  }
+
+  if (!["add", "remove"].includes(action)) {
+    return res.status(400).json({
+      error: "action must be either 'add' or 'remove'",
+    });
+  }
+
+  try {
+    await updateUserWeakCards(userId, cardId, flashcardId, action);
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpGetFocusReviewData(req, res) {
+  const { card_id } = req.params;
+  const { id: userId } = req.token;
+
+  if (!card_id) {
+    return res.status(400).json({ error: "card_id is required" });
+  }
+
+  try {
+    const focusReviewData = await getFocusReviewData(userId, card_id);
+
+    if (!focusReviewData) {
+      return res
+        .status(404)
+        .json({ error: "Card not found or no review data" });
+    }
+
+    return res.status(200).json(focusReviewData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpGetFocusQuizData(req, res) {
+  const { card_id } = req.params;
+  const { id: userId } = req.token;
+
+  if (!card_id) {
+    return res.status(400).json({ error: "card_id is required" });
+  }
+
+  try {
+    const focusQuizData = await getFocusQuizData(userId, card_id);
+
+    if (!focusQuizData) {
+      return res
+        .status(404)
+        .json({ error: "Card not found or no quiz data" });
+    }
+
+    return res.status(200).json(focusQuizData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function httpUpdateUserStrugglingQuiz(req, res) {
+  const { id: userId } = req.token;
+  const { cardId, quizId, action } = req.body;
+
+  if (!cardId || !quizId || !action) {
+    return res.status(400).json({
+      error: "cardId, quizId, and action are required",
+    });
+  }
+
+  if (action !== "add" && action !== "remove") {
+    return res.status(400).json({
+      error: "action must be 'add' or 'remove'",
+    });
+  }
+
+  try {
+    await updateUserStrugglingQuiz(userId, cardId, quizId, action);
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 }

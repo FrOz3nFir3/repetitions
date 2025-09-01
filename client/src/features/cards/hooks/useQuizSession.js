@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { usePatchUpdateUserQuizProgressMutation } from "../../../api/apiSlice";
 import {
   selectCurrentUser,
@@ -8,8 +9,12 @@ import {
 
 export const useQuizSession = (card, onFinish) => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const user = useSelector(selectCurrentUser);
   const [updateUser] = usePatchUpdateUserQuizProgressMutation();
+
+  // Check if we're on focus quiz page to avoid cache invalidation
+  const isOnFocusQuizPage = location.pathname.includes("/focus-quiz");
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -83,8 +88,10 @@ export const useQuizSession = (card, onFinish) => {
         card_id: card._id,
         quiz_id: currentQuestion._id,
         correct: isCorrect,
+        struggling: !isCorrect, // Mark as struggling if answered incorrectly
         isFirstQuestion: currentQuestionIndex === 0,
         isLastQuestion: currentQuestionIndex === quizzes.length - 1,
+        skipFocusQuizInvalidation: isOnFocusQuizPage, // Skip invalidation if on focus quiz page
       };
       updateUser(updateDetails);
     }

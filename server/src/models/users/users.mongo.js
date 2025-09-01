@@ -19,6 +19,10 @@ const quizAttemptSchema = new Schema(
       type: Number,
       default: 0,
     },
+    struggling: {
+      type: Boolean,
+      default: false,
+    },
   },
   { _id: false }
 );
@@ -29,6 +33,22 @@ const reviewSchema = new Schema(
       type: Number,
       default: 0,
     },
+    weakCards: [
+      {
+        flashcardId: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        reviewCount: {
+          type: Number,
+          default: 1,
+        },
+      },
+    ],
     updatedAt: {
       type: Date,
       default: Date.now,

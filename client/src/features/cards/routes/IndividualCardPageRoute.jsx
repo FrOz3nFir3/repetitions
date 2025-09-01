@@ -2,14 +2,30 @@ import React, { lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import IndividualCardPage from "./IndividualCardPage"; // Eager load the layout component
 import CardActions from "../components/CardActions";
+import NotFound from "../../not-found/components/NotFound";
 
-// Lazy load the content of the outlet
-const ReviewRoute = lazy(() => import("./ReviewRoute"));
-const QuizRoute = lazy(() => import("./QuizRoute"));
+// Standalone routes that manage their own data fetching
+const StandaloneReviewRoute = lazy(() => import("./StandaloneReviewRoute"));
+const StandaloneFocusReviewRoute = lazy(() =>
+  import("./StandaloneFocusReviewRoute")
+);
+const StandaloneQuizRoute = lazy(() => import("./StandaloneQuizRoute"));
+const StandaloneFocusQuizRoute = lazy(() =>
+  import("./StandaloneFocusQuizRoute")
+);
+
+// Outlet-based routes that benefit from shared layout
 const EditCardRoute = lazy(() => import("./EditCardRoute"));
 
 const IndividualCardPageRoute = () => (
   <Routes>
+    {/* Standalone routes with full-screen experience */}
+    <Route path="review" element={<StandaloneReviewRoute />} />
+    <Route path="focus-review" element={<StandaloneFocusReviewRoute />} />
+    <Route path="quiz" element={<StandaloneQuizRoute />} />
+    <Route path="focus-quiz" element={<StandaloneFocusQuizRoute />} />
+
+    {/* Outlet-based routes that benefit from shared layout */}
     <Route element={<IndividualCardPage />}>
       <Route
         index
@@ -29,10 +45,10 @@ const IndividualCardPageRoute = () => (
           </div>
         }
       />
-      <Route path="review" element={<ReviewRoute />} />
-      <Route path="quiz" element={<QuizRoute />} />
       <Route path="edit" element={<EditCardRoute />} />
     </Route>
+
+    <Route path="*" element={<NotFound />} />
   </Routes>
 );
 

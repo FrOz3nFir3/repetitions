@@ -7,7 +7,7 @@ import RandomFact from "./RandomFact";
 import QuizTips from "./QuizTips";
 import FunFactToggle from "./FunFactToggle";
 
-const QuizSession = ({ session }) => {
+const QuizSession = ({ session, cardId }) => {
   const {
     quizzes,
     currentQuestionIndex,
@@ -23,7 +23,11 @@ const QuizSession = ({ session }) => {
 
   return (
     <div className="relative z-10 p-6 sm:p-8">
-      <QuizHeader current={currentQuestionIndex + 1} total={quizzes.length} />
+      <QuizHeader 
+        current={currentQuestionIndex + 1} 
+        total={quizzes.length}
+        cardId={cardId}
+      />
 
       {currentQuestionIndex === 0 && !selectedAnswer && (
         <QuizTips className="mb-6" />

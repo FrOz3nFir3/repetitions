@@ -6,12 +6,21 @@ import {
   PlayIcon,
   ArrowPathIcon,
   AcademicCapIcon,
+  FireIcon,
 } from "@heroicons/react/24/solid";
+import {
+  BookOpenIcon,
+  FolderIcon,
+  HashtagIcon,
+  TagIcon,
+} from "@heroicons/react/24/outline";
 
 const StudiedCardGridItem = ({ card }) => {
   const navigate = useNavigate();
   const lastReviewedCardNo = card.lastReviewedCardNo ?? 0;
   const totalReviewCards = card.reviewLength ?? 0;
+  const weakCardsCount = card.weakCardsCount ?? 0;
+  const strugglingQuizCount = card.strugglingQuizCount ?? 0;
   const hasStarted = lastReviewedCardNo > 0;
   const isCompleted = hasStarted && lastReviewedCardNo >= totalReviewCards;
   const progressPercentage =
@@ -28,6 +37,18 @@ const StudiedCardGridItem = ({ card }) => {
     e.preventDefault();
     e.stopPropagation();
     navigate(`/card/${card._id}/quiz`);
+  };
+
+  const handleFocusReviewClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/card/${card._id}/focus-review`);
+  };
+
+  const handleFocusQuizClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/card/${card._id}/focus-quiz`);
   };
 
   return (
@@ -62,19 +83,7 @@ const StudiedCardGridItem = ({ card }) => {
         {/* Category Badge */}
         <div className="flex items-center gap-2 mb-4">
           <div className="p-1.5 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg shadow-sm">
-            <svg
-              className="h-3 w-3 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-              />
-            </svg>
+            <FolderIcon className="w-4 h-4 text-white" />
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">
@@ -89,20 +98,8 @@ const StudiedCardGridItem = ({ card }) => {
         {/* Main Topic */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
-              <svg
-                className="h-3 w-3 text-blue-600 dark:text-blue-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                />
-              </svg>
+            <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded">
+              <HashtagIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
             <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide">
               Main Topic
@@ -116,20 +113,8 @@ const StudiedCardGridItem = ({ card }) => {
         {/* Sub Topic */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1 bg-purple-100 dark:bg-purple-900/30 rounded">
-              <svg
-                className="h-3 w-3 text-purple-600 dark:text-purple-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                />
-              </svg>
+            <div className="p-1.5 bg-purple-100 dark:bg-purple-900/30 rounded">
+              <TagIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </div>
             <span className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide">
               Sub Topic
@@ -163,35 +148,65 @@ const StudiedCardGridItem = ({ card }) => {
 
       {/* Footer */}
       <div className="relative z-10 px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-gray-50/50 to-gray-50/50 dark:from-gray-900/10 dark:to-gray-900/10">
-        <div className="flex justify-between items-center gap-2">
-          {isCompleted ? (
-            <>
-              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-semibold border-2 border-blue-200 dark:border-blue-700">
-                <ArrowPathIcon className="h-4 w-4" />
-                <span>Review Again</span>
-              </div>
-              <button
-                onClick={handleQuizClick}
-                className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
-              >
-                <AcademicCapIcon className="h-4 w-4" />
-                <span>Take Quiz</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-semibold border-2 border-blue-200 dark:border-blue-700">
-                <PlayIcon className="h-4 w-4" />
-                <span>{hasStarted ? "Continue" : "Start Review"}</span>
-              </div>
-              <button
-                onClick={handleQuizClick}
-                className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
-              >
-                <AcademicCapIcon className="h-4 w-4" />
-                <span>Take Quiz</span>
-              </button>
-            </>
+        <div className="flex flex-col gap-3">
+          <div className="flex justify-between items-center gap-2">
+            {isCompleted ? (
+              <>
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-semibold border-2 border-blue-200 dark:border-blue-700">
+                  <ArrowPathIcon className="h-4 w-4" />
+                  <span>Review Again</span>
+                </div>
+                <button
+                  onClick={handleQuizClick}
+                  className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
+                >
+                  <AcademicCapIcon className="h-4 w-4" />
+                  <span>Take Quiz</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-semibold border-2 border-blue-200 dark:border-blue-700">
+                  <PlayIcon className="h-4 w-4" />
+                  <span>{hasStarted ? "Continue" : "Start Review"}</span>
+                </div>
+                <button
+                  onClick={handleQuizClick}
+                  className="cursor-pointer flex items-center gap-2 px-3 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-300 text-sm font-semibold border-2 border-purple-200 dark:border-purple-700"
+                >
+                  <AcademicCapIcon className="h-4 w-4" />
+                  <span>Take Quiz</span>
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Focus Review Button - Show when user has weak cards */}
+          {weakCardsCount > 0 && (
+            <button
+              onClick={handleFocusReviewClick}
+              className="cursor-pointer w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <FireIcon className="animate-pulse h-4 w-4" />
+              <span>Focus Review</span>
+              <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-bold">
+                {weakCardsCount}
+              </span>
+            </button>
+          )}
+
+          {/* Focus Quiz Button - Show when user has struggling quizzes */}
+          {strugglingQuizCount > 0 && (
+            <button
+              onClick={handleFocusQuizClick}
+              className="cursor-pointer w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-lg transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <FireIcon className="animate-pulse h-4 w-4" />
+              <span>Focus Quiz</span>
+              <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-bold">
+                {strugglingQuizCount}
+              </span>
+            </button>
           )}
         </div>
       </div>

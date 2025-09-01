@@ -17,13 +17,13 @@ const Breadcrumbs = ({ card, cardData }) => {
 
   // Get current activity for breadcrumb with icon and better naming
   const getCurrentActivity = () => {
-    if (pathname.includes("/review")) {
+    if (pathname.includes("review")) {
       return {
         name: "Review Session",
         icon: BookOpenIcon,
       };
     }
-    if (pathname.includes("/quiz")) {
+    if (pathname.includes("quiz")) {
       return {
         name: "Quiz Mode",
         icon: AcademicCapIcon,
@@ -56,7 +56,7 @@ const Breadcrumbs = ({ card, cardData }) => {
   }, [location]);
 
   // Don't render breadcrumb if no data
-  if (!card || !cardData) {
+  if (!card?.category || !cardData?.category) {
     return null;
   }
 

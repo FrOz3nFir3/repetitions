@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   PlayIcon,
   ChartBarIcon,
@@ -19,6 +19,8 @@ import ProgressBar from "../../../components/ui/ProgressBar";
 import StatBadge from "../../../components/ui/StatBadge";
 
 const DeckProgressCard = ({ card, onViewReport, index }) => {
+  const navigate = useNavigate();
+
   const progress = {
     // TODO: change this later (key names)
     card_id: card._id,
@@ -33,6 +35,15 @@ const DeckProgressCard = ({ card, onViewReport, index }) => {
     "main-topic": card["main-topic"],
     "sub-topic": card["sub-topic"],
     category: card.category,
+  };
+
+  // Extract struggling quiz count from the card data
+  const strugglingQuizCount = card.strugglingQuizCount ?? 0;
+
+  const handleFocusQuizClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/card/${progress.card_id}/focus-quiz`);
   };
 
   // not valid data
@@ -85,7 +96,7 @@ const DeckProgressCard = ({ card, onViewReport, index }) => {
   return (
     <div
       style={{ animationDelay: `${index * 50}ms` }}
-      className="animate-fade-in group relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
+      className="self-start animate-fade-in group relative bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
     >
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-full blur-2xl transition-all duration-500 group-hover:from-indigo-500/10 group-hover:to-purple-500/10"></div>
@@ -209,6 +220,21 @@ const DeckProgressCard = ({ card, onViewReport, index }) => {
           {notStarted ? "Start Quiz" : "Continue Quiz"}
           <ArrowRightIcon className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
         </Link>
+
+        {/* Focus Quiz Button - Show when user has struggling quizzes */}
+        {strugglingQuizCount > 0 && (
+          <button
+            onClick={handleFocusQuizClick}
+            className="cursor-pointer w-full flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-2xl transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+          >
+            <FireIcon className="animate-pulse h-4 w-4" />
+            <span>Focus Quiz</span>
+            <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-bold">
+              {strugglingQuizCount}
+            </span>
+          </button>
+        )}
+
         <button
           disabled={notStarted}
           onClick={() => onViewReport(progress)}

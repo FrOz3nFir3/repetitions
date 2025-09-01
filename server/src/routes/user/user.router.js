@@ -10,10 +10,14 @@ import {
   httpGetUserStats,
   httpGetQuizProgress,
   httpGetCardReviewProgress,
-  httpUpdateUserQuizProgress,
   httpUpdateUserReviewProgress,
   httpRefreshToken,
   httpGetCSRFToken,
+  httpUpdateWeakCards,
+  httpGetFocusReviewData,
+  httpUpdateUserQuizProgress,
+  httpGetFocusQuizData,
+  httpUpdateUserStrugglingQuiz,
 } from "./user.controller.js";
 import {
   requireAuthentication,
@@ -109,6 +113,34 @@ userRouter.patch(
   apiLimiter,
   requireAuthenticationWithCSRF,
   httpUpdateUserReviewProgress
+);
+
+userRouter.patch(
+  "/weak-cards",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpUpdateWeakCards
+);
+
+userRouter.get(
+  "/focus-review/:card_id",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpGetFocusReviewData
+);
+
+userRouter.patch(
+  "/struggling-quiz",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpUpdateUserStrugglingQuiz
+);
+
+userRouter.get(
+  "/focus-quiz/:card_id",
+  apiLimiter,
+  requireAuthenticationWithCSRF,
+  httpGetFocusQuizData
 );
 
 export default userRouter;

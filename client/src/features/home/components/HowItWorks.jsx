@@ -28,13 +28,13 @@ const HowItWorks = (props) => {
       number: "02",
       title: "Review System",
       description:
-        "Use spaced repetition to review your flashcards. Mark cards as easy, medium, or hard to focus on the ones that need more attention.",
+        "Use spaced repetition to review your flashcards. Mark cards as Perfect, Close, or Difficult to focus on the ones that need more attention.",
       icon: ArrowPathIcon,
       gradient: "from-purple-500 to-pink-500",
       features: [
-        "Spaced repetition",
-        "Difficulty marking",
-        "Review scheduling",
+        "Study Flashcards",
+        "Difficulty assesement",
+        "Focus Review Sessions",
       ],
     },
     {
@@ -45,9 +45,9 @@ const HowItWorks = (props) => {
       icon: CheckCircleIcon,
       gradient: "from-emerald-500 to-teal-500",
       features: [
-        "Progress tracking",
-        "Simple statistics",
-        "Performance overview",
+        "Interactive Quiz",
+        "Performance Overview",
+        "Focus Quiz Sessions",
       ],
     },
   ];

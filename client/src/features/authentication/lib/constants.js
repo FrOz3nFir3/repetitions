@@ -5,6 +5,7 @@ import {
   PencilSquareIcon,
   ChartBarIcon,
   UserCircleIcon,
+  FireIcon,
 } from "@heroicons/react/24/outline";
 
 export const guestFeatures = [
@@ -36,6 +37,13 @@ export const guestFeatures = [
     icon: ChartBarIcon,
     title: "Track Progress",
     description: "View detailed performance analytics",
+    available: false,
+  },
+  {
+    icon: FireIcon,
+    title: "Focus Review / Quiz Sessions",
+    description:
+      "Focused learning sessions based upon your feedback / performance",
     available: false,
   },
   {
@@ -75,6 +83,13 @@ export const memberFeatures = [
     icon: ChartBarIcon,
     title: "Track Progress",
     description: "Detailed analytics and performance insights",
+    available: true,
+  },
+  {
+    icon: FireIcon,
+    title: "Focus Review / Quiz Sessions",
+    description:
+      "Focused learning sessions based upon your feedback / performance",
     available: true,
   },
   {

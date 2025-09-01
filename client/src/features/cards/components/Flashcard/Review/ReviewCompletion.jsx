@@ -1,7 +1,18 @@
 import React from "react";
-import { TrophyIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../../../authentication/state/authSlice";
+import { TrophyIcon, SparklesIcon, FireIcon } from "@heroicons/react/24/solid";
 
 const ReviewCompletion = ({ onRestart, completedCardsCount }) => {
+  const user = useSelector(selectCurrentUser);
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  const handleFocusReview = () => {
+    navigate(`/card/${id}/focus-review`);
+  };
+
   return (
     <div className="flex justify-center mb-6 animate-in slide-in-from-bottom-4 duration-500">
       <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 backdrop-blur-md rounded-3xl p-6 sm:p-8 shadow-xl border border-green-200/50 dark:border-green-700/50 max-w-md text-center">
@@ -26,6 +37,16 @@ const ReviewCompletion = ({ onRestart, completedCardsCount }) => {
         </p>
 
         <div className="space-y-3">
+          {user && (
+            <button
+              onClick={handleFocusReview}
+              className="cursor-pointer w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
+            >
+              <FireIcon className="animate-pulse h-5 w-5" />
+              Do Focus Review
+            </button>
+          )}
+
           <button
             onClick={onRestart}
             className="cursor-pointer w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"

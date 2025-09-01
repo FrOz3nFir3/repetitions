@@ -25,7 +25,7 @@ const FunFactToggle = ({ showFacts, onToggle }) => {
               showFacts
                 ? "bg-gradient-to-r from-purple-500 to-pink-600"
                 : "bg-gray-300 dark:bg-gray-600"
-            } cursor-pointer relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 shadow-lg hover:shadow-xl`}
+            } cursor-pointer relative inline-flex shrink-0 h-7 w-12 items-center rounded-full transition-all duration-300 shadow-lg hover:shadow-xl`}
           >
             <span
               className={`${

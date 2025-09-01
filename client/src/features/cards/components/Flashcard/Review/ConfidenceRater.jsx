@@ -1,4 +1,6 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../../../authentication/state/authSlice";
 import {
   CheckIcon,
   ExclamationTriangleIcon,
@@ -6,7 +8,8 @@ import {
   LightBulbIcon,
 } from "@heroicons/react/24/solid";
 
-const ConfidenceRater = ({ onRate }) => {
+const ConfidenceRater = ({ onRate, isFocusReview = false }) => {
+  const user = useSelector(selectCurrentUser);
   return (
     <div className="flex justify-center mb-6 animate-in slide-in-from-bottom-4 duration-300">
       <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg rounded-3xl p-6 shadow-2xl border border-gray-200/60 dark:border-gray-700/60 w-full max-w-4xl ">
@@ -20,8 +23,11 @@ const ConfidenceRater = ({ onRate }) => {
               Rate Your Understanding
             </h3>
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            How confident are you with this flashcard?
+
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {user && !isFocusReview
+              ? "Cards marked for focus will be available in Focus Review mode for targeted practice"
+              : "Cards marked for review will be added to this session for immediate practice"}
           </p>
         </div>
 
@@ -58,7 +64,7 @@ const ConfidenceRater = ({ onRate }) => {
             </div>
             <div className="absolute top-2 right-2 ">
               <div className="bg-white/30 text-xs px-2 py-1 rounded-full text-white font-medium shadow-sm">
-                Review
+                {user ? "Focus" : "Review"}
               </div>
             </div>
           </button>
@@ -78,7 +84,7 @@ const ConfidenceRater = ({ onRate }) => {
             </div>
             <div className="absolute top-2 right-2">
               <div className="bg-white/30 text-xs px-2 py-1 rounded-full text-white font-medium shadow-sm">
-                Review
+                {user ? "Focus" : "Review"}
               </div>
             </div>
           </button>

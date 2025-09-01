@@ -1,8 +1,21 @@
 import React from "react";
-import { AcademicCapIcon, ChartBarIcon } from "@heroicons/react/24/solid";
+import {
+  AcademicCapIcon,
+  ChartBarIcon,
+  FireIcon,
+} from "@heroicons/react/24/solid";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
-const QuizHeader = ({ current, total }) => {
+const QuizHeader = ({ current, total, cardId }) => {
+  const user = useSelector(selectCurrentUser);
+  const navigate = useNavigate();
   const progressPercentage = total > 0 ? (current / total) * 100 : 0;
+
+  const handleFocusQuiz = () => {
+    navigate(`/card/${cardId}/focus-quiz`);
+  };
 
   return (
     <div className="mb-8">
@@ -21,17 +34,30 @@ const QuizHeader = ({ current, total }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
-          <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
-            <ChartBarIcon className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <span className="text-lg font-bold text-gray-900 dark:text-white">
-              {current} / {total}
-            </span>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              {Math.round(progressPercentage)}% Complete
-            </p>
+        <div className="flex justify-center flex-wrap items-center gap-3">
+          {/* Focus Quiz Button - Always show for authenticated users */}
+          <button
+            onClick={handleFocusQuiz}
+            disabled={!user}
+            className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-2xl transition-all duration-300 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+            title="Focus on questions you've answered incorrectly"
+          >
+            <FireIcon className="h-4 w-4 animate-pulse" />
+            <span>Focus Quiz</span>
+          </button>
+
+          <div className="flex items-center gap-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg">
+            <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+              <ChartBarIcon className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">
+                {current} / {total}
+              </span>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {Math.round(progressPercentage)}% Complete
+              </p>
+            </div>
           </div>
         </div>
       </div>

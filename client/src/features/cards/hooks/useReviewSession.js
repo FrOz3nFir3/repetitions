@@ -5,10 +5,12 @@ import {
 } from "../../../api/apiSlice";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
+import { useWeakCards } from "./useWeakCards";
 
 export const useReviewSession = (initialCards, card_id) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [slideDirection, setSlideDirection] = useState("");
@@ -28,6 +30,7 @@ export const useReviewSession = (initialCards, card_id) => {
     skip: !card_id || !user || skipGetCall,
   });
   const [updateReviewProgress] = useUpdateUserReviewProgressMutation();
+  const { updateWeakCardBasedOnRating } = useWeakCards();
 
   // Refs to track progress updates and prevent duplicate calls
   const lastSavedProgress = useRef(0);
@@ -60,7 +63,7 @@ export const useReviewSession = (initialCards, card_id) => {
 
   const currentFlashcard = sessionCards[currentIndex];
 
-  const handleSetSearchParams = (key, value) => {
+  const handleSetSearchParams = useCallback((key, value) => {
     setSearchParams(
       (prev) => {
         const newParams = new URLSearchParams(prev);
@@ -73,7 +76,7 @@ export const useReviewSession = (initialCards, card_id) => {
       },
       { replace: true }
     ); // Use replace instead of push
-  };
+  }, [setSearchParams]);
 
   // Handle initial setup from cardProgress
   useEffect(() => {
@@ -114,7 +117,7 @@ export const useReviewSession = (initialCards, card_id) => {
     handleSetSearchParams("cardNo", cardNo.toString());
   }, [currentIndex]);
 
-  // Debounced progress update function
+  // Debounced progress update function - stabilized dependencies
   const debouncedProgressUpdate = useCallback(
     (cardId, cardNo) => {
       if (!cardId || cardNo === lastSavedProgress.current || !user) return;
@@ -129,15 +132,18 @@ export const useReviewSession = (initialCards, card_id) => {
         // Double-check the progress hasn't been saved already and user is still logged in
         if (cardNo !== lastSavedProgress.current && user) {
           setSkipGetCall(true); // Skip GET call after this update
+          // Check if on focus review page at time of execution
+          const currentlyOnFocusReview = window.location.pathname.includes("/focus-review");
           updateReviewProgress({
             card_id: cardId,
             lastReviewedCardNo: cardNo,
+            skipFocusReviewInvalidation: currentlyOnFocusReview,
           });
           lastSavedProgress.current = cardNo;
         }
       }, 4000); // 4 second debounce
     },
-    [updateReviewProgress, user]
+    [updateReviewProgress, user] // Removed isOnFocusReviewPage dependency
   );
 
   // Handle completion - only call once
@@ -152,9 +158,12 @@ export const useReviewSession = (initialCards, card_id) => {
       // Calculate the actual number of original cards (not including review cards)
       const originalCardsCount = initialCards.length;
       setSkipGetCall(true); // Skip GET call after this update
+      // Check if on focus review page at time of execution
+      const currentlyOnFocusReview = window.location.pathname.includes("/focus-review");
       updateReviewProgress({
         card_id,
         lastReviewedCardNo: originalCardsCount,
+        skipFocusReviewInvalidation: currentlyOnFocusReview,
       });
       lastSavedProgress.current = originalCardsCount;
     }
@@ -245,14 +254,20 @@ export const useReviewSession = (initialCards, card_id) => {
       setSlideDirection(direction === "next" ? "left" : "right");
 
       setTimeout(() => {
-        const effectiveLength = justAddedReviewCard
-          ? sessionCards.length + 1
-          : // biome-ignore lint/style/noUselessElse: <explanation>
-            sessionCards.length;
-        const newIndex =
-          direction === "next"
-            ? (currentIndex + 1) % effectiveLength
-            : (currentIndex - 1 + effectiveLength) % effectiveLength;
+        let newIndex;
+        if (direction === "next") {
+          newIndex = currentIndex + 1;
+          // If we're at the end and not adding a review card, show completion
+          if (newIndex >= sessionCards.length && !justAddedReviewCard) {
+            setShowCompletion(true);
+            return;
+          }
+        } else {
+          newIndex = currentIndex - 1;
+          if (newIndex < 0) {
+            newIndex = sessionCards.length - 1;
+          }
+        }
 
         setCurrentIndex(newIndex);
         const nextCard = sessionCards[newIndex];
@@ -263,14 +278,14 @@ export const useReviewSession = (initialCards, card_id) => {
         setSlideDirection(direction === "next" ? "in-right" : "in-left");
       }, 150);
     },
-    [currentIndex, sessionCards]
+    [currentIndex, sessionCards, card_id, debouncedProgressUpdate, handleSetSearchParams]
   );
 
-  const handleNext = (justAddedReviewCard = false) =>
-    navigate("next", justAddedReviewCard);
-  const handlePrev = () => navigate("prev");
+  const handleNext = useCallback((justAddedReviewCard = false) =>
+    navigate("next", justAddedReviewCard), [navigate]);
+  const handlePrev = useCallback(() => navigate("prev"), [navigate]);
 
-  const handleCardSelect = (index) => {
+  const handleCardSelect = useCallback((index) => {
     if (index === currentIndex) {
       setIsFlipped(!isFlipped);
       if (!isFlipped) setShowConfidenceRating(true);
@@ -287,9 +302,9 @@ export const useReviewSession = (initialCards, card_id) => {
     if (selectedCard && !selectedCard.isReview && selectedCard.urlCardNo) {
       handleSetSearchParams("cardNo", selectedCard.urlCardNo.toString());
     }
-  };
+  }, [currentIndex, isFlipped, sessionCards, handleSetSearchParams]);
 
-  const handleFlipCard = () => {
+  const handleFlipCard = useCallback(() => {
     setIsFlipped(!isFlipped);
     if (!isFlipped) {
       setShowConfidenceRating(true);
@@ -304,17 +319,40 @@ export const useReviewSession = (initialCards, card_id) => {
         debouncedProgressUpdate(card_id, 1);
       }
     }
-  };
+  }, [isFlipped, user, currentIndex, card_id, debouncedProgressUpdate]);
 
-  const handleConfidenceRating = (rating) => {
+  const handleConfidenceRating = async (rating) => {
     const willAddReviewCard = rating === "partial" || rating === "struggling";
     setShowConfidenceRating(false);
-    if (willAddReviewCard) {
-      setReviewCards((prev) => [...prev, currentFlashcard]);
-    } else {
+
+    if (user) {
+      // For logged-in users: Make immediate API call to save weak cards (no delays!)
+      if (card_id && currentFlashcard?._id) {
+        try {
+          await updateWeakCardBasedOnRating(
+            card_id,
+            currentFlashcard._id,
+            rating
+          );
+        } catch (error) {
+          // Continue with the review flow even if weak cards update fails
+        }
+      }
+      // Track completed cards for UI purposes
       setCompletedCards((prev) => new Set(prev).add(currentFlashcard.question));
+    } else {
+      // For non-logged-in users: Add to local review cards for immediate review experience
+      if (willAddReviewCard) {
+        setReviewCards((prev) => [...prev, currentFlashcard]);
+      } else {
+        setCompletedCards((prev) =>
+          new Set(prev).add(currentFlashcard.question)
+        );
+      }
     }
-    setTimeout(() => handleNext(willAddReviewCard), 300);
+
+    // Navigate appropriately based on whether we added a review card
+    setTimeout(() => handleNext(!user && willAddReviewCard), 300);
   };
 
   const restartReview = () => {
@@ -340,7 +378,13 @@ export const useReviewSession = (initialCards, card_id) => {
 
     if (card_id && user) {
       setSkipGetCall(true); // Skip GET call after this update
-      updateReviewProgress({ card_id, lastReviewedCardNo: 0 });
+      // Check if on focus review page at time of execution
+      const currentlyOnFocusReview = window.location.pathname.includes("/focus-review");
+      updateReviewProgress({
+        card_id,
+        lastReviewedCardNo: 0,
+        skipFocusReviewInvalidation: currentlyOnFocusReview,
+      });
       lastSavedProgress.current = 0;
     }
   };

@@ -5,9 +5,12 @@ import {
   useLocation,
   useSearchParams,
 } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useGetIndividualCardQuery } from "../../../api/apiSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  useGetIndividualCardQuery,
+} from "../../../api/apiSlice";
 import { initialCard } from "../state/cardSlice";
+import { selectCurrentUser } from "../../authentication/state/authSlice";
 import CardInfo from "../components/CardInfo";
 import CardLogs from "../components/CardLogs";
 import Breadcrumbs from "../components/Breadcrumbs";
@@ -22,12 +25,10 @@ function IndividualCardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
   const location = useLocation();
+  const user = useSelector(selectCurrentUser);
 
   const getCardViewType = () => {
-    const { pathname, search } = location;
-    if (pathname.includes("/review")) return "review";
-    if (pathname.includes("/quiz")) return "quiz";
-
+    const { pathname } = location;
     if (pathname.includes("/edit")) {
       const view = searchParams.get("view");
       if (view === "flashcards") return "edit_flashcards";
@@ -39,6 +40,7 @@ function IndividualCardPage() {
     return "overview"; // default view
   };
 
+  // Fetch card data (only for overview and edit routes that use outlet)
   const { data: cardData, isFetching } = useGetIndividualCardQuery({
     id: params.id,
     view: getCardViewType(),
@@ -49,7 +51,7 @@ function IndividualCardPage() {
       dispatch(initialCard(cardData));
     }
 
-    // sync up edit to flaschards
+    // sync up edit to flashcards
     const { pathname } = location;
     const view = searchParams.get("view");
     const inValidView = view !== "flashcards" && view !== "quizzes";
@@ -59,22 +61,22 @@ function IndividualCardPage() {
         return prev;
       });
     }
-  }, [cardData, dispatch]);
+  }, [cardData, dispatch, location, searchParams, setSearchParams]);
 
-  const isFocusedActivity =
-    location.pathname.includes("/review") ||
-    location.pathname.includes("/quiz");
 
+
+  // Show loading while fetching data
   if (isFetching) {
     return (
       <IndividualCardPageSkeleton
-        isFocusedActivity={isFocusedActivity}
+        isFocusedActivity={false}
         view={getCardViewType()}
       />
     );
   }
 
   if (!cardData) {
+    // probably move from here to individual components later
     return <NotFound />;
   }
 
@@ -83,20 +85,17 @@ function IndividualCardPage() {
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <Breadcrumbs card={cardData} cardData={cardData} />
 
-        <div
-          className={`grid grid-cols-1 ${
-            isFocusedActivity ? "" : "lg:grid-cols-3"
-          } gap-8`}
-        >
-          {!isFocusedActivity && (
-            <div className="lg:col-span-1 space-y-6">
-              <CardInfo card={cardData} />
-              {/* TODO: position this better or have better visual  */}
-              <CardLogs logs={cardData.logs || []} cardId={cardData._id} />
-            </div>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1 space-y-6">
+            <CardInfo card={cardData} />
+            {/* TODO: position this better or have better visual  */}
+            <CardLogs
+              logs={cardData.logs || []}
+              cardId={cardData._id}
+            />
+          </div>
 
-          <div className={`${isFocusedActivity ? "" : "lg:col-span-2"}`}>
+          <div className="lg:col-span-2">
             <Outlet />
           </div>
         </div>

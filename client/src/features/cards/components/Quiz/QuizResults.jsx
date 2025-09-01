@@ -4,8 +4,10 @@ import {
   ChartBarIcon,
   TrophyIcon,
   SparklesIcon,
+  FireIcon,
 } from "@heroicons/react/24/solid";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
 const DetailedReportModal = lazy(() =>
@@ -23,10 +25,16 @@ const StatCard = ({ label, value, color, icon: Icon }) => (
 
 const QuizResults = ({ score, totalQuestions, onRestart, cardId }) => {
   const user = useSelector(selectCurrentUser);
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const percentage = totalQuestions > 0 ? (score / totalQuestions) * 100 : 0;
   const incorrect = totalQuestions - score;
+  const hasStrugglingQuestions = incorrect > 0;
+
+  const handleFocusQuiz = () => {
+    navigate(`/card/${cardId}/focus-quiz`);
+  };
 
   const getPerformanceMessage = () => {
     if (percentage === 100) return "Flawless Victory!";
@@ -135,6 +143,17 @@ const QuizResults = ({ score, totalQuestions, onRestart, cardId }) => {
             <ArrowPathIcon className="h-5 w-5 group-hover:rotate-180 transition-transform duration-300" />
             Take Quiz Again
           </button>
+          
+          {user && hasStrugglingQuestions && (
+            <button
+              onClick={handleFocusQuiz}
+              className="cursor-pointer group w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            >
+              <FireIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+              Focus on Difficult Questions
+            </button>
+          )}
+          
           {user && (
             <button
               onClick={() => setIsModalOpen(true)}

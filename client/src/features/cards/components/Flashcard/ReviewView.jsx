@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../../../authentication/state/authSlice";
 import { useReviewSession } from "../../hooks/useReviewSession";
 import ReviewEmptyState from "./Review/ReviewEmptyState";
 import ReviewSession from "./Review/ReviewSession";
 
 function Review({ card }) {
   const { review = [] } = card ?? {};
+  const user = useSelector(selectCurrentUser);
   const session = useReviewSession(review, card?._id);
 
   useEffect(() => {
@@ -28,7 +31,7 @@ function Review({ card }) {
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-br from-indigo-400/10 to-pink-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
-      <ReviewSession review={review} session={session} />
+      <ReviewSession review={review} session={session} cardId={card?._id} />
     </div>
   );
 }

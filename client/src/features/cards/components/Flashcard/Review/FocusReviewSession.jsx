@@ -4,10 +4,10 @@ import Flashcard from "./Flashcard";
 import Navigation from "./Navigation";
 import CardGallery from "./CardGallery";
 import ConfidenceRater from "./ConfidenceRater";
-import ReviewCompletion from "./ReviewCompletion";
-import ReviewHeader from "./ReviewHeader";
+import FocusReviewCompletion from "./FocusReviewCompletion";
+import FocusReviewHeader from "./FocusReviewHeader";
 
-const ReviewSession = ({ review, session, cardId }) => {
+const FocusReviewSession = ({ focusCards, session }) => {
   const {
     currentIndex,
     currentFlashcard,
@@ -16,13 +16,15 @@ const ReviewSession = ({ review, session, cardId }) => {
     showConfidenceRating,
     showCompletion,
     completedCards,
+    perfectCards,
     sessionCards,
+    allWeakCardsMastered,
     handleNext,
     handlePrev,
     handleCardSelect,
     handleFlipCard,
     handleConfidenceRating,
-    restartReview,
+    restartFocusReview,
   } = session;
 
   const getSlideClass = () => {
@@ -47,7 +49,11 @@ const ReviewSession = ({ review, session, cardId }) => {
 
   return (
     <div className="relative z-10 p-6 sm:p-8">
-      <ReviewHeader showCompletion={showCompletion} cardId={cardId} />
+      <FocusReviewHeader
+        currentIndex={currentIndex}
+        showCompletion={showCompletion}
+        focusCardsCount={focusCards.length}
+      />
       {!showCompletion ? (
         <Flashcard
           currentFlashcard={currentFlashcard}
@@ -55,21 +61,27 @@ const ReviewSession = ({ review, session, cardId }) => {
           setIsFlipped={handleFlipCard}
           getSlideClass={getSlideClass}
           currentIndex={currentFlashcard?.originalIndex ?? 0}
-          totalCards={review.length}
+          totalCards={focusCards.length}
           showFeedbackIndicator={isFlipped && showConfidenceRating}
           isReviewCard={currentFlashcard?.isReview}
         />
       ) : (
-        <ReviewCompletion
-          onRestart={restartReview}
+        <FocusReviewCompletion
           completedCardsCount={completedCards.size}
+          totalFocusCards={focusCards.length}
+          allWeakCardsMastered={allWeakCardsMastered}
+          perfectCards={perfectCards}
+          totalWeakCards={focusCards.length}
+          restartFocusReview={restartFocusReview}
         />
       )}
 
       {isFlipped &&
         showConfidenceRating &&
         currentFlashcard &&
-        !showCompletion && <ConfidenceRater onRate={handleConfidenceRating} />}
+        !showCompletion && (
+          <ConfidenceRater isFocusReview onRate={handleConfidenceRating} />
+        )}
 
       {!!sessionCards.length && !showCompletion && (
         <>
@@ -90,7 +102,7 @@ const ReviewSession = ({ review, session, cardId }) => {
           />
           <CardGallery
             isFlipped={isFlipped}
-            review={review}
+            review={focusCards}
             currentFlashcard={currentFlashcard}
             handleCardSelect={handleCardSelect}
           />
@@ -100,4 +112,4 @@ const ReviewSession = ({ review, session, cardId }) => {
   );
 };
 
-export default ReviewSession;
+export default FocusReviewSession;

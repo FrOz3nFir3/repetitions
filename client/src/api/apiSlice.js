@@ -83,7 +83,16 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "cards",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Card", "IndividualCard", "Report", "User", "CardReviewProgress"],
+  tagTypes: [
+    "Card",
+    "IndividualCard",
+    "Report",
+    "User",
+    "CardReviewProgress",
+    "FocusReviewData",
+    "FocusQuizData", // Separate tag for focus quiz sessions
+    "RegularReviewData", // Separate tag for regular review sessions to avoid unnecessary focus review refetches
+  ],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({
     getAllCards: builder.query({
@@ -251,7 +260,7 @@ export const apiSlice = createApi({
     getCardReviewProgress: builder.query({
       query: (card_id) => `/user/review-progress/${card_id}`,
       providesTags: (result, error, card_id) => [
-        { type: "CardReviewProgress", id: card_id },
+        { type: "RegularReviewData", id: card_id }, // Use RegularReviewData for regular review sessions
       ],
       serializeQueryArgs: ({ queryArgs }) => {
         return queryArgs; // Each card_id gets its own cache entry
@@ -310,13 +319,22 @@ export const apiSlice = createApi({
         body: user,
       }),
       invalidatesTags: (result, error, arg) => {
-        if (!error && arg.isFirstQuestion) {
-          // TODO: for every first question it will call user auth can optimize this later
-          return ["Report", "User"];
-        }
         if (!error) {
-          return ["Report"];
+          const tags = ["Report"];
+          
+          // Add struggling quiz tracking
+          if (arg.isFirstQuestion) {
+            tags.push("User");
+          }
+          
+          // Only invalidate FocusQuizData if NOT on focus quiz page
+          if (!arg.skipFocusQuizInvalidation) {
+            tags.push({ type: "FocusQuizData", id: arg.card_id });
+          }
+          
+          return tags;
         }
+        return [];
       },
     }),
 
@@ -326,12 +344,53 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: progress,
       }),
-      invalidatesTags: (result, error, { card_id }) => {
+      invalidatesTags: (result, error, { card_id, skipFocusReviewInvalidation }) => {
         if (!error) {
-          return [
+          const tags = [
             { type: "Report", id: "LIST" },
-            { type: "CardReviewProgress", id: card_id },
+            { type: "Report", id: card_id },
+            { type: "RegularReviewData", id: card_id },
+            { type: "RegularReviewData", id: "LIST" },
           ];
+          
+          // Only invalidate FocusReviewData if NOT on focus review page
+          if (!skipFocusReviewInvalidation) {
+            tags.push({ type: "FocusReviewData", id: card_id });
+          }
+          
+          return tags;
+        }
+        return [];
+      },
+    }),
+
+    updateUserWeakCards: builder.mutation({
+      query: (weakCardData) => ({
+        url: "/user/weak-cards",
+        method: "PATCH",
+        body: weakCardData,
+      }),
+      invalidatesTags: (result, error, { cardId, skipFocusReviewInvalidation, skipRegularReviewInvalidation }) => {
+        if (!error) {
+          const tags = [
+            { type: "Report", id: "LIST" },
+            { type: "Report", id: cardId },
+          ];
+          
+          // Only invalidate RegularReviewData if NOT on regular review page
+          if (!skipRegularReviewInvalidation) {
+            tags.push(
+              { type: "RegularReviewData", id: cardId },
+              { type: "RegularReviewData", id: "LIST" }
+            );
+          }
+          
+          // Only invalidate FocusReviewData if NOT on focus review page
+          if (!skipFocusReviewInvalidation) {
+            tags.push({ type: "FocusReviewData", id: cardId });
+          }
+          
+          return tags;
         }
         return [];
       },
@@ -368,6 +427,44 @@ export const apiSlice = createApi({
             ]
           : [{ type: "Card", id: "LIST" }],
     }),
+
+    getFocusReviewData: builder.query({
+      query: (cardId) => `/user/focus-review/${cardId}`,
+      providesTags: (result, error, cardId) => [
+        { type: "FocusReviewData", id: cardId },
+      ],
+    }),
+
+    getFocusQuizData: builder.query({
+      query: (cardId) => `/user/focus-quiz/${cardId}`,
+      providesTags: (result, error, cardId) => [
+        { type: "FocusQuizData", id: cardId },
+      ],
+    }),
+
+    updateUserStrugglingQuiz: builder.mutation({
+      query: (strugglingQuizData) => ({
+        url: "/user/struggling-quiz",
+        method: "PATCH",
+        body: strugglingQuizData,
+      }),
+      invalidatesTags: (result, error, { cardId, skipFocusQuizInvalidation }) => {
+        if (!error) {
+          const tags = [
+            { type: "Report", id: "LIST" },
+            { type: "Report", id: cardId },
+          ];
+          
+          // Only invalidate FocusQuizData if NOT on focus quiz page
+          if (!skipFocusQuizInvalidation) {
+            tags.push({ type: "FocusQuizData", id: cardId });
+          }
+          
+          return tags;
+        }
+        return [];
+      },
+    }),
   }),
 });
 
@@ -384,6 +481,7 @@ export const {
   usePatchUpdateUserProfileMutation,
   usePatchUpdateUserQuizProgressMutation,
   useUpdateUserReviewProgressMutation,
+  useUpdateUserWeakCardsMutation,
   usePostLogoutUserMutation,
   usePostGoogleLoginMutation,
   useGetUserProgressPaginatedQuery,
@@ -394,4 +492,7 @@ export const {
   useGetCardLogsQuery,
   useGetPublicUserByUsernameQuery,
   useGetCardsByAuthorQuery,
+  useGetFocusReviewDataQuery,
+  useGetFocusQuizDataQuery,
+  useUpdateUserStrugglingQuizMutation,
 } = apiSlice;
