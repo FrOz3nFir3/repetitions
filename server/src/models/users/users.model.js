@@ -1017,14 +1017,16 @@ export async function updateUserQuizProgress(userId, details) {
     updateQuery.$inc["studying.$.quiz.timesFinished"] = 1;
   }
 
+  const quidIdObject = new mongoose.Types.ObjectId(`${quiz_id}`);
+
   const result = await Users.updateOne(
     {
       _id: { $eq: userId },
       "studying.cardId": { $eq: card_id },
-      "studying.quiz.attempts.quizId": { $eq: quiz_id },
+      "studying.quiz.attempts.quizId": { $eq: quidIdObject },
     },
     {
-      ...quiz_id,
+      ...quidIdObject,
     },
     {
       ...updateQuery,
@@ -1040,7 +1042,7 @@ export async function updateUserQuizProgress(userId, details) {
         "studying.$.quiz.attempts.$[attempt].struggling": struggling || false,
       },
     },
-    { arrayFilters: [{ "attempt.quizId": quiz_id }] }
+    { arrayFilters: [{ "attempt.quizId": { $eq: quidIdObject } }] }
   );
 
   // quiz doesn't exist (probably taking for first time)

@@ -14,7 +14,7 @@ apiRouter.use("/cards", cardsRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/user", userRouter);
 
-app.get("/health", async (req, res) => {
+apiRouter.get("/health", async (req, res) => {
   const connectionInfo = getConnectionStatus();
 
   res.json({
