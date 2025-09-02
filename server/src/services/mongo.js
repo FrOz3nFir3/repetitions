@@ -36,11 +36,11 @@ export async function mongoConnect() {
 
   // Connect to MongoDB
   await mongoose.connect(MONGO_URI, {
-    maxPoolSize: 10, // Pool of connections for concurrent users
-    minPoolSize: 3, // Keep minimum connections alive
+    maxPoolSize: 30,
+    minPoolSize: 10,
     compressors: "zlib",
     bufferCommands: false, // Don't buffer commands if not connected
-    maxIdleTimeMS: 600000, // 10 minutes
+    maxIdleTimeMS: 900000, // 15 minutes
   });
 }
 

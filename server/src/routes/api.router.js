@@ -6,6 +6,7 @@ import cardsRouter from "./cards/cards.router.js";
 import cardRouter from "./card/card.router.js";
 import usersRouter from "./user/users.router.js";
 import { csrfProtectionMiddleware } from "../middleware/csrf.middleware.js";
+import { getConnectionStatus } from "../services/mongo.js";
 
 apiRouter.use(csrfProtectionMiddleware);
 apiRouter.use("/card", cardRouter);
@@ -13,4 +14,17 @@ apiRouter.use("/cards", cardsRouter);
 apiRouter.use("/users", usersRouter);
 apiRouter.use("/user", userRouter);
 
+app.get("/health", async (req, res) => {
+  const connectionInfo = getConnectionStatus();
+
+  res.json({
+    status: "ok",
+    mongodb: connectionInfo.status,
+    connectionState: connectionInfo.state,
+    isConnected: connectionInfo.isConnected,
+    uptime: process.uptime(),
+    timestamp: new Date().toLocaleString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
 export default apiRouter;

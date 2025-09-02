@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { escapeRegex } from "../../utils/textNormalization.js";
 
 export async function findUserByEmail(email, projection = {}) {
-  return Users.findOne({ email }, projection).lean();
+  return Users.findOne({ email: String(email) }, projection).lean();
 }
 
 export async function findUserByUsername(username, projection = {}) {
@@ -524,7 +524,7 @@ export async function updateUserReviewProgress(
   };
 
   const updatedUser = await Users.findOneAndUpdate(
-    { _id: userId, "studying.cardId": { $ne: card_id } },
+    { _id: { $eq: userId }, "studying.cardId": { $ne: card_id } },
     { $push: { studying: newReviewProgress } },
     { new: true }
   );
@@ -534,7 +534,7 @@ export async function updateUserReviewProgress(
   }
 
   return Users.findOneAndUpdate(
-    { _id: userId, "studying.cardId": card_id },
+    { _id: { $eq: userId }, "studying.cardId": { $eq: card_id } },
     {
       $set: {
         "studying.$.review.lastReviewedCardNo": lastReviewedCardNo,
@@ -974,7 +974,11 @@ export async function updateUserQuizProgress(userId, details) {
 
   // has reviewed before but giving quiz first time
   const initializedUser = await Users.findOneAndUpdate(
-    { _id: userId, "studying.cardId": card_id, "studying.quiz": null },
+    {
+      _id: { $eq: userId },
+      "studying.cardId": { $eq: card_id },
+      "studying.quiz": null,
+    },
     { $set: { "studying.$.quiz": firstQuizProgress } },
     { new: true }
   ).lean();
@@ -1015,9 +1019,12 @@ export async function updateUserQuizProgress(userId, details) {
 
   const result = await Users.updateOne(
     {
-      _id: userId,
-      "studying.cardId": card_id,
-      "studying.quiz.attempts.quizId": quiz_id,
+      _id: { $eq: userId },
+      "studying.cardId": { $eq: card_id },
+      "studying.quiz.attempts.quizId": { $eq: quiz_id },
+    },
+    {
+      ...quiz_id,
     },
     {
       ...updateQuery,
@@ -1039,7 +1046,7 @@ export async function updateUserQuizProgress(userId, details) {
   // quiz doesn't exist (probably taking for first time)
   if (result.modifiedCount === 0) {
     return Users.findOneAndUpdate(
-      { _id: userId, "studying.cardId": card_id },
+      { _id: { $eq: userId }, "studying.cardId": { $eq: card_id } },
       {
         ...updateQuery,
         $push: {

@@ -83,22 +83,6 @@ app.use(
   })
 );
 
-// Health check route (no middleware overhead)
-app.get("/health", async (req, res) => {
-  const { getConnectionStatus } = await import("./services/mongo.js");
-  const connectionInfo = getConnectionStatus();
-
-  res.json({
-    status: "ok",
-    mongodb: connectionInfo.status,
-    connectionState: connectionInfo.state,
-    isConnected: connectionInfo.isConnected,
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development",
-  });
-});
-
 // Cookie parser for API routes
 app.use("/api", cookieParser(cookieSecret));
 
@@ -112,7 +96,7 @@ const corsOptions = {
 };
 app.use("/api", cors(corsOptions));
 
-app.use("/api", apiRouter);
+app.use("/api", accessLimiter, apiRouter);
 
 // this will only run in development mode
 if (!runningInProduction) {

@@ -4,6 +4,7 @@ import {
   XCircleIcon,
   FireIcon,
 } from "@heroicons/react/24/solid";
+import { getTextFromHtml } from "../../../../utils/dom";
 
 const FocusQuizGallery = ({
   quizzes,
@@ -101,8 +102,7 @@ const FocusQuizGallery = ({
                   }
                 `}
                 >
-                  {quiz.quizQuestion?.replace(/<[^>]*>/g, "") ||
-                    "Question content"}
+                  {getTextFromHtml(getquiz.quizQuestion) || "Question content"}
                 </p>
               </div>
 
