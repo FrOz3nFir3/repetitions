@@ -6,9 +6,6 @@ import {
   httpGetCardLogs,
 } from "./card.controller.js";
 import { requireAuthenticationWithCSRF } from "../../middleware/auth.middleware.js";
-import { apiLimiter } from "../../middleware/rateLimiter.middleware.js";
-
-cardRouter.use(apiLimiter);
 
 cardRouter.get("/:id", httpGetCardById);
 cardRouter.get("/:id/logs", httpGetCardLogs);

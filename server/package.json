@@ -25,6 +25,7 @@
     "helmet": "^8.1.0",
     "jsdom": "^26.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lru-cache": "^11.1.0",
     "mongoose": "^8.16.1",
     "repetitions.tech": "file:.."
   },

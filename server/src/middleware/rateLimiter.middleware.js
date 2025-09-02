@@ -1,48 +1,94 @@
 import rateLimit from "express-rate-limit";
+import { LRUCache } from "lru-cache";
 
 const getClientIp = (req) => {
-  // 'x-vercel-forwarded-for' is a trusted header provided by Vercel.
-  // It contains the real client IP and cannot be spoofed.
   const ip =
-    req.headers["x-vercel-forwarded-for"] ?? req.headers["x-forwarded-for"];
+    req.headers["x-vercel-forwarded-for"] ||
+    req.headers["x-forwarded-for"] ||
+    req.socket.remoteAddress;
 
-  // Fallback to req.ip for local development and other environments.
-  // req.ip is determined by Express's 'trust proxy' setting.
   return ip || req.ip;
 };
 
+// --- A Memory-Safe Store for Abusive IPs ---
+// This cache will automatically evict the least recently used IPs
+// if it reaches its size limit, preventing a memory leak.
+// It will also automatically evict entries after their TTL (Time To Live).
+const abuseTracker = new LRUCache({
+  max: 100000, // A single, larger cache for all abuse tracking.
+  // The TTL here is for how long a "strike" is remembered.
+  ttl: 12 * 60 * 60 * 1000, // Strikes are forgotten after 12 hour.
+});
+const GLOBAL_ABUSE_THRESHOLD = 200; // How many times an IP can get rate-limited before a long-term block.
+const AUTH_ABUSE_THRESHOLD = 10;
+
 // Rate limiter for sensitive authentication actions like login and registration
 export const authLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // Limit each IP to 10 requests per windowMs
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  keyGenerator: getClientIp,
-  message: {
-    error: "Too many requests from this IP, please try again after 10 minutes",
-  },
-});
+  handler: (req, res, next, options) => {
+    const key = options.keyGenerator(req);
+    // Increment the strike count for this user/IP.
+    const strikeCount = (abuseTracker.get(key) || 0) + 1;
+    abuseTracker.set(key, strikeCount); // The cache's TTL will handle eviction.
 
-// A more general rate limiter for other authenticated API endpoints
-export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 350, // Limit each IP to 350 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
+    if (strikeCount >= AUTH_ABUSE_THRESHOLD) {
+      // On the final strike, send a harsher message.
+      return res.status(options.statusCode).json({
+        error:
+          "Access has been temporarily restricted due to excessive requests. Please try again later.",
+      });
+    }
+
+    // Send the standard "soft" rate-limit message.
+    res.status(options.statusCode).json({ error: options.message.error });
+  },
   keyGenerator: getClientIp,
   message: {
     error: "Too many requests from this IP, please try again after 15 minutes",
   },
 });
 
-export const accessLimiter = rateLimit({
-  windowMs: 30 * 60 * 1000, // 30 mins
-  max: 700, // Limit each IP to 700 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: getClientIp,
-  message: {
-    error:
-      "Too many requests from this IP, please try again after half an hour",
+// A more general rate limiter authenticated API endpoints
+export const globalApiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1-minute window
+  max: (req, res) => {
+    const key = req.token ? req.token.id : getClientIp(req);
+
+    const strikes = abuseTracker.get(key) || 0;
+    // If this user/IP has reached the abuse threshold, block them.
+    if (strikes >= GLOBAL_ABUSE_THRESHOLD) {
+      return 0; // The "Penalty Box" logic.
+    }
+
+    return req.token ? 300 : 200; // Standard limits for everyone else.
   },
+  keyGenerator: (req, res) => {
+    return req.token ? req.token.id : getClientIp(req);
+  },
+  handler: (req, res, next, options) => {
+    const key = options.keyGenerator(req);
+
+    // Increment the strike count for this user/IP.
+    const strikeCount = (abuseTracker.get(key) || 0) + 1;
+    abuseTracker.set(key, strikeCount); // The cache's TTL will handle eviction.
+
+    if (strikeCount >= GLOBAL_ABUSE_THRESHOLD) {
+      // On the final strike, send a harsher message.
+      return res.status(options.statusCode).json({
+        error:
+          "Access has been temporarily restricted due to excessive requests. Please try again later.",
+      });
+    }
+
+    // Send the standard "soft" rate-limit message.
+    res.status(options.statusCode).json({ error: options.message.error });
+  },
+  message: {
+    error: "You are making requests too quickly. Please slow down.",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });

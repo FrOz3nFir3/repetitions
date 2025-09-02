@@ -23,54 +23,37 @@ import {
   requireAuthentication,
   requireAuthenticationWithCSRF,
 } from "../../middleware/auth.middleware.js";
-import {
-  authLimiter,
-  apiLimiter,
-} from "../../middleware/rateLimiter.middleware.js";
+import { authLimiter } from "../../middleware/rateLimiter.middleware.js";
 
 import { Router } from "express";
 const userRouter = Router();
 
 // Apply the API limiter to the authenticated user details endpoint
 // /authed provides CSRF token, so only requires authentication (not CSRF)
-userRouter.post(
-  "/authed",
-  apiLimiter,
-  requireAuthentication,
-  httpPostAuthDetails
-);
+userRouter.post("/authed", requireAuthentication, httpPostAuthDetails);
 
 userRouter.get(
   "/progress",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetUserProgressPaginated
 );
 
-userRouter.get(
-  "/stats",
-  apiLimiter,
-  requireAuthenticationWithCSRF,
-  httpGetUserStats
-);
+userRouter.get("/stats", requireAuthenticationWithCSRF, httpGetUserStats);
 
 userRouter.get(
   "/quiz-progress",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetQuizProgress
 );
 
 userRouter.get(
   "/review-progress/:card_id",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetCardReviewProgress
 );
 
 userRouter.get(
   "/report/:card_id",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetDetailedReport
 );
@@ -86,59 +69,43 @@ userRouter.post(
   requireAuthenticationWithCSRF,
   httpLogoutUser
 );
-userRouter.post("/refresh", apiLimiter, httpRefreshToken);
+userRouter.post("/refresh", httpRefreshToken);
 
 // Dedicated CSRF token endpoint for lightweight token refresh
-userRouter.post(
-  "/csrf-refresh",
-  apiLimiter,
-  requireAuthentication,
-  httpGetCSRFToken
-);
+userRouter.post("/csrf-refresh", requireAuthentication, httpGetCSRFToken);
 
-userRouter.patch(
-  "/",
-  apiLimiter,
-  requireAuthenticationWithCSRF,
-  httpUpdateUser
-);
+userRouter.patch("/", requireAuthenticationWithCSRF, httpUpdateUser);
 userRouter.patch(
   "/quiz-progress",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpUpdateUserQuizProgress
 );
 userRouter.patch(
   "/review-progress",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpUpdateUserReviewProgress
 );
 
 userRouter.patch(
   "/weak-cards",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpUpdateWeakCards
 );
 
 userRouter.get(
   "/focus-review/:card_id",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetFocusReviewData
 );
 
 userRouter.patch(
   "/struggling-quiz",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpUpdateUserStrugglingQuiz
 );
 
 userRouter.get(
   "/focus-quiz/:card_id",
-  apiLimiter,
   requireAuthenticationWithCSRF,
   httpGetFocusQuizData
 );

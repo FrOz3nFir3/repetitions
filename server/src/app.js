@@ -8,9 +8,10 @@ import path from "node:path";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import apiRouter from "./routes/api.router.js";
-import { accessLimiter } from "./middleware/rateLimiter.middleware.js";
 import helmet from "helmet";
 import cors from "cors";
+import { globalApiLimiter } from "./middleware/rateLimiter.middleware.js";
+import { attachTokenIfAuthenticated } from "./middleware/auth.middleware.js";
 
 const app = express();
 const __dirname = import.meta.dirname;
@@ -96,14 +97,32 @@ const corsOptions = {
 };
 app.use("/api", cors(corsOptions));
 
-app.use("/api", accessLimiter, apiRouter);
+app.use(attachTokenIfAuthenticated);
+app.use((req, res, next) => {
+  const url = req.url;
+  // we have individual authLimited for this routes
+  if (
+    url === "/api/user/login" ||
+    url === "/api/user/register" ||
+    url === "/api/user/google-login"
+  ) {
+    next();
+    return;
+  }
 
-// this will only run in development mode
-if (!runningInProduction) {
-  app.get("/*allRoutes", accessLimiter, (req, res) => {
+  globalApiLimiter(req, res, next);
+});
+app.use("/api", apiRouter);
+
+// This middleware only runs if no other /api route was matched
+app.use((req, res, next) => {
+  if (!runningInProduction) {
+    // this will only run in development mode
     res.set("Cache-Control", "no-cache, must-revalidate");
     res.sendFile(path.join(__dirname, "..", "public", "index.html"));
-  });
-}
+  } else {
+    res.status(404).json({ error: "API endpoint not found" });
+  }
+});
 
 export default app;
