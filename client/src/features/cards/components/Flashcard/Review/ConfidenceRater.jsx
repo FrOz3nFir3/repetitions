@@ -64,7 +64,7 @@ const ConfidenceRater = ({ onRate, isFocusReview = false }) => {
             </div>
             <div className="absolute top-2 right-2 ">
               <div className="bg-white/30 text-xs px-2 py-1 rounded-full text-white font-medium shadow-sm">
-                {user ? "Focus" : "Review"}
+                {user && !isFocusReview ? "Focus" : "Review"}
               </div>
             </div>
           </button>
@@ -84,7 +84,7 @@ const ConfidenceRater = ({ onRate, isFocusReview = false }) => {
             </div>
             <div className="absolute top-2 right-2">
               <div className="bg-white/30 text-xs px-2 py-1 rounded-full text-white font-medium shadow-sm">
-                {user ? "Focus" : "Review"}
+                {user && !isFocusReview ? "Focus" : "Review"}
               </div>
             </div>
           </button>

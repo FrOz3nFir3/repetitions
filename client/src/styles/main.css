@@ -83,3 +83,29 @@
 span.inline-code {
   @apply inline-block bg-gray-200 dark:bg-gray-800 text-red-500 dark:text-red-400 font-mono rounded-md px-1.5 py-1;
 }
+
+/* List Styles */
+.custom-rich-text-editor ul {
+  @apply list-disc pl-6 my-2;
+}
+
+.custom-rich-text-editor ol {
+  @apply list-decimal pl-6 my-2;
+}
+
+.custom-rich-text-editor li {
+  @apply my-1;
+  display: list-item;
+}
+
+.custom-rich-text-editor p:last-child::before {
+  content: "";
+}
+
+/* Nested lists */
+.custom-rich-text-editor ul ul,
+.custom-rich-text-editor ol ol,
+.custom-rich-text-editor ul ol,
+.custom-rich-text-editor ol ul {
+  @apply my-1 pl-6;
+}

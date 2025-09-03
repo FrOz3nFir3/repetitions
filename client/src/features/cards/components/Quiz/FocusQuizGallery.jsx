@@ -27,7 +27,7 @@ const FocusQuizGallery = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-64 overflow-y-auto p-4 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-h-64 overflow-y-auto p-4 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm rounded-2xl">
         {quizzes.map((quiz, index) => {
           const isCurrentQuestion = currentQuestion?._id === quiz._id;
           const questionNumber = index + 1;
@@ -55,13 +55,14 @@ const FocusQuizGallery = ({
             statusColor =
               "bg-orange-100 dark:bg-orange-900/30 border-orange-300 dark:border-orange-500";
           }
+          const plainText = getTextFromHtml(quiz.quizQuestion);
 
           return (
             <button
               key={quiz._id}
               onClick={() => handleQuizSelect(index)}
               className={`
-                relative p-3 rounded-xl transition-all duration-200 border-2
+                cursor-pointer relative p-3 rounded-xl transition-all duration-200 border-2
                 ${
                   isCurrentQuestion
                     ? `${statusColor} transform scale-105 shadow-lg`
@@ -69,7 +70,7 @@ const FocusQuizGallery = ({
                 }
                 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900
               `}
-              title={`Question ${questionNumber}: ${quiz.quizQuestion?.substring(
+              title={`Question ${questionNumber}: ${plainText?.substring(
                 0,
                 50
               )}...`}
@@ -102,7 +103,7 @@ const FocusQuizGallery = ({
                   }
                 `}
                 >
-                  {getTextFromHtml(getquiz.quizQuestion) || "Question content"}
+                  {plainText || "Question content"}
                 </p>
               </div>
 

@@ -1,15 +1,10 @@
 import React, { useImperativeHandle, forwardRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
 import { FontSize, TextStyle } from "@tiptap/extension-text-style";
 
 import { MenuBar } from "./RichTextEditor/MenuBar";
-import {
-  CustomKeyboardShortcuts,
-  CustomCodeBlock,
-  InlineCode,
-} from "./RichTextEditor/extensions";
+import { CustomCodeBlock, InlineCode } from "./RichTextEditor/extensions";
 
 const RichTextEditor = forwardRef(
   ({ initialContent, onChange, editable, className = "" }, ref) => {
@@ -18,12 +13,10 @@ const RichTextEditor = forwardRef(
         StarterKit.configure({
           codeBlock: false,
         }),
-        Underline,
         TextStyle,
         FontSize,
         InlineCode,
         CustomCodeBlock,
-        CustomKeyboardShortcuts,
       ],
       content: initialContent || "",
       onUpdate: ({ editor }) => {
@@ -35,7 +28,7 @@ const RichTextEditor = forwardRef(
       editorProps: {
         attributes: {
           class:
-            "space-y-2  prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none ",
+            "prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none max-w-none prose-ul:list-disc prose-ul:pl-6 prose-ol:list-decimal prose-ol:pl-6 prose-li:my-0",
         },
       },
     });
@@ -62,7 +55,7 @@ const RichTextEditor = forwardRef(
         } break-word custom-rich-text-editor bg-white dark:bg-gray-700 dark:text-white flex flex-col w-full mt-1 rounded-md border border-gray-300 dark:border-gray-600 shadow-sm focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 max-h-96 ${className}`}
       >
         <MenuBar editor={editor} />
-        <div className=" p-5 overflow-y-auto cursor-text" onClick={handleClick}>
+        <div className="p-4 overflow-y-auto cursor-text" onClick={handleClick}>
           <EditorContent editor={editor} />
         </div>
       </div>

@@ -8,7 +8,7 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect, index }) => {
   const optionLabels = ["A", "B", "C", "D", "E", "F"];
 
   let baseClasses =
-    "cursor-pointer w-full text-left p-5 sm:p-6 rounded-2xl border-2  focus:outline-none focus:ring-4 focus:ring-opacity-50 group";
+    "cursor-pointer w-full text-left p-4 rounded-2xl border-2  focus:outline-none focus:ring-4 focus:ring-opacity-50 group";
 
   let stateClasses = "";
 

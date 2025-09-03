@@ -55,7 +55,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
           {error && (
             <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-2 border-red-200 dark:border-red-800 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-rose-500/5"></div>
-              <div className="relative p-6">
+              <div className="relative p-4">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
                     <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-xl">
@@ -79,7 +79,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
           {isSuccess && (
             <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800 shadow-lg">
               <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5"></div>
-              <div className="relative p-6">
+              <div className="relative p-4">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0">
                     <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-xl">

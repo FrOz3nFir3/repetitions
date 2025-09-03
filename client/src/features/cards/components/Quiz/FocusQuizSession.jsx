@@ -1,5 +1,10 @@
 import React from "react";
-import { ArrowsRightLeftIcon, FireIcon, ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import {
+  ArrowsRightLeftIcon,
+  FireIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/solid";
 import FocusQuizHeader from "./FocusQuizHeader";
 import QuizQuestion from "./QuizQuestion";
 import QuizOptions from "./QuizOptions";
@@ -108,42 +113,50 @@ const FocusQuizSession = ({ focusQuizzes, session }) => {
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
               </div>
             </div>
-            
+
             {/* Navigation Controls on the right */}
             <div className="flex items-center justify-between mt-3">
               <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <ArrowsRightLeftIcon className="h-4 w-4" />
                 Use Left/Right arrow keys to navigate
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <button
                   onClick={handlePrev}
                   disabled={isFirstQuestion}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm border ${
+                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm border ${
                     isFirstQuestion
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed'
-                      : 'bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:shadow-md'
+                      ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed"
+                      : "bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:shadow-md"
                   }`}
-                  title={isFirstQuestion ? "Already at first question" : "Previous question"}
+                  title={
+                    isFirstQuestion
+                      ? "Already at first question"
+                      : "Previous question"
+                  }
                 >
                   <ChevronLeftIcon className="h-4 w-4" />
                   <span className="text-sm font-medium">Prev</span>
                 </button>
-                
+
                 <div className="px-2.5 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-md text-sm font-medium border border-orange-200 dark:border-orange-500/30">
                   {currentQuestionIndex + 1} / {sessionQuizzes.length}
                 </div>
-                
+
                 <button
                   onClick={handleNext}
                   disabled={isLastQuestion}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm border ${
+                  className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm border ${
                     isLastQuestion
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed'
-                      : 'bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:shadow-md'
+                      ? "bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-600 cursor-not-allowed"
+                      : "bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:shadow-md"
                   }`}
-                  title={isLastQuestion ? "Already at last question" : "Next question"}
+                  title={
+                    isLastQuestion
+                      ? "Already at last question"
+                      : "Next question"
+                  }
                 >
                   <span className="text-sm font-medium">Next</span>
                   <ChevronRightIcon className="h-4 w-4" />

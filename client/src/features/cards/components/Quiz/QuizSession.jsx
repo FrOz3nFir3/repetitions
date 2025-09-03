@@ -23,8 +23,8 @@ const QuizSession = ({ session, cardId }) => {
 
   return (
     <div className="relative z-10 p-6 sm:p-8">
-      <QuizHeader 
-        current={currentQuestionIndex + 1} 
+      <QuizHeader
+        current={currentQuestionIndex + 1}
         total={quizzes.length}
         cardId={cardId}
       />

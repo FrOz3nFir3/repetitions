@@ -34,7 +34,7 @@ const HtmlRenderer = ({ htmlContent, className = "" }) => {
     <div
       ref={contentRef}
       dangerouslySetInnerHTML={{ __html: htmlContent }}
-      className={`break-word mt-2 max-h-96 max-w-full pr-2  overflow-auto space-y-2 prose dark:text-white dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${
+      className={`custom-rich-text-editor break-word mt-2 max-h-96 max-w-full pr-2  overflow-auto space-y-2 prose dark:text-white dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl ${
         className ?? ""
       }`}
     />

@@ -40,7 +40,7 @@ const QuizItem = ({ quiz }) => {
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-blue-200 dark:border-blue-700 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-blue-200 dark:border-blue-700 shadow-lg hover:shadow-xl transition-all duration-300">
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <HtmlRenderer htmlContent={quizQuestion} />
           </div>
@@ -63,7 +63,7 @@ const QuizItem = ({ quiz }) => {
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-emerald-200 dark:border-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-emerald-200 dark:border-emerald-700 shadow-lg hover:shadow-xl transition-all duration-300">
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <HtmlRenderer htmlContent={quizAnswer} />
           </div>
@@ -86,7 +86,7 @@ const QuizItem = ({ quiz }) => {
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-amber-200 dark:border-amber-700 shadow-lg hover:shadow-xl transition-all duration-300">
+        <div className="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-amber-200 dark:border-amber-700 shadow-lg hover:shadow-xl transition-all duration-300">
           <div className="flex items-center gap-3">
             <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {minimumOptions || 2}
@@ -126,7 +126,7 @@ const QuizItem = ({ quiz }) => {
                     : "bg-white/90 dark:bg-gray-800/90 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600"
                 }`}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-center gap-4">
                   {isCorrect && (
                     <div className="flex-shrink-0 mt-1">
                       <div className="p-1 bg-green-100 dark:bg-green-900/50 rounded-lg">

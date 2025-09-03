@@ -4,10 +4,10 @@ import HtmlRenderer from "../../../../components/ui/HtmlRenderer";
 
 const QuizQuestion = ({ questionText, current }) => {
   return (
-    <div className="relative mb-6">
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl border-2 border-purple-200/50 dark:border-purple-700/50 shadow-2xl p-6 sm:p-8">
+    <div className="relative mb-4">
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl border border-purple-200/50 dark:border-purple-700/50 shadow-2xl py-4 p-5">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-2">
           <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
             <QuestionMarkCircleIcon className="h-5 w-5 text-white" />
           </div>

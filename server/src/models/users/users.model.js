@@ -1026,9 +1026,6 @@ export async function updateUserQuizProgress(userId, details) {
       "studying.quiz.attempts.quizId": { $eq: quidIdObject },
     },
     {
-      ...quidIdObject,
-    },
-    {
       ...updateQuery,
       $inc: {
         ...updateQuery.$inc,
