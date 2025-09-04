@@ -8,6 +8,7 @@ import {
   TrashIcon,
   HashtagIcon,
   FunnelIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -167,6 +168,13 @@ const AddQuizModal = ({ cardId, flashcards }) => {
                   </p>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="cursor-pointer p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              >
+                <XMarkIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+              </button>
             </div>
 
             {/* Error Message */}
@@ -284,7 +292,7 @@ const AddQuizModal = ({ cardId, flashcards }) => {
                       </p>
                     </div>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-amber-200 dark:border-amber-700 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <div className="p-1 rounded-xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-2 border-amber-200 dark:border-amber-700 shadow-lg hover:shadow-xl transition-all duration-300">
                     <input
                       type="number"
                       id="minimumOptions"
@@ -292,7 +300,7 @@ const AddQuizModal = ({ cardId, flashcards }) => {
                       onChange={(e) =>
                         setMinimumOptions(Number(e.target.value))
                       }
-                      className="w-full px-4 py-3 text-lg border-0 bg-transparent text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-0"
+                      className="w-full px-4 py-1 text-lg border-0 bg-transparent text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-0"
                       min={2}
                       max={10}
                       disabled={isLoading}

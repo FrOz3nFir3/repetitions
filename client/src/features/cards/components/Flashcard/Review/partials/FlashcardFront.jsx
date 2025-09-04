@@ -57,7 +57,7 @@ const FlashcardFront = ({
           </div>
         ) : (
           <HtmlRenderer
-            className="max-w-full !text-sm sm:!text-xl leading-relaxed"
+            className="max-w-full !text-sm sm:!text-lg leading-relaxed"
             htmlContent={questionContent}
           />
         )}

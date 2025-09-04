@@ -86,11 +86,11 @@ span.inline-code {
 
 /* List Styles */
 .custom-rich-text-editor ul {
-  @apply list-disc pl-6 my-2;
+  @apply list-disc pl-8;
 }
 
 .custom-rich-text-editor ol {
-  @apply list-decimal pl-6 my-2;
+  @apply list-decimal pl-8;
 }
 
 .custom-rich-text-editor li {
@@ -99,7 +99,7 @@ span.inline-code {
 }
 
 .custom-rich-text-editor p:last-child::before {
-  content: "";
+  content: "" !important;
 }
 
 /* Nested lists */
@@ -107,5 +107,5 @@ span.inline-code {
 .custom-rich-text-editor ol ol,
 .custom-rich-text-editor ul ol,
 .custom-rich-text-editor ol ul {
-  @apply my-1 pl-6;
+  @apply my-1 pl-8;
 }

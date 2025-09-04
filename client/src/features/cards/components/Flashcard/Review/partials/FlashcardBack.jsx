@@ -52,7 +52,7 @@ const FlashcardBack = ({
           </div>
         ) : (
           <HtmlRenderer
-            className="max-w-full !text-sm sm:!text-xl leading-relaxed"
+            className="max-w-full !text-sm sm:!text-base leading-relaxed"
             htmlContent={answerContent}
           />
         )}

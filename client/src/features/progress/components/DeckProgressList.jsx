@@ -31,7 +31,7 @@ const DeckProgressList = ({ user, onViewReport }) => {
     resetSearch,
   } = useQuizProgressWithSearch(user);
 
-  // Get stats for the summary
+  //TODO: fix this later  Get stats for the summary (exclude stat count for deleted cards etc)
   const { data: stats } = useGetUserStatsQuery(undefined, {
     skip: !user?.studyingCount,
   });
@@ -50,7 +50,7 @@ const DeckProgressList = ({ user, onViewReport }) => {
         title="Ready to Start Learning?"
         message="Your learning journey begins with your first quiz. Choose a deck and start building your knowledge!"
         ctaText="Explore Learning Decks"
-        ctaLink="/category"
+        ctaLink="/categories"
         icon={RocketLaunchIcon}
       />
     );

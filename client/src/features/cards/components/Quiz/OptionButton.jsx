@@ -38,7 +38,7 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect, index }) => {
       <div className="flex items-center gap-4">
         {/* Option Label */}
         <div
-          className={`flex-shrink-0 w-5 sm:w-10 h-5 sm:h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+          className={`flex-shrink-0 w-5 sm:w-8 h-5 sm:h-8 rounded-xl flex items-center justify-center font-bold text-xs transition-all duration-300 ${
             selectedAnswer
               ? isCorrectAnswer
                 ? "bg-green-500 text-white"
@@ -52,8 +52,8 @@ const OptionButton = ({ option, answer, selectedAnswer, onSelect, index }) => {
         </div>
 
         {/* Option Content */}
-        <div className="w-0 flex-grow">
-          <HtmlRenderer className="max-w-full !mt-0" htmlContent={option} />
+        <div className="w-0  flex-grow">
+          <HtmlRenderer className="max-w-full  !mt-0" htmlContent={option} />
         </div>
 
         {/* Result Icon */}

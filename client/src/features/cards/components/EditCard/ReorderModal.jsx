@@ -24,6 +24,7 @@ import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import {
   AdjustmentsHorizontalIcon,
   CheckIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
@@ -167,21 +168,26 @@ const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
     <Modal className={"!p-0"} isOpen={isOpen} onClose={onClose} maxWidth="7xl">
       <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden h-[85vh] flex flex-col">
         {/* Clean Header - Title Only */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 flex-shrink-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10"></div>
-          <div className="relative px-6 py-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
-                <AdjustmentsHorizontalIcon className="h-8 w-8 text-white" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
-                <p className="text-indigo-100 dark:text-purple-100 leading-relaxed">
-                  {description}
-                </p>
-              </div>
+        <div className="flex px-6 py-6 items-center justify-between relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+              <AdjustmentsHorizontalIcon className="h-8 w-8 text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
+              <p className="text-indigo-100 dark:text-purple-100 leading-relaxed">
+                {description}
+              </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+          >
+            <XMarkIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+          </button>
         </div>
 
         <div ref={errorRef}>

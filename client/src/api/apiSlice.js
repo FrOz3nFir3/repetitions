@@ -321,17 +321,17 @@ export const apiSlice = createApi({
       invalidatesTags: (result, error, arg) => {
         if (!error) {
           const tags = ["Report"];
-          
+
           // Add struggling quiz tracking
           if (arg.isFirstQuestion) {
             tags.push("User");
           }
-          
+
           // Only invalidate FocusQuizData if NOT on focus quiz page
           if (!arg.skipFocusQuizInvalidation) {
             tags.push({ type: "FocusQuizData", id: arg.card_id });
           }
-          
+
           return tags;
         }
         return [];
@@ -344,7 +344,11 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: progress,
       }),
-      invalidatesTags: (result, error, { card_id, skipFocusReviewInvalidation }) => {
+      invalidatesTags: (
+        result,
+        error,
+        { card_id, skipFocusReviewInvalidation }
+      ) => {
         if (!error) {
           const tags = [
             { type: "Report", id: "LIST" },
@@ -352,12 +356,12 @@ export const apiSlice = createApi({
             { type: "RegularReviewData", id: card_id },
             { type: "RegularReviewData", id: "LIST" },
           ];
-          
+
           // Only invalidate FocusReviewData if NOT on focus review page
           if (!skipFocusReviewInvalidation) {
             tags.push({ type: "FocusReviewData", id: card_id });
           }
-          
+
           return tags;
         }
         return [];
@@ -370,13 +374,17 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: weakCardData,
       }),
-      invalidatesTags: (result, error, { cardId, skipFocusReviewInvalidation, skipRegularReviewInvalidation }) => {
+      invalidatesTags: (
+        result,
+        error,
+        { cardId, skipFocusReviewInvalidation, skipRegularReviewInvalidation }
+      ) => {
         if (!error) {
           const tags = [
             { type: "Report", id: "LIST" },
             { type: "Report", id: cardId },
           ];
-          
+
           // Only invalidate RegularReviewData if NOT on regular review page
           if (!skipRegularReviewInvalidation) {
             tags.push(
@@ -384,12 +392,12 @@ export const apiSlice = createApi({
               { type: "RegularReviewData", id: "LIST" }
             );
           }
-          
+
           // Only invalidate FocusReviewData if NOT on focus review page
           if (!skipFocusReviewInvalidation) {
             tags.push({ type: "FocusReviewData", id: cardId });
           }
-          
+
           return tags;
         }
         return [];
@@ -448,18 +456,22 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: strugglingQuizData,
       }),
-      invalidatesTags: (result, error, { cardId, skipFocusQuizInvalidation }) => {
+      invalidatesTags: (
+        result,
+        error,
+        { cardId, skipFocusQuizInvalidation }
+      ) => {
         if (!error) {
           const tags = [
             { type: "Report", id: "LIST" },
             { type: "Report", id: cardId },
           ];
-          
+
           // Only invalidate FocusQuizData if NOT on focus quiz page
           if (!skipFocusQuizInvalidation) {
             tags.push({ type: "FocusQuizData", id: cardId });
           }
-          
+
           return tags;
         }
         return [];

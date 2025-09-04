@@ -78,6 +78,7 @@ export function NewCardForm({ category, newCard }) {
       </button>
 
       <Modal
+        avoidBackDropClose={false}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         maxWidth="4xl"

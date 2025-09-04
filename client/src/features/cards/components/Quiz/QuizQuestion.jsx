@@ -12,7 +12,7 @@ const QuizQuestion = ({ questionText, current }) => {
             <QuestionMarkCircleIcon className="h-5 w-5 text-white" />
           </div>
           <div>
-            <span className="text-purple-600 dark:text-purple-400 text-sm font-bold">
+            <span className="text-purple-600 dark:text-purple-400 text-lg font-bold">
               Question {current}
             </span>
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -22,7 +22,7 @@ const QuizQuestion = ({ questionText, current }) => {
         </div>
 
         {/* Question Content */}
-        <div className="text-lg sm:text-xl text-gray-900 dark:text-white leading-relaxed">
+        <div className="text-base text-gray-900 dark:text-white leading-relaxed">
           <HtmlRenderer htmlContent={questionText} />
         </div>
       </div>

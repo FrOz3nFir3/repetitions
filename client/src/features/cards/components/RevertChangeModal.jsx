@@ -99,29 +99,38 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
     >
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-3 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl shadow-lg">
-            <ArrowUturnLeftIcon className="h-6 w-6 text-white" />
+        <div className="flex justify-between items-center gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl shadow-lg">
+              <ArrowUturnLeftIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-700 to-amber-700 dark:from-orange-300 dark:to-amber-300 bg-clip-text text-transparent">
+                Revert Change
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Review and confirm the change reversal
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-700 to-amber-700 dark:from-orange-300 dark:to-amber-300 bg-clip-text text-transparent">
-              Revert Change
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Review and confirm the change reversal
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+          >
+            <XMarkIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+          </button>
         </div>
 
         {/* Warning Banner */}
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 flex items-center gap-3">
           <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">
               This action will revert the field to its previous value
             </p>
             <p className="text-amber-700 dark:text-amber-300 text-xs mt-1">
-              This change cannot be undone and will create a new log entry
+              This change will create a new log entry
             </p>
           </div>
         </div>
@@ -182,7 +191,7 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                 <p className="font-semibold text-red-700 dark:text-red-300">
-                  Current Value (will be removed)
+                  New Value (will be removed)
                 </p>
               </div>
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded-lg p-3">

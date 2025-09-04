@@ -20,41 +20,39 @@ const ReportContent = ({
       <div className={slideClassName}>
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/30 dark:border-gray-700/30">
           {/* Question Header */}
-          <div className="mb-6 sm:mb-8">
+          <div className="mb-4">
             <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <div className="p-2 sm:p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl sm:rounded-2xl shadow-lg flex-shrink-0">
-                <QuestionMarkCircleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl sm:rounded-2xl shadow-lg flex-shrink-0">
+                <QuestionMarkCircleIcon className="h-5 w-5  text-white" />
               </div>
               <div>
-                <h3 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-gray-900 via-purple-800 to-pink-600 dark:from-white dark:via-purple-200 dark:to-pink-300 bg-clip-text text-transparent">
+                <h3 className="text-lg  font-bold bg-gradient-to-r from-gray-900 via-purple-800 to-pink-600 dark:from-white dark:via-purple-200 dark:to-pink-300 bg-clip-text text-transparent">
                   Question {currentIndex + 1}
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   Review the question and correct answer
                 </p>
               </div>
             </div>
 
             {/* Question Content */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-purple-200/50 dark:border-purple-700/50 shadow-lg">
-              <HtmlRenderer
-                className="!mt-0 text-base sm:text-lg text-gray-900 dark:text-white"
-                htmlContent={currentQuestion.question}
-              />
-            </div>
+            <HtmlRenderer
+              className="!mt-0 text-base  text-gray-900 dark:text-white"
+              htmlContent={currentQuestion.question}
+            />
           </div>
 
           {/* Answer Options */}
           <div className="mb-6 sm:mb-8">
             <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <div className="p-2 sm:p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl shadow-lg flex-shrink-0">
-                <LightBulbIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl sm:rounded-2xl shadow-lg flex-shrink-0">
+                <LightBulbIcon className="h-6 w-6  text-white" />
               </div>
               <div>
-                <h3 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+                <h3 className="text-base  font-bold text-gray-900 dark:text-white">
                   Answer Options
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                <p className="text-xs  text-gray-600 dark:text-gray-400">
                   The correct answer is highlighted
                 </p>
               </div>
@@ -77,9 +75,9 @@ const ReportContent = ({
                     </div>
                   )}
 
-                  <div className="relative z-10 p-4 sm:p-6 flex items-center">
+                  <div className="relative z-10 p-4 flex items-center">
                     <div
-                      className={`flex-shrink-0 w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-sm sm:text-lg mr-3 sm:mr-4 ${
+                      className={`flex-shrink-0 w-8 h-8 rounded-lg sm:rounded-xl flex items-center justify-center font-bold text-sm sm:text-lg mr-3 sm:mr-4 ${
                         option === currentQuestion.answer
                           ? "bg-white/20 text-white border-2 border-white/30"
                           : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
@@ -89,7 +87,7 @@ const ReportContent = ({
                     </div>
                     <div className="min-w-0 flex-1">
                       <HtmlRenderer
-                        className={`!mt-0 text-sm sm:text-base leading-relaxed ${
+                        className={`!mt-0 text-sm leading-relaxed ${
                           option === currentQuestion.answer
                             ? "text-white"
                             : "text-gray-800 dark:text-gray-200"
@@ -99,7 +97,7 @@ const ReportContent = ({
                     </div>
                     {option === currentQuestion.answer && (
                       <div className="flex-shrink-0 ml-3 sm:ml-4">
-                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                        <CheckCircleIcon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                       </div>
                     )}
                   </div>

@@ -29,8 +29,6 @@ export function CardField({
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value);
-  const [previewData, setPreviewData] = useState(flashcardData);
-  const [isFlipped, setIsFlipped] = useState(false);
 
   useEffect(() => {
     setInputValue(value);
@@ -64,11 +62,6 @@ export function CardField({
 
   const handleEditClick = () => {
     setIsEditing(true);
-    if (text === "answer") {
-      setIsFlipped(true);
-    } else {
-      setIsFlipped(false);
-    }
   };
 
   const isUnchanged = inputValue === value;
@@ -93,17 +86,26 @@ export function CardField({
               onChange={handleValueChange}
               editable={!isLoading}
             />
-          ) : (
+          ) : text === "minimumOptions" ? (
             <input
-              type={text === "minimumOptions" ? "number" : "text"}
+              type={"number"}
               value={inputValue}
               onChange={(e) => handleValueChange(e.target.value)}
               className="bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 h-10 break-word "
-              min={text === "minimumOptions" ? 2 : undefined}
-              max={text === "minimumOptions" ? 4 : undefined}
+              min={2}
+              max={4}
               required
               disabled={isLoading}
             />
+          ) : (
+            <textarea
+              onChange={(e) => {
+                handleValueChange(e.target.value);
+              }}
+              defaultValue={inputValue}
+              disabled={isLoading}
+              className="disabled:cursor-not-allowed disabled:opacity-40 p-2 resize-none min-h-30  bg-white dark:bg-gray-700 dark:text-white block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm break-word "
+            ></textarea>
           )}
 
           <div className="text-sm text-gray-500 dark:text-gray-400 text-right">
