@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   PlayIcon,
@@ -14,12 +14,18 @@ import {
   StarIcon,
   ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { HashtagIcon } from "@heroicons/react/24/solid";
 import ProgressBar from "../../../components/ui/ProgressBar";
 import StatBadge from "../../../components/ui/StatBadge";
+import DeleteConfirmationModal from "../../../components/ui/DeleteConfirmationModal";
+import { usePatchUpdateUserQuizProgressMutation } from "../../../api/apiSlice";
 
 const DeckProgressCard = ({ card, onViewReport, index }) => {
   const navigate = useNavigate();
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [patchUpdateUserQuizProgress, { isLoading: isResetting }] =
+    usePatchUpdateUserQuizProgressMutation();
 
   const progress = {
     // TODO: change this later (key names)
@@ -217,7 +223,7 @@ const DeckProgressCard = ({ card, onViewReport, index }) => {
           className="group/btn w-full flex items-center justify-center px-5 py-4 border border-transparent rounded-2xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
         >
           <PlayIcon className="w-5 h-5 mr-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
-          {notStarted ? "Start Quiz" : "Continue Quiz"}
+          {notStarted ? "Start Quiz" : "Reattempt Quiz"}
           <ArrowRightIcon className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
         </Link>
 
@@ -243,7 +249,28 @@ const DeckProgressCard = ({ card, onViewReport, index }) => {
           <ChartBarIcon className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform duration-300" />
           View Detailed Report
         </button>
+
+        <button
+          disabled={notStarted || isResetting}
+          onClick={() => setIsResetModalOpen(true)}
+          className=" cursor-pointer group/btn disabled:cursor-not-allowed disabled:opacity-30 w-full flex items-center justify-center px-5 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-2xl text-sm font-semibold text-white bg-red-500    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700 transition-all duration-300 hover:border-red-700  hover:shadow-lg"
+        >
+          <ArrowPathIcon className="w-4 h-4 mr-2 " />
+          {isResetting ? "Resetting..." : "Reset Progress"}
+        </button>
       </div>
+      <DeleteConfirmationModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={async () => {
+          await patchUpdateUserQuizProgress({
+            card_id: progress.card_id,
+            resetProgress: true,
+          });
+        }}
+        title="Reset Quiz Progress"
+        description="Are you sure you want to reset your progress for this quiz? All your quiz stats  will be permanently erased."
+      />
     </div>
   );
 };

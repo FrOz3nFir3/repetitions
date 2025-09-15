@@ -80,7 +80,7 @@ const DeleteConfirmationModal = ({
                 onClose();
               }}
             >
-              Delete
+              Confirm
             </button>
           </div>
         </div>

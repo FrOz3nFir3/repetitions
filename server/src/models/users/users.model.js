@@ -1065,6 +1065,38 @@ export async function updateUserQuizProgress(userId, details) {
   return Users.findOne({ _id: userId }).lean();
 }
 
+export async function resetUserQuizProgress(userId, cardId) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(cardId)
+  ) {
+    throw new Error("Invalid ObjectId provided");
+  }
+
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const cardObjectId = new mongoose.Types.ObjectId(cardId);
+
+  return Users.findOneAndUpdate(
+    {
+      _id: userObjectId,
+      "studying.cardId": cardObjectId,
+    },
+    {
+      $set: {
+        "studying.$.quiz": {
+          timesStarted: 0,
+          timesFinished: 0,
+          totalCorrect: 0,
+          totalIncorrect: 0,
+          attempts: [],
+          updatedAt: new Date(),
+        },
+      },
+    },
+    { new: true }
+  ).lean();
+}
+
 export async function updateUserStrugglingQuiz(userId, cardId, quizId, action) {
   if (
     !mongoose.Types.ObjectId.isValid(userId) ||
