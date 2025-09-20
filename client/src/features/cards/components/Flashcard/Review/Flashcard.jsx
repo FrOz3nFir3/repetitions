@@ -37,25 +37,27 @@ const Flashcard = ({
             }}
             onClick={() => setIsFlipped(!isFlipped)}
           >
-            <FlashcardFront
-              isReviewCard={isReviewCard}
-              currentIndex={currentIndex}
-              totalCards={totalCards}
-              isQuestionEmpty={isQuestionEmpty}
-              questionContent={currentFlashcard.question}
-              viewOnly={viewOnly}
-              isFlipped={isFlipped}
-            />
-            <FlashcardBack
-              isReviewCard={isReviewCard}
-              currentIndex={currentIndex}
-              totalCards={totalCards}
-              isAnswerEmpty={isAnswerEmpty}
-              answerContent={currentFlashcard.answer}
-              viewOnly={viewOnly}
-              showFeedbackIndicator={showFeedbackIndicator}
-              isFlipped={isFlipped}
-            />
+            <React.Fragment key={currentFlashcard._id}>
+              <FlashcardFront
+                isReviewCard={isReviewCard}
+                currentIndex={currentIndex}
+                totalCards={totalCards}
+                isQuestionEmpty={isQuestionEmpty}
+                questionContent={currentFlashcard.question}
+                viewOnly={viewOnly}
+                isFlipped={isFlipped}
+              />
+              <FlashcardBack
+                isReviewCard={isReviewCard}
+                currentIndex={currentIndex}
+                totalCards={totalCards}
+                isAnswerEmpty={isAnswerEmpty}
+                answerContent={currentFlashcard.answer}
+                viewOnly={viewOnly}
+                showFeedbackIndicator={showFeedbackIndicator}
+                isFlipped={isFlipped}
+              />
+            </React.Fragment>
           </div>
         ) : (
           <FlashcardEmptyState />
