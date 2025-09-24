@@ -85,7 +85,9 @@ export const apiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: [
     "Card",
-    "IndividualCard",
+    "CardOverview", // For view=overview (default view)
+    "CardFlashcards", // For view=edit_flashcards, view=review and view=review_text
+    "CardQuiz", // For view=edit_quizzes and view=quiz
     "Report",
     "User",
     "CardReviewProgress",
@@ -150,8 +152,17 @@ export const apiSlice = createApi({
 
     getIndividualCard: builder.query({
       query: ({ id, view = "overview" }) => `/card/${id}?view=${view}`,
-      providesTags: ["IndividualCard"],
-      // providesTags: ["Card"],
+      providesTags: (result, error, { id, view }) => {
+        // Only provide view-specific tags, no generic IndividualCard tag
+        if (view === "edit_flashcards" || view === "review" || view === "review_text") {
+          return [{ type: "CardFlashcards", id }];
+        } else if (view === "edit_quizzes" || view === "quiz") {
+          return [{ type: "CardQuiz", id }];
+        } else {
+          // Default case for overview and any other views
+          return [{ type: "CardOverview", id }];
+        }
+      },
     }),
 
     postCreateNewCard: builder.mutation({
@@ -169,8 +180,43 @@ export const apiSlice = createApi({
         method: "PATCH",
         body: card,
       }),
-      invalidatesTags: (result, error, arg) =>
-        !error ? ["Card", "IndividualCard"] : null,
+      invalidatesTags: (result, error, arg) => {
+        if (error) return [];
+
+        // TODO: later have updateType for better clarity
+        const { _id, updateType } = arg;
+        const tags = ["Card", { type: "CardOverview", id: _id }]; // Only invalidate the general Card list, not individual card views
+
+        // Auto-detect update type based on parameters if not explicitly provided
+        let detectedUpdateType = updateType;
+        if (!detectedUpdateType) {
+          // Check for quiz-related parameters
+          if (arg.quizId || arg.deleteQuiz || arg.quizzes || arg.quizQuestion || arg.quizAnswer) {
+            detectedUpdateType = "quiz";
+          }
+          // Check for flashcard-related parameters
+          else if (arg.flashcardId || arg.deleteFlashcard || arg.review || arg.question || arg.answer) {
+            detectedUpdateType = "flashcards";
+          }
+          else {
+            detectedUpdateType = "overview";
+          }
+        }
+
+        // Invalidate specific view tags based on what was updated
+        if (detectedUpdateType === "flashcards") {
+          // Only invalidate flashcard-related views
+          tags.push({ type: "CardFlashcards", id: _id });
+        } else if (detectedUpdateType === "quiz") {
+          // Only invalidate quiz view
+          tags.push({ type: "CardQuiz", id: _id });
+        } else if (detectedUpdateType === "overview") {
+          tags.push({ type: "CardFlashcards", id: _id });
+          tags.push({ type: "CardQuiz", id: _id });
+        }
+
+        return tags;
+      },
     }),
 
     postRegisterUser: builder.mutation({
@@ -430,9 +476,9 @@ export const apiSlice = createApi({
       providesTags: (result) =>
         result?.cards
           ? [
-              ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
-              { type: "Card", id: "LIST" },
-            ]
+            ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
+            { type: "Card", id: "LIST" },
+          ]
           : [{ type: "Card", id: "LIST" }],
     }),
 

@@ -350,6 +350,10 @@ export async function getCardById(id, view = "overview") {
       break;
     case "edit_quizzes":
       finalProjection.quizzes = 1;
+      finalProjection.reviewLength = { $size: "$review" };
+      break;
+    case "review_text":
+      finalProjection = {};
       finalProjection.review = {
         $map: {
           input: "$review",
@@ -375,11 +379,11 @@ export async function getCardById(id, view = "overview") {
     card.logs = [];
   }
 
-  // optimizing the payload upfront
-  if (view === "edit_quizzes") {
+  // Post-processing for specific views
+  if (view === "review_text") {
     card.review = card.review.map((item) => {
       return {
-        ...item,
+        _id: item._id,
         question: getTextFromHTML(item.question),
       };
     });

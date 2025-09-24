@@ -6,7 +6,10 @@ import QuizList from "./QuizList";
 import EditQuizModal from "./EditQuizModal";
 import ReorderModal from "./ReorderModal";
 import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmationModal";
-import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
+import {
+  usePatchUpdateCardMutation,
+  useGetIndividualCardQuery,
+} from "../../../../api/apiSlice";
 import { getTextFromHtml } from "../../../../utils/dom";
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
 
@@ -34,6 +37,12 @@ const QuizManagementView = ({
   );
 
   const [updateCard] = usePatchUpdateCardMutation();
+
+  // Fetch review text data for flashcard dropdown options
+  const { data: reviewTextData } = useGetIndividualCardQuery({
+    id: cardId,
+    view: "review_text",
+  });
 
   const filteredQuizzes = useMemo(() => {
     if (!selectedFlashcardId) {
@@ -72,15 +81,15 @@ const QuizManagementView = ({
 
   const flashcardDropdownOptions = useMemo(
     () =>
-      review?.map((flashcard, index) => {
-        const plainText = flashcard.question;
+      reviewTextData?.review?.map((flashcard, index) => {
+        const plainText = flashcard.question; // Already processed with getTextFromHTML on backend
         return {
           value: flashcard._id,
           label: `Flashcard ${index + 1}`,
           description: plainText,
         };
-      }),
-    [review]
+      }) || [],
+    [reviewTextData?.review]
   );
 
   const handleFlashcardSelect = (value) => {
@@ -185,10 +194,10 @@ const QuizManagementView = ({
           quiz={selectedQuiz}
           cardId={cardId}
           flashcardId={selectedQuiz.flashcardId}
-          flashcards={review}
+          flashcards={reviewTextData?.review || []}
         />
       )}
-      
+
       <ReorderModal
         isOpen={isReorderModalOpen}
         onClose={() => setIsReorderModalOpen(false)}
@@ -196,7 +205,7 @@ const QuizManagementView = ({
         contentType="quizzes"
         items={quizzes || []}
       />
-      
+
       {isDeleteModalOpen && selectedQuiz && (
         <DeleteConfirmationModal
           isOpen={isDeleteModalOpen}

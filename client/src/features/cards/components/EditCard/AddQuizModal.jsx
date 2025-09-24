@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import Modal from "../../../../components/ui/Modal";
-import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
+import { useGetIndividualCardQuery, usePatchUpdateCardMutation } from "../../../../api/apiSlice";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import {
   ArrowPathIcon,
@@ -26,7 +26,7 @@ import { selectCurrentUser } from "../../../authentication/state/authSlice";
 
 let tempIdCounter = 0;
 
-const AddQuizModal = ({ cardId, flashcards }) => {
+const AddQuizModal = ({ cardId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [quizQuestion, setQuizQuestion] = useState("");
   const [quizAnswer, setQuizAnswer] = useState("");
@@ -35,6 +35,10 @@ const AddQuizModal = ({ cardId, flashcards }) => {
   const [minimumOptions, setMinimumOptions] = useState(2);
   const user = useSelector(selectCurrentUser);
 
+  const { data: reviewTextData } = useGetIndividualCardQuery({
+    id: cardId,
+    view: "review_text",
+  });
   const [updateCard, { error, isLoading }] = usePatchUpdateCardMutation();
   const questionEditorRef = useRef(null);
   const answerEditorRef = useRef(null);
@@ -42,7 +46,7 @@ const AddQuizModal = ({ cardId, flashcards }) => {
 
   const flashcardOptions = useMemo(
     () =>
-      flashcards?.map((flashcard, index) => {
+      reviewTextData?.review?.map((flashcard, index) => {
         const plainText = flashcard.question;
         return {
           value: flashcard._id,
@@ -50,7 +54,7 @@ const AddQuizModal = ({ cardId, flashcards }) => {
           description: plainText,
         };
       }),
-    [flashcards]
+    [reviewTextData?.review]
   );
 
   useEffect(() => {

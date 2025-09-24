@@ -55,8 +55,8 @@ const EditCardView = () => {
         flashcardId={_id}
         view={view}
         setSearchParams={setSearchParams}
-        card={card}
       />
+     {/* TODO: fix this later to match the exact new flashcards count */}
       <ViewSwitcher
         view={view}
         setSearchParams={setSearchParams}

@@ -2,7 +2,7 @@ import React from "react";
 import { NewFlashcardModal } from "./NewFlashCardModal";
 import AddQuizModal from "./AddQuizModal";
 
-const EditCardHeader = ({ flashcardId, view, card }) => (
+const EditCardHeader = ({ flashcardId, view }) => (
   <div className="flex gap-2 flex-wrap justify-between items-center mb-4">
     <div>
       <h2 className="text-3xl font-bold text-gray-800 dark:text-white">
@@ -13,7 +13,7 @@ const EditCardHeader = ({ flashcardId, view, card }) => (
       {view === "flashcards" ? (
         <NewFlashcardModal flashcardId={flashcardId} />
       ) : (
-        <AddQuizModal cardId={flashcardId} flashcards={card.review} />
+        <AddQuizModal cardId={flashcardId}  />
       )}
     </div>
   </div>
