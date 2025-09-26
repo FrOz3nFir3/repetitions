@@ -6,6 +6,13 @@ import {
   getAuthorOfCard,
   getQuizById,
   findExistingCard,
+  processUpdateRequest,
+  acceptReviewItem,
+  rejectReviewItem,
+  getCardReviewers,
+  addCardReviewers,
+  removeCardReviewer,
+  getReviewQueueItems,
 } from "../../models/cards/cards.model.js";
 import { getTextFromHTML, sanitizeHTML } from "../../utils/dom.js";
 
@@ -36,6 +43,20 @@ export async function httpGetCardLogs(req, res) {
   }
 }
 
+export async function httpGetReviewQueueItems(req, res) {
+  const { id } = req.params;
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 7; // Default to 7 items as requested
+
+  try {
+    const data = await getReviewQueueItems(id, page, limit);
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch review queue items" });
+  }
+}
+
 export async function httpPatchUpdateCard(req, res) {
   const token = req.token;
 
@@ -43,19 +64,9 @@ export async function httpPatchUpdateCard(req, res) {
     return res.status(401).json({ error: "Authentication / Login required" });
   }
 
-  // have this extracted ? like is authorOptions?
-  if (req.body.deleteCard || req.body.deleteQuiz || req.body.deleteOption) {
-    const authorObjectId = await getAuthorOfCard(req.body._id);
-    if (!authorObjectId) {
-      return res.status(404).json({ error: "Card not found" });
-    }
-    if (authorObjectId.toString() !== token.id) {
-      return res.status(403).json({
-        error:
-          "You don't have access to delete. Only the author has access for deletion.",
-      });
-    }
-  }
+  // Allow all authenticated users to make any changes
+  // Users with review permission (authors/reviewers) will have changes applied directly
+  // Non-reviewers will have their changes (including deletions) go to review queue
 
   let {
     question,
@@ -182,7 +193,8 @@ export async function httpPatchUpdateCard(req, res) {
         }.`,
       });
     }
-    if (quiz && quiz.options.length < minimumOptions - 1) {
+    // causing issues in updating check later fixed for now
+    if (quiz && newOptions.length < minimumOptions - 1) {
       return res.status(400).json({
         error: `Add more options as per minimum options.`,
       });
@@ -238,20 +250,34 @@ export async function httpPatchUpdateCard(req, res) {
   }
 
   try {
-    const updatedCard = await updateCard({
-      question,
-      answer,
-      option,
-      quizQuestion,
-      quizAnswer,
-      options: newOptions,
-      description,
-      minimumOptions,
-      ...otherBody,
-      userId: token.id,
-    });
+    const updatedCard = await processUpdateRequest(
+      otherBody._id,
+      {
+        question,
+        answer,
+        option,
+        quizQuestion,
+        quizAnswer,
+        options: newOptions,
+        description,
+        minimumOptions,
+        ...otherBody,
+        userId: token.id,
+      },
+      token.id,
+      req.hasReviewPermission
+    );
 
-    return res.json({ ok: true });
+    if (req.hasReviewPermission) {
+      return res.json({ ok: true, message: "Card updated successfully" });
+    } else {
+      return res.json({
+        ok: true,
+        message: "Your changes have been added to Review Queue for approval",
+        card: updatedCard,
+        reviewQueue: true,
+      });
+    }
   } catch (error) {
     console.log(error);
     if (error.message.includes("duplicate key error collection")) {
@@ -261,5 +287,214 @@ export async function httpPatchUpdateCard(req, res) {
       });
     }
     return res.status(400).json({ error: error.message });
+  }
+}
+
+export async function httpAcceptReviewItem(req, res) {
+  const token = req.token;
+  const { id: cardId, itemId } = req.params;
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  // Check if user has review permissions (already checked by middleware)
+  if (!req.hasReviewPermission) {
+    return res.status(403).json({
+      error: "You don't have permission to review changes for this card.",
+    });
+  }
+
+  try {
+    const updatedCard = await acceptReviewItem(cardId, itemId, token.id);
+
+    if (!updatedCard) {
+      return res.status(404).json({ error: "Card or review item not found" });
+    }
+
+    res.json({
+      ok: true,
+      message: "Review item accepted and change applied successfully",
+    });
+  } catch (error) {
+    console.log("Error accepting review item:", error);
+
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message.includes("expired")) {
+      return res.status(410).json({ error: error.message });
+    }
+    if (error.message.includes("Invalid")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Failed to accept review item" });
+  }
+}
+
+export async function httpRejectReviewItem(req, res) {
+  const token = req.token;
+  const { id: cardId, itemId } = req.params;
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  // Check if user has review permissions (already checked by middleware)
+  if (!req.hasReviewPermission) {
+    return res.status(403).json({
+      error: "You don't have permission to review changes for this card.",
+    });
+  }
+
+  try {
+    const updatedCard = await rejectReviewItem(cardId, itemId, token.id);
+
+    if (!updatedCard) {
+      return res.status(404).json({ error: "Card or review item not found" });
+    }
+
+    res.json({
+      ok: true,
+      message: "Review item rejected successfully",
+    });
+  } catch (error) {
+    console.log("Error rejecting review item:", error);
+
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message.includes("Invalid")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Failed to reject review item" });
+  }
+}
+export async function httpGetCardReviewers(req, res) {
+  const token = req.token;
+  const { id: cardId } = req.params;
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  // Check if user has review permissions (already checked by middleware)
+  if (!req.hasReviewPermission) {
+    return res.status(403).json({
+      error: "You don't have permission to view reviewers for this card.",
+    });
+  }
+
+  try {
+    const reviewers = await getCardReviewers(cardId);
+    res.json({ reviewers });
+  } catch (error) {
+    console.log("Error getting card reviewers:", error);
+
+    if (error.message.includes("Invalid card ID")) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error.message.includes("Card not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Failed to get card reviewers" });
+  }
+}
+export async function httpAddCardReviewers(req, res) {
+  const token = req.token;
+  const { id: cardId } = req.params;
+  const { userIds } = req.body;
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  // Check if user has review permissions (already checked by middleware)
+  if (!req.hasReviewPermission) {
+    return res.status(403).json({
+      error: "You don't have permission to manage reviewers for this card.",
+    });
+  }
+
+  // Validate input
+  if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({
+      error: "userIds must be a non-empty array of user IDs",
+    });
+  }
+
+  try {
+    await addCardReviewers(cardId, userIds, token.id);
+    res.json({
+      ok: true,
+      message: "Reviewers added successfully",
+    });
+  } catch (error) {
+    console.log("Error adding card reviewers:", error);
+
+    if (
+      error.message.includes("Invalid card ID") ||
+      error.message.includes("invalid user IDs")
+    ) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (
+      error.message.includes("Card not found") ||
+      error.message.includes("users not found")
+    ) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (error.message.includes("already reviewers")) {
+      return res.status(409).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Failed to add reviewers" });
+  }
+}
+export async function httpRemoveCardReviewer(req, res) {
+  const token = req.token;
+  const { id: cardId, userId } = req.params;
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  // Check if user has review permissions (already checked by middleware)
+  if (!req.hasReviewPermission) {
+    return res.status(403).json({
+      error: "You don't have permission to manage reviewers for this card.",
+    });
+  }
+
+  try {
+    const updatedCard = await removeCardReviewer(cardId, userId, token.id);
+    res.json({
+      ok: true,
+      message: "Reviewer removed successfully",
+    });
+  } catch (error) {
+    console.log("Error removing card reviewer:", error);
+
+    if (
+      error.message.includes("Invalid card ID") ||
+      error.message.includes("Invalid") ||
+      error.message.includes("user ID")
+    ) {
+      return res.status(400).json({ error: error.message });
+    }
+    if (error.message.includes("Card not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+    if (
+      error.message.includes("Cannot remove") ||
+      error.message.includes("not a reviewer")
+    ) {
+      return res.status(409).json({ error: error.message });
+    }
+
+    return res.status(500).json({ error: "Failed to remove reviewer" });
   }
 }

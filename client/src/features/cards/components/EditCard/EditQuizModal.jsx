@@ -24,6 +24,7 @@ import { getTextFromHtml } from "../../../../utils/dom";
 import QuizTips from "./QuizTips";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
+import toast from "react-hot-toast";
 
 let tempIdCounter = 0;
 
@@ -149,6 +150,7 @@ const EditQuizModal = ({
 
     updateCard(payload).then((response) => {
       if (response.data) {
+        toast.success(response.data.message);
         const optionToRemove = options.find(
           (opt) => opt._id === selectedOptionId
         );
@@ -211,6 +213,7 @@ const EditQuizModal = ({
 
     updateCard(payload).then((response) => {
       if (response.data) {
+        toast.success(response.data.message);
         onClose();
       }
     });

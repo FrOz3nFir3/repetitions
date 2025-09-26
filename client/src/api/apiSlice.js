@@ -88,12 +88,14 @@ export const apiSlice = createApi({
     "CardOverview", // For view=overview (default view)
     "CardFlashcards", // For view=edit_flashcards, view=review and view=review_text
     "CardQuiz", // For view=edit_quizzes and view=quiz
+    "CardReviewQueue", // For review queue data
     "Report",
     "User",
     "CardReviewProgress",
     "FocusReviewData",
     "FocusQuizData", // Separate tag for focus quiz sessions
     "RegularReviewData", // Separate tag for regular review sessions to avoid unnecessary focus review refetches
+    "Reviewers", // For reviewer management
   ],
   // The "endpoints" represent operations and requests for this server
   endpoints: (builder) => ({
@@ -154,13 +156,26 @@ export const apiSlice = createApi({
       query: ({ id, view = "overview" }) => `/card/${id}?view=${view}`,
       providesTags: (result, error, { id, view }) => {
         // Only provide view-specific tags, no generic IndividualCard tag
-        if (view === "edit_flashcards" || view === "review" || view === "review_text") {
-          return [{ type: "CardFlashcards", id }];
+        if (
+          view === "edit_flashcards" ||
+          view === "review" ||
+          view === "review_text"
+        ) {
+          return [
+            { type: "CardFlashcards", id },
+            { type: "CardReviewQueue", id },
+          ];
         } else if (view === "edit_quizzes" || view === "quiz") {
-          return [{ type: "CardQuiz", id }];
+          return [
+            { type: "CardQuiz", id },
+            { type: "CardReviewQueue", id },
+          ];
         } else {
           // Default case for overview and any other views
-          return [{ type: "CardOverview", id }];
+          return [
+            { type: "CardOverview", id },
+            { type: "CardReviewQueue", id },
+          ];
         }
       },
     }),
@@ -191,14 +206,25 @@ export const apiSlice = createApi({
         let detectedUpdateType = updateType;
         if (!detectedUpdateType) {
           // Check for quiz-related parameters
-          if (arg.quizId || arg.deleteQuiz || arg.quizzes || arg.quizQuestion || arg.quizAnswer) {
+          if (
+            arg.quizId ||
+            arg.deleteQuiz ||
+            arg.quizzes ||
+            arg.quizQuestion ||
+            arg.quizAnswer
+          ) {
             detectedUpdateType = "quiz";
           }
           // Check for flashcard-related parameters
-          else if (arg.flashcardId || arg.deleteFlashcard || arg.review || arg.question || arg.answer) {
+          else if (
+            arg.flashcardId ||
+            arg.deleteFlashcard ||
+            arg.review ||
+            arg.question ||
+            arg.answer
+          ) {
             detectedUpdateType = "flashcards";
-          }
-          else {
+          } else {
             detectedUpdateType = "overview";
           }
         }
@@ -214,6 +240,10 @@ export const apiSlice = createApi({
           tags.push({ type: "CardFlashcards", id: _id });
           tags.push({ type: "CardQuiz", id: _id });
         }
+
+        // Always invalidate review queue data when card is updated
+        // This ensures review queue items are refreshed after any card changes
+        tags.push({ type: "CardReviewQueue", id: _id });
 
         return tags;
       },
@@ -349,6 +379,37 @@ export const apiSlice = createApi({
       },
     }),
 
+    getReviewQueueItems: builder.query({
+      query: ({ cardId, page }) => {
+        const params = new URLSearchParams({ page: page.toString() });
+        return `/card/${cardId}/review-queue?${params.toString()}`;
+      },
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { cardId } = queryArgs;
+        return `reviewQueue-${cardId}`;
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        // If it's page 1, replace the cache (new data or reset)
+        if (arg.page === 1) {
+          return {
+            items: newItems.items,
+            hasMore: newItems.hasMore,
+          };
+        }
+        // Otherwise, append for infinite scroll
+        return {
+          items: [...currentCache.items, ...newItems.items],
+          hasMore: newItems.hasMore,
+        };
+      },
+      providesTags: (result, error, { cardId }) => [
+        { type: "CardReviewQueue", id: cardId },
+      ],
+    }),
+
     patchUpdateUserProfile: builder.mutation({
       query: (user) => ({
         url: "/user",
@@ -476,9 +537,9 @@ export const apiSlice = createApi({
       providesTags: (result) =>
         result?.cards
           ? [
-            ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
-            { type: "Card", id: "LIST" },
-          ]
+              ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
+              { type: "Card", id: "LIST" },
+            ]
           : [{ type: "Card", id: "LIST" }],
     }),
 
@@ -523,6 +584,111 @@ export const apiSlice = createApi({
         return [];
       },
     }),
+
+    // Review Queue Management Endpoints
+    acceptReviewItem: builder.mutation({
+      query: ({ cardId, itemId }) => ({
+        url: `/card/${cardId}/review-queue/${itemId}/accept`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { cardId }) => {
+        if (!error) {
+          return [
+            { type: "CardReviewQueue", id: cardId },
+            { type: "CardOverview", id: cardId },
+            { type: "CardFlashcards", id: cardId },
+            { type: "CardQuiz", id: cardId },
+            "Card",
+          ];
+        }
+        return [];
+      },
+    }),
+
+    rejectReviewItem: builder.mutation({
+      query: ({ cardId, itemId }) => ({
+        url: `/card/${cardId}/review-queue/${itemId}/reject`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { cardId }) => {
+        if (!error) {
+          return [{ type: "CardReviewQueue", id: cardId }];
+        }
+        return [];
+      },
+    }),
+
+    deleteReviewItem: builder.mutation({
+      query: ({ cardId, itemId }) => ({
+        url: `/card/${cardId}/review-queue/${itemId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { cardId }) => {
+        if (!error) {
+          return [{ type: "CardReviewQueue", id: cardId }];
+        }
+        return [];
+      },
+    }),
+
+    // Reviewer Management Endpoints
+    getReviewers: builder.query({
+      query: (cardId) => `/card/${cardId}/reviewers`,
+      providesTags: (result, error, cardId) => [
+        { type: "Reviewers", id: cardId },
+      ],
+    }),
+
+    addReviewers: builder.mutation({
+      query: ({ cardId, userIds }) => ({
+        url: `/card/${cardId}/reviewers`,
+        method: "POST",
+        body: { userIds },
+      }),
+      invalidatesTags: (result, error, { cardId }) => {
+        if (!error) {
+          return [{ type: "Reviewers", id: cardId }];
+        }
+        return [];
+      },
+    }),
+
+    removeReviewer: builder.mutation({
+      query: ({ cardId, userId }) => ({
+        url: `/card/${cardId}/reviewers/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { cardId }) => {
+        if (!error) {
+          return [{ type: "Reviewers", id: cardId }];
+        }
+        return [];
+      },
+    }),
+
+    // User Search Endpoint
+    searchUsers: builder.query({
+      query: ({ search, limit = 10, id }) => {
+        const params = new URLSearchParams({
+          limit: limit.toString(),
+          id: id?.toString(),
+        });
+        if (search && search.trim()) {
+          params.append("search", search.trim());
+        }
+        return `/users/search?${params.toString()}`;
+      },
+      providesTags: ["User"],
+      // Keep cache for 5 minutes for user search results
+      keepUnusedDataFor: 300,
+      // Serialize query args to enable proper caching
+      serializeQueryArgs: ({ queryArgs }) => {
+        return {
+          search: queryArgs.search?.trim() || "",
+          limit: queryArgs.limit || 10,
+        };
+      },
+    }),
   }),
 });
 
@@ -548,9 +714,20 @@ export const {
   useGetCardReviewProgressQuery,
   useGetDetailedReportQuery,
   useGetCardLogsQuery,
+  useGetReviewQueueItemsQuery,
   useGetPublicUserByUsernameQuery,
   useGetCardsByAuthorQuery,
   useGetFocusReviewDataQuery,
   useGetFocusQuizDataQuery,
   useUpdateUserStrugglingQuizMutation,
+  // Review Queue Management Hooks
+  useAcceptReviewItemMutation,
+  useRejectReviewItemMutation,
+  useDeleteReviewItemMutation,
+  // Reviewer Management Hooks
+  useGetReviewersQuery,
+  useAddReviewersMutation,
+  useRemoveReviewerMutation,
+  // User Search Hook
+  useSearchUsersQuery,
 } = apiSlice;

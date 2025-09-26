@@ -6,9 +6,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  useGetIndividualCardQuery,
-} from "../../../api/apiSlice";
+import { useGetIndividualCardQuery } from "../../../api/apiSlice";
 import { initialCard } from "../state/cardSlice";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
 import CardInfo from "../components/CardInfo";
@@ -33,6 +31,7 @@ function IndividualCardPage() {
       const view = searchParams.get("view");
       if (view === "flashcards") return "edit_flashcards";
       if (view === "quizzes") return "edit_quizzes";
+      if (view === "review-queue") return "review-queue"; // Use review-queue view for optimized data
 
       // default when in edit
       return "edit_flashcards";
@@ -54,7 +53,8 @@ function IndividualCardPage() {
     // sync up edit to flashcards
     const { pathname } = location;
     const view = searchParams.get("view");
-    const inValidView = view !== "flashcards" && view !== "quizzes";
+    const validViews = ["flashcards", "quizzes", "review-queue"];
+    const inValidView = !validViews.includes(view);
     if (pathname.includes("/edit") && inValidView) {
       setSearchParams((prev) => {
         prev.set("view", "flashcards");
@@ -62,8 +62,6 @@ function IndividualCardPage() {
       });
     }
   }, [cardData, dispatch, location, searchParams, setSearchParams]);
-
-
 
   // Show loading while fetching data
   if (isFetching) {
@@ -89,10 +87,7 @@ function IndividualCardPage() {
           <div className="lg:col-span-1 space-y-6">
             <CardInfo card={cardData} />
             {/* TODO: position this better or have better visual  */}
-            <CardLogs
-              logs={cardData.logs || []}
-              cardId={cardData._id}
-            />
+            <CardLogs logs={cardData.logs || []} cardId={cardData._id} />
           </div>
 
           <div className="lg:col-span-2">

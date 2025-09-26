@@ -20,6 +20,7 @@ import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import Flashcard from "../Flashcard/Review/Flashcard";
 import FlashcardTips from "./FlashcardTips";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
+import toast from "react-hot-toast";
 
 export function NewFlashcardModal({ flashcardId }) {
   const user = useSelector(selectCurrentUser);
@@ -41,6 +42,7 @@ export function NewFlashcardModal({ flashcardId }) {
 
     updateCard(updateDetails).then((response) => {
       if (response.data) {
+        toast.success(response.data.message);
         setIsOpen(false);
         setQuestion("");
         setAnswer("");

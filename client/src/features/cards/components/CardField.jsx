@@ -6,7 +6,7 @@ import {
   XMarkIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
-
+import { toast } from "react-hot-toast";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
 import { useSelector } from "react-redux";
 const RichTextEditor = React.lazy(() =>
@@ -51,6 +51,7 @@ export function CardField({
     updateCard(updateDetails).then((response) => {
       if (response.data) {
         setIsEditing(false);
+        toast.success(response.data.message);
       }
     });
   };

@@ -14,6 +14,7 @@ const ActionCard = ({
   layout = "vertical",
   stats,
   color,
+  className,
 }) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -32,7 +33,7 @@ const ActionCard = ({
 
   if (layout === "horizontal") {
     return (
-      <Link to={to} className="group block">
+      <Link to={to} className={`group block ${className || ""}`}>
         <div
           className={`
           relative overflow-hidden rounded-2xl p-6 h-full
@@ -148,7 +149,7 @@ const ActionCard = ({
 
   // Vertical layout - Big, Bold, Beautiful
   return (
-    <Link to={to} className="group block">
+    <Link to={to} className={`group block ${className || ""}`}>
       <div
         className={`
         relative overflow-hidden rounded-3xl p-8 text-center h-full min-h-[280px]

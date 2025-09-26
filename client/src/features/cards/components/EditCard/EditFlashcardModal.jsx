@@ -18,6 +18,7 @@ import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import Flashcard from "../Flashcard/Review/Flashcard";
 import FlashcardTips from "./FlashcardTips";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
+import toast from "react-hot-toast";
 
 const EditFlashcardModal = ({ isOpen, onClose, flashcard, cardId }) => {
   const user = useSelector(selectCurrentUser);
@@ -77,6 +78,7 @@ const EditFlashcardModal = ({ isOpen, onClose, flashcard, cardId }) => {
 
     updateCard(payload).then((response) => {
       if (response.data) {
+        toast.success(response.data.message);
         onClose();
       }
     });

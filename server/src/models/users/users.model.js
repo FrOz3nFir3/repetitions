@@ -1154,3 +1154,57 @@ export async function updateUserStrugglingQuiz(userId, cardId, quizId, action) {
 
   throw new Error(`Invalid action: ${action}. Must be 'add' or 'remove'`);
 }
+/**
+ * Search users by username or email with pagination
+ */
+export async function searchUsers(searchTerm, page = 1, limit = 10) {
+  if (!searchTerm || searchTerm.trim().length === 0) {
+    return { users: [], total: 0, hasMore: false, page, limit };
+  }
+
+  const skip = (page - 1) * limit;
+  const trimmedSearch = searchTerm.trim();
+
+  // Create regex for case-insensitive search
+  const searchRegex = new RegExp(escapeRegex(trimmedSearch), "i");
+
+  const pipeline = [
+    {
+      $match: {
+        $or: [
+          { username: searchRegex },
+          { email: searchRegex },
+          { name: searchRegex },
+        ],
+      },
+    },
+    {
+      $facet: {
+        users: [
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              name: 1,
+              username: 1,
+            },
+          },
+        ],
+        totalCount: [{ $count: "total" }],
+      },
+    },
+  ];
+
+  const result = await Users.aggregate(pipeline);
+  const users = result[0]?.users || [];
+  const total = result[0]?.totalCount[0]?.total || 0;
+  const hasMore = skip + limit < total;
+
+  return {
+    users,
+    total,
+    hasMore,
+    page,
+    limit,
+  };
+}

@@ -8,6 +8,7 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
+import toast from "react-hot-toast";
 
 const AddNewOption = ({ cardId, flashcardId, quiz }) => {
   const [updateCard, { isLoading, error }] = usePatchUpdateCardMutation();
@@ -27,7 +28,7 @@ const AddNewOption = ({ cardId, flashcardId, quiz }) => {
     };
     updateCard(updateDetails).then((res) => {
       if (res.data) {
-        
+        toast.success(res.data.message);
         handleCancel();
       }
     });

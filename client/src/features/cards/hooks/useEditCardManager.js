@@ -5,7 +5,9 @@ export const useEditCardManager = (card) => {
   const { review = [], quizzes = [] } = card || {};
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const view = searchParams.get("view") || "flashcards";
+  const rawView = searchParams.get("view") || "flashcards";
+  const validViews = ["flashcards", "quizzes", "review-queue"];
+  const view = validViews.includes(rawView) ? rawView : "flashcards";
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
@@ -80,6 +82,9 @@ export const useEditCardManager = (card) => {
   };
 
   const handleIndexChange = (newIndex, direction = "") => {
+    // Review queue doesn't use index navigation
+    if (view === "review-queue") return;
+
     const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
     const paramName = view === "flashcards" ? "cardNo" : "quizNo";
 
@@ -96,6 +101,9 @@ export const useEditCardManager = (card) => {
   useEffect(() => {
     // Guard clause: Don't run the effect until the data is loaded.
     if (!card) return;
+
+    // Review queue doesn't use index-based navigation
+    if (view === "review-queue") return;
 
     const isFlashcardView = view === "flashcards";
     const items = isFlashcardView ? filteredFlashcards : filteredQuizzes;
@@ -131,12 +139,14 @@ export const useEditCardManager = (card) => {
   ]);
 
   const handleNext = () => {
+    if (view === "review-queue") return;
     const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
     if (items.length === 0) return;
     handleIndexChange((currentIndex + 1) % items.length, "left");
   };
 
   const handlePrev = () => {
+    if (view === "review-queue") return;
     const items = view === "flashcards" ? filteredFlashcards : filteredQuizzes;
     if (items.length === 0) return;
     handleIndexChange(
@@ -160,6 +170,8 @@ export const useEditCardManager = (card) => {
 
   const handleJump = (e) => {
     e.preventDefault();
+    if (view === "review-queue") return;
+
     const formData = new FormData(e.target);
     const jumpValue = formData.get("jumpToIndex");
     const jumpIndex = parseInt(jumpValue, 10) - 1;
@@ -174,7 +186,9 @@ export const useEditCardManager = (card) => {
   const currentItem =
     view === "flashcards"
       ? filteredFlashcards[currentIndex]
-      : filteredQuizzes[currentIndex];
+      : view === "quizzes"
+        ? filteredQuizzes[currentIndex]
+        : null;
 
   const originalFlashcardIndex = useMemo(() => {
     if (view !== "flashcards" || !currentItem || !review) return null;

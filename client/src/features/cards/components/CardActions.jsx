@@ -4,6 +4,7 @@ import {
   PencilSquareIcon,
   WrenchScrewdriverIcon,
   AcademicCapIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import {
   BookOpenIcon as BookOpenSolid,
@@ -11,6 +12,7 @@ import {
   PencilSquareIcon as PencilSquareSolid,
   WrenchScrewdriverIcon as WrenchScrewdriverSolid,
   LightBulbIcon,
+  ClipboardDocumentCheckIcon as ClipboardDocumentCheckSolid,
 } from "@heroicons/react/24/solid";
 import ActionCard from "./ActionCard";
 import { useSelector } from "react-redux";
@@ -29,6 +31,8 @@ const CardActions = ({
 
   const reviewLength = card?.review?.length || card?.reviewLength || 0;
   const quizzesLength = card?.quizzes?.length || card?.quizzesLength || 0;
+  const reviewQueueLength =
+    card?.reviewQueue?.length || card?.reviewQueueLength || 0;
 
   // Create relative paths that navigate to sibling routes
   const getActionPath = (action) => (isRelative ? action : `../${action}`);
@@ -90,6 +94,27 @@ const CardActions = ({
               value: quizzesLength,
               label: "Quizzes",
               icon: AcademicCapSolid,
+            },
+          ]}
+        />
+
+        <ActionCard
+          to={getActionPath("edit?view=review-queue")}
+          icon={ClipboardDocumentCheckIcon}
+          solidIcon={ClipboardDocumentCheckSolid}
+          title="Review Queue"
+          subtitle="📝 Collaboration Mode"
+          description="Review and approve changes from other users."
+          bgGradient="bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700"
+          hoverGradient="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-900/30"
+          color="gray"
+          layout={layout}
+          className={layout === "vertical" ? "sm:col-span-2" : "lg:col-span-2"}
+          stats={[
+            {
+              value: reviewQueueLength,
+              label: "Pending",
+              icon: ClipboardDocumentCheckSolid,
             },
           ]}
         />

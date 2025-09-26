@@ -12,6 +12,7 @@ import {
 } from "../../../../api/apiSlice";
 import { getTextFromHtml } from "../../../../utils/dom";
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
 
 const QuizManagementView = ({
   quizzes,
@@ -69,13 +70,17 @@ const QuizManagementView = ({
 
   const confirmDelete = async () => {
     if (selectedQuiz) {
-      await updateCard({
+      updateCard({
         _id: cardId,
         quizId: selectedQuiz._id,
         deleteQuiz: true,
-      }).unwrap();
-      setIsDeleteModalOpen(false);
-      setSelectedQuiz(null);
+      }).then((response) => {
+        if (response.data) {
+          toast.success(response.data.message);
+        }
+        setIsDeleteModalOpen(false);
+        setSelectedQuiz(null);
+      });
     }
   };
 

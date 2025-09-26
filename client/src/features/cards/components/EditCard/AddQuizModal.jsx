@@ -1,6 +1,9 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import Modal from "../../../../components/ui/Modal";
-import { useGetIndividualCardQuery, usePatchUpdateCardMutation } from "../../../../api/apiSlice";
+import {
+  useGetIndividualCardQuery,
+  usePatchUpdateCardMutation,
+} from "../../../../api/apiSlice";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import {
   ArrowPathIcon,
@@ -23,6 +26,7 @@ import { getTextFromHtml } from "../../../../utils/dom";
 import QuizTips from "./QuizTips";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
+import toast from "react-hot-toast";
 
 let tempIdCounter = 0;
 
@@ -110,6 +114,7 @@ const AddQuizModal = ({ cardId }) => {
     };
     updateCard(updateDetails).then((response) => {
       if (response.data) {
+        toast.success(response.data.message);
         setIsOpen(false);
         setQuizQuestion("");
         setQuizAnswer("");

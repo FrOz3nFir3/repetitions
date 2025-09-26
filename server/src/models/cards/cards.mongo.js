@@ -18,7 +18,7 @@ const logEntrySchema = new Schema({
   eventType: {
     type: String,
     required: true,
-    enum: ["created", "updated", "deleted"],
+    enum: ["created", "updated", "deleted", "reverted"],
   },
   timestamp: {
     type: Date,
@@ -45,6 +45,27 @@ const quizSchema = new Schema({
   options: { type: [optionSchema], default: [] },
   minimumOptions: { type: Number, default: 2 },
   flashcardId: { type: Schema.Types.ObjectId, required: false },
+});
+
+const reviewQueueItemSchema = new Schema({
+  changeType: {
+    type: String,
+    enum: ["edit", "addition", "deletion"],
+    required: true,
+  },
+  field: { type: String, required: true },
+  oldValue: { type: Schema.Types.Mixed },
+  newValue: { type: Schema.Types.Mixed },
+  oldDisplayText: { type: Schema.Types.Mixed },
+  newDisplayText: { type: Schema.Types.Mixed },
+  targetId: { type: String }, // flashcardId, quizId, optionId
+  submittedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  submittedAt: { type: Date, default: Date.now },
+  expiresAt: {
+    type: Date,
+    default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  },
+  metadata: { type: Schema.Types.Mixed }, // Additional context data
 });
 
 const reviewSchema = new Schema({
@@ -86,6 +107,14 @@ const cardsSchema = new Schema(
     lastUpdatedBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
+    },
+    reviewers: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: function () { return [this.author]; }
+    },
+    reviewQueue: {
+      type: [reviewQueueItemSchema],
+      default: []
     },
     logs: [logEntrySchema],
   },

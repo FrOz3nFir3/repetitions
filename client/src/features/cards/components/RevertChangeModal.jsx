@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { selectCurrentUser } from "../../authentication/state/authSlice";
+import toast from "react-hot-toast";
 
 const RevertChangeModal = ({ isOpen, onClose, change }) => {
   const errorRef = React.useRef(null);
@@ -77,6 +78,7 @@ const RevertChangeModal = ({ isOpen, onClose, change }) => {
     updateCard(updateDetails).then((response) => {
       if (response.data) {
         onClose();
+        toast.success(response.data.message);
       }
     });
   };

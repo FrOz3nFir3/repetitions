@@ -5,6 +5,7 @@ import {
   Outlet,
   ScrollRestoration,
 } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 import Header from "../components/layout/Header/Header";
 
@@ -42,6 +43,7 @@ const RootLayout = () => (
   <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
     <Header />
     <Outlet />
+    <Toaster />
     <ScrollRestoration
       getKey={(location, matches) => {
         // probably look into this later

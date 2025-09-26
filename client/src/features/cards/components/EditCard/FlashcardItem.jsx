@@ -21,6 +21,7 @@ import FlashcardTips from "./FlashcardTips";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
 import { selectCurrentCard } from "../../state/cardSlice";
+import toast from "react-hot-toast";
 
 const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
   const [updateCard, { error, isSuccess }] = usePatchUpdateCardMutation();
@@ -37,8 +38,12 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
       cardId: flashcard._id,
       deleteCard: true,
     };
-    updateCard(updateDetails);
-    setIsDeleteModalOpen(false);
+    updateCard(updateDetails).then((response) => {
+      if (response.data) {
+        toast.success(response.data.message);
+        setIsDeleteModalOpen(false);
+      }
+    });
   };
 
   useEffect(() => {
@@ -123,7 +128,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
               <span className="text-sm font-medium">Edit</span>
 
               <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <span className="whitespace-nowrap z-99 text-xs font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-blue-200 dark:border-blue-700">
+                <span className="whitespace-nowrap z-40 text-xs font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-blue-200 dark:border-blue-700">
                   Edit flashcard
                 </span>
               </div>
@@ -139,7 +144,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
                 <span className="text-sm font-medium">Reorder</span>
 
                 <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <span className="whitespace-nowrap z-99 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-emerald-200 dark:border-emerald-700">
+                  <span className="whitespace-nowrap z-40 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-emerald-200 dark:border-emerald-700">
                     Reorder flashcards
                   </span>
                 </div>
@@ -153,7 +158,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
             >
               <TrashIcon className="h-6 w-6 text-gray-500 dark:text-gray-400 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200" />
               <div className="absolute -bottom-6 left-0 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <span className="whitespace-nowrap z-99 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-red-200 dark:border-red-700">
+                <span className="whitespace-nowrap z-40 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 px-3 py-1 rounded-lg shadow-lg border border-red-200 dark:border-red-700">
                   Delete Card
                 </span>
               </div>

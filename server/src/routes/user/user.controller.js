@@ -21,6 +21,7 @@ import {
   getFocusQuizData,
   updateUserStrugglingQuiz,
   resetUserQuizProgress,
+  searchUsers,
 } from "../../models/users/users.model.js";
 import { getPagination } from "../../services/query.js";
 import {
@@ -608,9 +609,7 @@ export async function httpGetFocusQuizData(req, res) {
     const focusQuizData = await getFocusQuizData(userId, card_id);
 
     if (!focusQuizData) {
-      return res
-        .status(404)
-        .json({ error: "Card not found or no quiz data" });
+      return res.status(404).json({ error: "Card not found or no quiz data" });
     }
 
     return res.status(200).json(focusQuizData);
@@ -642,5 +641,37 @@ export async function httpUpdateUserStrugglingQuiz(req, res) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
+  }
+}
+export async function httpSearchUsers(req, res) {
+  const token = req.token;
+  const { search: searchTerm } = req.query;
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50); // Cap at 50 results
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+
+  // Check if user has review permissions (already checked by middleware)
+  if (!req.hasReviewPermission) {
+    return res.status(403).json({
+      error: "You don't have permission to search users for this card.",
+    });
+  }
+
+  // Validate search term
+  if (!searchTerm || searchTerm.trim().length < 2) {
+    return res.status(400).json({
+      error: "Search term must be at least 2 characters long",
+    });
+  }
+
+  try {
+    const result = await searchUsers(searchTerm, page, limit);
+    res.json(result);
+  } catch (error) {
+    console.log("Error searching users:", error);
+    return res.status(500).json({ error: "Failed to search users" });
   }
 }

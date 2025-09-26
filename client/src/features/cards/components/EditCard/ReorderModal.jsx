@@ -28,6 +28,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../../../authentication/state/authSlice";
+import toast from "react-hot-toast";
 
 const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
   const [orderedItems, setOrderedItems] = useState(items || []);
@@ -153,6 +154,7 @@ const ReorderModal = ({ isOpen, onClose, cardId, contentType, items }) => {
 
     updateCard(updateData).then((res) => {
       if (res.data) {
+        toast.success(res.data.message);
         onClose();
       }
     });

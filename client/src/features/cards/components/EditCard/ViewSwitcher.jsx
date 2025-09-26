@@ -1,11 +1,16 @@
 import React from "react";
-import { BookOpenIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
+import {
+  BookOpenIcon,
+  AcademicCapIcon,
+  ClipboardDocumentCheckIcon,
+} from "@heroicons/react/24/outline";
 
 const ViewSwitcher = ({
   view,
   setSearchParams,
   totalFlashcards,
   totalQuizzes,
+  totalReviewQueue = 0,
 }) => {
   const tabs = [
     {
@@ -19,6 +24,12 @@ const ViewSwitcher = ({
       view: "quizzes",
       icon: AcademicCapIcon,
       count: totalQuizzes,
+    },
+    {
+      name: "Review Queue",
+      view: "review-queue",
+      icon: ClipboardDocumentCheckIcon,
+      count: totalReviewQueue,
     },
   ];
 

@@ -43,6 +43,7 @@
     "react": "^19.1.0",
     "react-diff-viewer-continued": "^4.0.6",
     "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.3",
     "redux": "^5.0.1"
