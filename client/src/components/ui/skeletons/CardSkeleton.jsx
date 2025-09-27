@@ -2,7 +2,7 @@ import React from "react";
 
 const CardSkeleton = ({ showHeader = true }) => {
   return (
-    <div className="relative z-10 container mx-auto px-4 animate-pulse">
+    <div className="relative z-10 container mx-auto 2xl:max-w-7xl px-4 animate-pulse">
       {/* Header Section Skeleton */}
       {!!showHeader && (
         <>

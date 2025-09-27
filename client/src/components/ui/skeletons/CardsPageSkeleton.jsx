@@ -1,7 +1,7 @@
 const CardsPageSkeleton = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 animate-pulse">
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto 2xl:max-w-7xl px-4 py-8">
         {/* Breadcrumb Skeleton */}
         <div className="flex items-center space-x-2 mb-8">
           <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12"></div>
@@ -14,7 +14,7 @@ const CardsPageSkeleton = () => {
         </div>
 
         <div className="relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-slate-900/50 dark:to-indigo-950/30 py-16 rounded-3xl">
-          <div className="relative z-10 container mx-auto px-4">
+          <div className="relative z-10 container mx-auto 2xl:max-w-7xl px-4">
             {/* Header Section Skeleton */}
             <div className="text-center mb-12">
               {/* Category Badge Skeleton */}

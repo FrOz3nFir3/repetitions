@@ -1410,6 +1410,9 @@ export async function processUpdateRequest(
     // Users with review permission (authors or reviewers) can make direct updates
     return updateCard(updateDetails);
   }
+  if (!Types.ObjectId.isValid(cardId)) {
+    throw new Error("Invalid card ID ");
+  }
 
   // Non-author edits go to review queue
   const card = await Card.findById(cardId).lean();

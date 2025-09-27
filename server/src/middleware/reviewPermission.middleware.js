@@ -18,6 +18,10 @@ export async function checkReviewPermissions(req, res, next) {
     return res.status(400).json({ error: "Card ID is required" });
   }
 
+  if (!Types.ObjectId.isValid(cardId)) {
+    throw new Error("Invalid card ID ");
+  }
+
   try {
     // Get card with reviewers array
     const card = await Card.findById(cardId, {
