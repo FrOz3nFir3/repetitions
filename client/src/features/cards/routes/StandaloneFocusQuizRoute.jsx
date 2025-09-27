@@ -10,9 +10,7 @@ import ReviewPageSkeleton from "../../../components/ui/skeletons/ReviewPageSkele
 import QuizPageSkeleton from "../../../components/ui/skeletons/QuizPageSkeleton";
 import CardActions from "../components/CardActions";
 
-const FocusQuiz = lazy(() =>
-  import("../components/Quiz/FocusQuizView")
-);
+const FocusQuiz = lazy(() => import("../components/Quiz/FocusQuizView"));
 const NotFound = lazy(() =>
   import("../../../features/not-found/components/NotFound")
 );
@@ -78,7 +76,7 @@ const StandaloneFocusQuizRoute = () => {
   if (!user) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <Breadcrumbs card={focusQuizData} cardData={focusQuizData} />
           <RestrictedAccess description="You need to be logged in to access focus quiz sessions and track your difficult quizzes." />
         </div>
@@ -90,7 +88,7 @@ const StandaloneFocusQuizRoute = () => {
   if (isFetching) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <QuizPageSkeleton />
         </div>
       </div>
@@ -101,7 +99,7 @@ const StandaloneFocusQuizRoute = () => {
   if (error || !focusQuizData || !focusQuizData._id) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <NotFound />
         </div>
       </div>
@@ -110,7 +108,7 @@ const StandaloneFocusQuizRoute = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="container mx-auto 2xl:max-w-7xl p-4">
         <Breadcrumbs card={focusQuizData} cardData={focusQuizData} />
 
         {/* Full-screen focus quiz experience */}

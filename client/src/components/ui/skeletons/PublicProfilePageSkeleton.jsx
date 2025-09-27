@@ -4,7 +4,7 @@ import CardGridSkeleton from "./CardGridSkeleton";
 const PublicProfilePageSkeleton = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 animate-pulse">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto 2xl:max-w-7xl p-4">
         {/* User header skeleton */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">

@@ -77,7 +77,7 @@ const StandaloneFocusReviewRoute = () => {
   if (!user) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <Breadcrumbs card={focusReviewData} cardData={focusReviewData} />
           <RestrictedAccess description="You need to be logged in to access focus review sessions and track your difficult cards." />
         </div>
@@ -89,7 +89,7 @@ const StandaloneFocusReviewRoute = () => {
   if (isFetching) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <ReviewPageSkeleton />
         </div>
       </div>
@@ -100,7 +100,7 @@ const StandaloneFocusReviewRoute = () => {
   if (error || !focusReviewData || !focusReviewData._id) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <NotFound />
         </div>
       </div>
@@ -109,7 +109,7 @@ const StandaloneFocusReviewRoute = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="container mx-auto 2xl:max-w-7xl p-4">
         <Breadcrumbs card={focusReviewData} cardData={focusReviewData} />
 
         {/* Full-screen focus review experience */}

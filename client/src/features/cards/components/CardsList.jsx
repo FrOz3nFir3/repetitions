@@ -44,7 +44,7 @@ const CardList = () => {
         <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-gradient-to-br from-purple-400/5 to-pink-600/5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4">
+      <div className="relative z-10 container mx-auto 2xl:max-w-7xl p-4">
         {/* Enhanced Header Section */}
         <div className="text-center mb-12">
           {/* Category Badge */}

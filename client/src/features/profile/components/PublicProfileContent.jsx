@@ -41,7 +41,7 @@ const PublicProfileContent = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto 2xl:max-w-7xl p-4">
         <div className="text-center mb-12">
           <div className="flex justify-center mb-6">
             <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-3xl flex items-center justify-center shadow-2xl">

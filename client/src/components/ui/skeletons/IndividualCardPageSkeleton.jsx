@@ -10,7 +10,7 @@ const IndividualCardOverviewPageSkeleton = lazy(() =>
 const IndividualCardPageSkeleton = ({ isFocusedActivity, view }) => {
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 animate-pulse">
+      <div className="container mx-auto 2xl:max-w-7xl p-4 animate-pulse">
         <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
         <div
           className={`grid grid-cols-1 ${

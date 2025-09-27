@@ -45,7 +45,7 @@ const StandaloneReviewRoute = () => {
   if (isFetching) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <ReviewPageSkeleton />
         </div>
       </div>
@@ -56,7 +56,7 @@ const StandaloneReviewRoute = () => {
   if (error || !cardData || !cardData._id) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-        <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="container mx-auto 2xl:max-w-7xl p-4">
           <NotFound />
         </div>
       </div>
@@ -65,7 +65,7 @@ const StandaloneReviewRoute = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="container mx-auto 2xl:max-w-7xl p-4">
         <Breadcrumbs card={cardData} cardData={cardData} />
 
         {/* Full-screen review experience */}

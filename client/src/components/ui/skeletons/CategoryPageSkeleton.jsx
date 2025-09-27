@@ -1,7 +1,7 @@
 const CategoryPageSkeleton = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 animate-pulse">
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto 2xl:max-w-7xl  px-4 py-8">
         {/* Header Section Skeleton */}
         <div className="text-center my-16">
           <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg w-1/2 mx-auto mb-4"></div>
