@@ -4,7 +4,7 @@ import app from "./app.js";
 import { initMongoDB } from "./services/mongo.js";
 
 const PORT = process.env.PORT || 80;
-const runningInProduction = process.env.NODE_ENV == "production";
+const enableCluster = process.env.ENABLE_CLUSTER ?? false;
 
 async function startServer() {
   const localStartTime = Date.now();
@@ -47,7 +47,7 @@ function setupPrimary() {
   });
 }
 
-if (cluster.isPrimary && runningInProduction) {
+if (cluster.isPrimary && enableCluster) {
   setupPrimary();
 } else {
   startServer();
