@@ -88,20 +88,21 @@ const corsOptions = {
 app.use("/api", cors(corsOptions));
 
 app.use(attachTokenIfAuthenticated);
-app.use((req, res, next) => {
-  const url = req.url;
-  // we have individual authLimited for this routes
-  if (
-    url === "/api/user/login" ||
-    url === "/api/user/register" ||
-    url === "/api/user/google-login"
-  ) {
-    next();
-    return;
-  }
+// TODO: revert this after load testing
+// app.use((req, res, next) => {
+//   const url = req.url;
+//   // we have individual authLimited for this routes
+//   if (
+//     url === "/api/user/login" ||
+//     url === "/api/user/register" ||
+//     url === "/api/user/google-login"
+//   ) {
+//     next();
+//     return;
+//   }
 
-  globalApiLimiter(req, res, next);
-});
+//   globalApiLimiter(req, res, next);
+// });
 app.use("/api", apiRouter);
 
 // This middleware only runs if no other /api route was matched
