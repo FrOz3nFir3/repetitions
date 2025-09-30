@@ -1,10 +1,6 @@
 // Fast environment loading
 import dotenv from "dotenv";
-// Basic app configuration
-const runningInProduction = process.env.NODE_ENV == "production";
-if (!runningInProduction) {
-  dotenv.config({ path: "../.env" });
-}
+dotenv.config({ path: "../.env" });
 // Core imports - load upfront for better response times
 import express from "express";
 import path from "node:path";
@@ -19,6 +15,8 @@ import { attachTokenIfAuthenticated } from "./middleware/auth.middleware.js";
 const app = express();
 const __dirname = import.meta.dirname;
 const cookieSecret = process.env.COOKIE_SECRET;
+// Basic app configuration
+const runningInProduction = process.env.NODE_ENV == "production";
 
 // Generate deployment-specific ETag for production only
 const deploymentETag = runningInProduction

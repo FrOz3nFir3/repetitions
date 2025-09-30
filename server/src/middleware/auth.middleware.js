@@ -1,10 +1,7 @@
 import jwt from "jsonwebtoken";
 import { verifyCSRFToken } from "../routes/user/auth.controller.js";
 import dotenv from "dotenv";
-const runningInProduction = process.env.NODE_ENV == "production";
-if (!runningInProduction) {
-  dotenv.config({ path: "../.env" });
-}
+dotenv.config({ path: "../.env" });
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 export function attachTokenIfAuthenticated(req, res, next) {

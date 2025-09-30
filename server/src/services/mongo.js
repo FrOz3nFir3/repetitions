@@ -3,10 +3,7 @@ import { setServers } from "node:dns/promises";
 import dotenv from "dotenv";
 
 // Load env first for faster access
-const runningInProduction = process.env.NODE_ENV == "production";
-if (!runningInProduction) {
-  dotenv.config({ path: "../.env" });
-}
+dotenv.config({ path: "../.env" });
 // Set DNS servers for faster MongoDB Atlas resolution
 setServers(["1.1.1.1", "8.8.8.8"]);
 
