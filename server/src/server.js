@@ -1,7 +1,10 @@
+import cluster from "node:cluster";
+import os from "node:os";
 import app from "./app.js";
 import { initMongoDB } from "./services/mongo.js";
 
 const PORT = process.env.PORT || 80;
+const runningInProduction = process.env.NODE_ENV == "production";
 
 async function startServer() {
   const localStartTime = Date.now();
@@ -11,16 +14,41 @@ async function startServer() {
     await initMongoDB();
 
     // Start HTTP server
-    const server = app.listen(PORT, () => {
-      console.log(`Server listening on http://localhost:${PORT}`);
-      console.log(`Server Started in ${Date.now() - localStartTime}ms`);
+    app.listen(PORT, () => {
+      console.log(
+        `Worker ${process.pid} listening on http://localhost:${PORT}`
+      );
+      console.log(
+        `Worker ${process.pid} started in ${Date.now() - localStartTime}ms`
+      );
     });
-
-    return server;
   } catch (err) {
-    console.error(`Server startup failed:`, err.message);
-    throw err;
+    console.error(`Worker ${process.pid} startup failed:`, err.message);
+    process.exit(1); // Exit if worker fails to start
   }
 }
 
-startServer();
+function setupPrimary() {
+  const numCPUs = os.cpus().length;
+  console.log(`Primary ${process.pid} is running`);
+  console.log(`Forking for ${numCPUs} CPUs`);
+
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on("exit", (worker, code, signal) => {
+    console.log(
+      `Worker ${worker.process.pid} died with code: ${code}, and signal: ${signal}`
+    );
+    console.log("Starting a new worker");
+    cluster.fork(); // Restart a new worker when one dies
+  });
+}
+
+if (cluster.isPrimary && runningInProduction) {
+  setupPrimary();
+} else {
+  startServer();
+}
