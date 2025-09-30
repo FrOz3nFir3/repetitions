@@ -50,6 +50,13 @@ app.use((req, res, next) => {
   next();
 });
 
+// to save bandwidth if content not modified
+app.use((req, res, next) => {
+  // personal server need this caching to save transfer cost
+  res.set("Cache-Control", "no-cache, must-revalidate");
+  next();
+});
+
 // Compression for static files
 app.use((req, res, next) => {
   // commented as personal server require all caching
@@ -99,9 +106,6 @@ app.use("/api", apiRouter);
 
 // This middleware only runs if no other /api route was matched
 app.use((req, res, next) => {
-  // personal server need this caching to save transfer cost
-  res.set("Cache-Control", "no-cache, must-revalidate");
-
   if (!runningInProduction) {
     // this will only run in development mode
     res.sendFile(path.join(__dirname, "..", "public", "index.html"));
