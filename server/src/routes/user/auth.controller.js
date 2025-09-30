@@ -1,8 +1,10 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-
+const runningInProduction = process.env.NODE_ENV == "production";
+if (!runningInProduction) {
+  dotenv.config({ path: "../.env" });
+}
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
