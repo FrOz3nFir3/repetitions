@@ -18,11 +18,6 @@ const cookieSecret = process.env.COOKIE_SECRET;
 // Basic app configuration
 const runningInProduction = process.env.NODE_ENV == "production";
 
-// Generate deployment-specific ETag for production only
-const deploymentETag = runningInProduction
-  ? `"${process.env.VERCEL_GIT_COMMIT_SHA || Date.now()}"`
-  : null;
-
 // helmet js for fixing common vulnerabilities
 app.use(
   helmet({
@@ -57,10 +52,10 @@ app.use((req, res, next) => {
 
 // Compression for static files
 app.use((req, res, next) => {
-  // Skip compression for API routes
-  if (req.path.startsWith("/api")) {
-    return next();
-  }
+  // commented as personal server require all caching
+  // if (req.path.startsWith("/api")) {
+  //   return next();
+  // }
 
   compression({
     level: 9,
@@ -70,17 +65,7 @@ app.use((req, res, next) => {
 
 // Essential middleware
 app.use(express.json({ limit: "10mb" })); // Add limit for security
-app.use(
-  express.static(path.join(__dirname, "..", "public"), {
-    setHeaders: function (res, filePath) {
-      // Only modify cache headers in production
-      if (runningInProduction && path.basename(filePath) === "index.html") {
-        res.setHeader("Cache-Control", "no-cache, must-revalidate");
-        res.setHeader("ETag", deploymentETag);
-      }
-    },
-  })
-);
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Cookie parser for API routes
 app.use("/api", cookieParser(cookieSecret));
@@ -114,9 +99,11 @@ app.use("/api", apiRouter);
 
 // This middleware only runs if no other /api route was matched
 app.use((req, res, next) => {
+  // personal server need this caching to save transfer cost
+  res.set("Cache-Control", "no-cache, must-revalidate");
+
   if (!runningInProduction) {
     // this will only run in development mode
-    res.set("Cache-Control", "no-cache, must-revalidate");
     res.sendFile(path.join(__dirname, "..", "public", "index.html"));
   } else {
     res.status(404).json({ error: "API endpoint not found" });
