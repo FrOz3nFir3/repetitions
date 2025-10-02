@@ -1,45 +1,33 @@
-import { createClient } from "redis";
+import Redis from "ioredis";
 import dotenv from "dotenv";
 
-// Load env first for faster access
+// Load env first
 dotenv.config({ path: "../.env" });
 
-let retryCount = 0;
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
-const client = createClient({
-  url: process.env.REDIS_URI,
-  socket: {
-    reconnectStrategy: (options) => {
-      // Log the retry attempt
-      console.log(`Redis connection retry attempt: ${retryCount + 1}`);
+const redis = new Redis(process.env.REDIS_URI, {
+  retryStrategy: (times) => {
+    // Log the retry attempt
+    console.log(`Redis connection retry attempt: ${times}`);
 
-      if (retryCount >= MAX_RETRIES) {
-        console.error("Max Redis connection retries reached. Giving up.");
-        return new Error("Max Redis connection retries reached.");
-      }
+    if (times > MAX_RETRIES) {
+      console.error("Max Redis connection retries reached. Giving up.");
+      // To stop retrying, return null or a non-number.
+      return null;
+    }
 
-      // Increment the retry counter
-      retryCount++;
-
-      // Return a delay for the next retry (e.g., exponential backoff)
-      // This example uses a simple fixed delay
-      return Math.min(options.attempt * 100, 2000);
-    },
+    // Return a delay for the next retry (e.g., exponential backoff)
+    const delay = Math.min(times * 100, 2000);
+    return delay;
   },
 });
 
-client.on("error", (err) => console.log("Redis Client Error", err.message));
+redis.on("error", (err) => console.log("Redis Client Error", err.message));
+redis.on("connect", () => console.log("Initializing Redis connection...")); // Fired when connection is initiated
+const startTime = Date.now();
+redis.on("ready", () =>
+  console.log(`Redis connection ready in ${Date.now() - startTime}ms`)
+); // Fired after connection is successful
 
-async function redisConnect() {
-  try {
-    await client.connect();
-    console.log("Connected to Redis");
-  } catch (e) {
-    console.log("Error connecting to Redis", e.message ?? "Unknown error");
-  }
-}
-
-const redisClient = client;
-
-export { redisClient, redisConnect };
+export { redis };
