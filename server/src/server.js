@@ -2,8 +2,7 @@ import cluster from "node:cluster";
 import os from "node:os";
 import app from "./app.js";
 import { initMongoDB } from "./services/mongo.js";
-// automatically connects, later have proper valdiation to make sure redis is working
-import { redis } from "./services/redis.js";
+import { redisConnect } from "./services/redis.js";
 
 const PORT = process.env.PORT || 80;
 const enableCluster = process.env.ENABLE_CLUSTER ?? false;
@@ -14,6 +13,7 @@ async function startServer() {
   try {
     // Initialize MongoDB first (blocking)
     await initMongoDB();
+    await redisConnect();
 
     // Start HTTP server
     app.listen(PORT, () => {

@@ -1,33 +1,42 @@
-import Redis from "ioredis";
+import { createClient } from "redis";
 import dotenv from "dotenv";
 
-// Load env first
+// Load env first for faster access
 dotenv.config({ path: "../.env" });
 
 const MAX_RETRIES = 5;
 
-const redis = new Redis(process.env.REDIS_URI, {
-  retryStrategy: (times) => {
-    // Log the retry attempt
-    console.log(`Redis connection retry attempt: ${times}`);
+const client = createClient({
+  url: process.env.REDIS_URI,
+  socket: {
+    reconnectStrategy: (retryCount) => {
+      // Log the retry attempt
+      console.log(`Redis connection retry attempt: ${retryCount + 1}`);
 
-    if (times > MAX_RETRIES) {
-      console.error("Max Redis connection retries reached. Giving up.");
-      // To stop retrying, return null or a non-number.
-      return null;
-    }
+      if (retryCount >= MAX_RETRIES - 1) {
+        console.error("Max Redis connection retries reached. Giving up.");
+        return new Error("Max Redis connection retries reached.");
+      }
 
-    // Return a delay for the next retry (e.g., exponential backoff)
-    const delay = Math.min(times * 100, 2000);
-    return delay;
+      // Return a delay for the next retry (e.g., exponential backoff)
+      // This example uses a simple fixed delay
+      return 2000;
+    },
   },
 });
 
-redis.on("error", (err) => console.log("Redis Client Error", err.message));
-redis.on("connect", () => console.log("Initializing Redis connection...")); // Fired when connection is initiated
-const startTime = Date.now();
-redis.on("ready", () =>
-  console.log(`Redis connection ready in ${Date.now() - startTime}ms`)
-); // Fired after connection is successful
+client.on("error", (err) => console.log("Redis Client Error", err.message));
 
-export { redis };
+const startTime = Date.now();
+async function redisConnect() {
+  try {
+    await client.connect();
+    console.log(`Redis connection ready in ${Date.now() - startTime}ms`);
+  } catch (e) {
+    console.log("Error connecting to Redis", e.message ?? "Unknown error");
+  }
+}
+
+const redis = client;
+
+export { redis, redisConnect };
