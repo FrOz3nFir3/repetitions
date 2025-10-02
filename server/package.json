@@ -30,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "lru-cache": "^11.1.0",
     "mongoose": "^8.16.1",
+    "redis": "^5.8.2",
     "repetitions.tech": "file:.."
   },
   "devDependencies": {

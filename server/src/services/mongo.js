@@ -35,7 +35,7 @@ export async function mongoConnect() {
 
   // Connect to MongoDB
   await mongoose.connect(MONGO_URI, {
-    maxPoolSize: 30,
+    maxPoolSize: 100,
     minPoolSize: 10,
     compressors: "zlib",
     bufferCommands: false, // Don't buffer commands if not connected
