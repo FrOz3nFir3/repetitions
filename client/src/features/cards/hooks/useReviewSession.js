@@ -63,20 +63,23 @@ export const useReviewSession = (initialCards, card_id) => {
 
   const currentFlashcard = sessionCards[currentIndex];
 
-  const handleSetSearchParams = useCallback((key, value) => {
-    setSearchParams(
-      (prev) => {
-        const newParams = new URLSearchParams(prev);
-        if (value) {
-          newParams.set(key, value);
-        } else {
-          newParams.delete(key);
-        }
-        return newParams;
-      },
-      { replace: true }
-    ); // Use replace instead of push
-  }, [setSearchParams]);
+  const handleSetSearchParams = useCallback(
+    (key, value) => {
+      setSearchParams(
+        (prev) => {
+          const newParams = new URLSearchParams(prev);
+          if (value) {
+            newParams.set(key, value);
+          } else {
+            newParams.delete(key);
+          }
+          return newParams;
+        },
+        { replace: true }
+      ); // Use replace instead of push
+    },
+    [setSearchParams]
+  );
 
   // Handle initial setup from cardProgress
   useEffect(() => {
@@ -133,7 +136,8 @@ export const useReviewSession = (initialCards, card_id) => {
         if (cardNo !== lastSavedProgress.current && user) {
           setSkipGetCall(true); // Skip GET call after this update
           // Check if on focus review page at time of execution
-          const currentlyOnFocusReview = window.location.pathname.includes("/focus-review");
+          const currentlyOnFocusReview =
+            window.location.pathname.includes("/focus-review");
           updateReviewProgress({
             card_id: cardId,
             lastReviewedCardNo: cardNo,
@@ -159,7 +163,8 @@ export const useReviewSession = (initialCards, card_id) => {
       const originalCardsCount = initialCards.length;
       setSkipGetCall(true); // Skip GET call after this update
       // Check if on focus review page at time of execution
-      const currentlyOnFocusReview = window.location.pathname.includes("/focus-review");
+      const currentlyOnFocusReview =
+        window.location.pathname.includes("/focus-review");
       updateReviewProgress({
         card_id,
         lastReviewedCardNo: originalCardsCount,
@@ -212,11 +217,7 @@ export const useReviewSession = (initialCards, card_id) => {
 
   // Handle URL cardNo changes (but only after initial setup is complete)
   useEffect(() => {
-    if (
-      !isInitialSetupComplete.current ||
-      typeof cardNoQuery === "undefined" ||
-      Number.isNaN(cardNoQuery)
-    ) {
+    if (typeof cardNoQuery === "undefined" || Number.isNaN(cardNoQuery)) {
       return;
     }
 
@@ -278,31 +279,42 @@ export const useReviewSession = (initialCards, card_id) => {
         setSlideDirection(direction === "next" ? "in-right" : "in-left");
       }, 150);
     },
-    [currentIndex, sessionCards, card_id, debouncedProgressUpdate, handleSetSearchParams]
+    [
+      currentIndex,
+      sessionCards,
+      card_id,
+      debouncedProgressUpdate,
+      handleSetSearchParams,
+    ]
   );
 
-  const handleNext = useCallback((justAddedReviewCard = false) =>
-    navigate("next", justAddedReviewCard), [navigate]);
+  const handleNext = useCallback(
+    (justAddedReviewCard = false) => navigate("next", justAddedReviewCard),
+    [navigate]
+  );
   const handlePrev = useCallback(() => navigate("prev"), [navigate]);
 
-  const handleCardSelect = useCallback((index) => {
-    if (index === currentIndex) {
-      setIsFlipped(!isFlipped);
-      if (!isFlipped) setShowConfidenceRating(true);
-      return;
-    }
+  const handleCardSelect = useCallback(
+    (index) => {
+      if (index === currentIndex) {
+        setIsFlipped(!isFlipped);
+        if (!isFlipped) setShowConfidenceRating(true);
+        return;
+      }
 
-    // Mark that user has interacted
-    setUserHasInteracted(true);
+      // Mark that user has interacted
+      setUserHasInteracted(true);
 
-    setIsFlipped(false);
-    setShowConfidenceRating(false);
-    setCurrentIndex(index);
-    const selectedCard = sessionCards[index];
-    if (selectedCard && !selectedCard.isReview && selectedCard.urlCardNo) {
-      handleSetSearchParams("cardNo", selectedCard.urlCardNo.toString());
-    }
-  }, [currentIndex, isFlipped, sessionCards, handleSetSearchParams]);
+      setIsFlipped(false);
+      setShowConfidenceRating(false);
+      setCurrentIndex(index);
+      const selectedCard = sessionCards[index];
+      if (selectedCard && !selectedCard.isReview && selectedCard.urlCardNo) {
+        handleSetSearchParams("cardNo", selectedCard.urlCardNo.toString());
+      }
+    },
+    [currentIndex, isFlipped, sessionCards, handleSetSearchParams]
+  );
 
   const handleFlipCard = useCallback(() => {
     setIsFlipped(!isFlipped);
@@ -379,7 +391,8 @@ export const useReviewSession = (initialCards, card_id) => {
     if (card_id && user) {
       setSkipGetCall(true); // Skip GET call after this update
       // Check if on focus review page at time of execution
-      const currentlyOnFocusReview = window.location.pathname.includes("/focus-review");
+      const currentlyOnFocusReview =
+        window.location.pathname.includes("/focus-review");
       updateReviewProgress({
         card_id,
         lastReviewedCardNo: 0,

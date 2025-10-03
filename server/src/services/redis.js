@@ -15,7 +15,7 @@ const client = createClient({
 
       if (retryCount >= MAX_RETRIES - 1) {
         console.error("Max Redis connection retries reached. Giving up.");
-        return new Error("Max Redis connection retries reached.");
+        return false;
       }
 
       // Return a delay for the next retry (e.g., exponential backoff)
