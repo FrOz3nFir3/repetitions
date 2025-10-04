@@ -16,7 +16,6 @@ const useCategoriesWithSearch = () => {
   const { data, isFetching, isLoading, error, refetch } =
     useGetCategoriesPaginatedQuery({
       page: currentPage,
-      limit: 12,
       search: debouncedSearchQuery,
     });
 

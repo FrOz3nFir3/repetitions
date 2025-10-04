@@ -17,15 +17,51 @@ const StandaloneReviewRoute = () => {
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
 
-  // Fetch card data for review
+  // Fetch overview data (metadata + counts)
   const {
-    data: cardData,
-    isFetching,
-    error,
+    data: overviewData,
+    isLoading: isOverviewLoading,
+    error: overviewError,
+  } = useGetIndividualCardQuery({
+    id: params.id,
+    view: "overview",
+  });
+
+  // Fetch review-specific data (flashcards)
+  const {
+    data: reviewData,
+    isLoading: isReviewLoading,
+    error: reviewError,
   } = useGetIndividualCardQuery({
     id: params.id,
     view: "review",
   });
+
+  // Merge the data
+  const cardData = React.useMemo(() => {
+    // If review data is cached but overview is loading, use review data
+    if (reviewData && !overviewData) {
+      return {
+        _id: reviewData._id,
+        review: reviewData.review || [],
+      };
+    }
+
+    if (!overviewData) return null;
+
+    // Return partial data if review data is still loading
+    if (!reviewData) {
+      return {
+        ...overviewData,
+        review: [], // Empty array while loading
+      };
+    }
+
+    return {
+      ...overviewData,
+      review: reviewData.review || [],
+    };
+  }, [overviewData, reviewData]);
 
   // Set card data in Redux store when available
   useEffect(() => {
@@ -41,8 +77,9 @@ const StandaloneReviewRoute = () => {
     };
   }, [dispatch]);
 
-  // Show loading while fetching data
-  if (isFetching) {
+  // Show loading skeleton ONLY if BOTH are loading (initial load)
+  // If review data is cached, don't block rendering
+  if ((isOverviewLoading && isReviewLoading) || isReviewLoading) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
         <div className="container mx-auto 2xl:max-w-7xl p-4">
@@ -53,7 +90,7 @@ const StandaloneReviewRoute = () => {
   }
 
   // Handle errors or no data
-  if (error || !cardData || !cardData._id) {
+  if (overviewError || reviewError || !cardData) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
         <div className="container mx-auto 2xl:max-w-7xl p-4">

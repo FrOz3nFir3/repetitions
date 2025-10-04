@@ -17,34 +17,56 @@ const EditCardView = () => {
   const card = useSelector(selectCurrentCard);
   const { _id, review = [], quizzes = [], reviewQueue = [] } = card || {};
 
-  // Get current view to determine if we need to fetch review queue data
+  // Get current view to determine which data to fetch
   const currentView = searchParams.get("view") || "flashcards";
 
-  // Get the appropriate view type for API call
-  const getCardViewType = () => {
-    if (currentView === "flashcards") return "edit_flashcards";
-    if (currentView === "quizzes") return "edit_quizzes";
-    if (currentView === "review-queue") return "edit_flashcards"; // Use edit_flashcards to get review queue data
-    return "edit_flashcards";
+  // Always fetch overview data (with skipLogs for edit views)
+  const {
+    data: overviewData,
+    isLoading: isOverviewLoading,
+    error: overviewError,
+  } = useGetIndividualCardQuery({
+    id: params.id,
+    view: "overview",
+  });
+
+  // Fetch view-specific data based on current view
+  const getViewType = () => {
+    if (currentView === "flashcards") return "review";
+    if (currentView === "quizzes") return "quiz";
+    if (currentView === "review-queue") return "review-queue";
+    return "review";
   };
 
-  // Fetch card data specifically for review queue when needed
   const {
-    isLoading: isCardLoading,
-    error: cardError,
-    isFetching: isCardFetching,
-  } = useGetIndividualCardQuery(
-    {
-      id: params.id,
-      view: getCardViewType(),
-    },
-    {
-      // Only refetch if we're on review queue view and don't have review queue data
-      skip:
-        currentView !== "review-queue" ||
-        (card && card.reviewQueue !== undefined),
+    data: viewData,
+    isLoading: isViewLoading,
+    error: viewError,
+    isFetching: isViewFetching,
+  } = useGetIndividualCardQuery({
+    id: params.id,
+    view: getViewType(),
+  });
+
+  // Merge overview and view-specific data
+  const mergedCard = useMemo(() => {
+    if (!overviewData) return card;
+
+    const merged = { ...overviewData };
+
+    // Merge view-specific data
+    if (viewData) {
+      if (currentView === "flashcards" && viewData.review) {
+        merged.review = viewData.review;
+      } else if (currentView === "quizzes" && viewData.quizzes) {
+        merged.quizzes = viewData.quizzes;
+      } else if (currentView === "review-queue" && viewData.reviewQueue) {
+        merged.reviewQueue = viewData.reviewQueue;
+      }
     }
-  );
+
+    return merged;
+  }, [overviewData, viewData, currentView, card]);
 
   const {
     view,
@@ -62,31 +84,33 @@ const EditCardView = () => {
     handleNext,
     handleJump,
     handleIndexChange,
-  } = useEditCardManager(card);
+  } = useEditCardManager(mergedCard || card);
 
   const reviewMap = useMemo(() => {
     const map = new Map();
-    review.forEach((item, index) => {
+    const reviewArray = mergedCard?.review || review || [];
+    reviewArray.forEach((item, index) => {
       map.set(item._id, index);
     });
     return map;
-  }, [review]);
+  }, [mergedCard, review]);
 
   const quizMap = useMemo(() => {
     const map = new Map();
-    quizzes.forEach((item, index) => {
+    const quizzesArray = mergedCard?.quizzes || quizzes || [];
+    quizzesArray.forEach((item, index) => {
       map.set(item._id, index);
     });
     return map;
-  }, [quizzes]);
+  }, [mergedCard, quizzes]);
 
-  // Show loading state for review queue data
-  if (currentView === "review-queue" && (isCardLoading || isCardFetching)) {
+  // Show loading state
+  if (isOverviewLoading || isViewLoading) {
     return <EditCardPageSkeleton />;
   }
 
-  // Show error state for review queue
-  if (currentView === "review-queue" && cardError) {
+  // Show error state
+  if (overviewError || viewError) {
     return (
       <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="text-center py-12">
@@ -106,35 +130,42 @@ const EditCardView = () => {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-            Failed to load review queue
+            Failed to load card data
           </h3>
           <p className="text-gray-500 dark:text-gray-400">
-            There was an error loading the review queue data. Please try
-            refreshing the page.
+            There was an error loading the card data. Please try refreshing the
+            page.
           </p>
         </div>
       </div>
     );
   }
 
-  if (!card) {
+  if (!mergedCard && !card) {
     return <EditCardPageSkeleton />;
   }
+
+  const displayCard = mergedCard || card;
+
+  const displayReview = displayCard?.review || review || [];
+  const displayQuizzes = displayCard?.quizzes || quizzes || [];
+  const displayReviewQueue = displayCard?.reviewQueue || reviewQueue || [];
 
   return (
     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
       <EditCardHeader
-        flashcardId={_id}
+        flashcardId={displayCard?._id || _id}
         view={view}
         setSearchParams={setSearchParams}
       />
-      {/* TODO: fix this later to match the exact new flashcards count */}
       <ViewSwitcher
         view={view}
         setSearchParams={setSearchParams}
-        totalFlashcards={card?.reviewLength ?? review.length}
-        totalQuizzes={card?.quizzesLength ?? quizzes.length}
-        totalReviewQueue={card?.reviewQueueLength ?? reviewQueue.length}
+        totalFlashcards={displayCard?.reviewLength ?? displayReview.length}
+        totalQuizzes={displayCard?.quizzesLength ?? displayQuizzes.length}
+        totalReviewQueue={
+          displayCard?.reviewQueueLength ?? displayReviewQueue.length
+        }
       />
 
       {view === "flashcards" ? (
@@ -148,7 +179,7 @@ const EditCardView = () => {
           currentIndex={currentIndex}
           totalCount={filteredFlashcards.length}
           currentFlashcard={currentItem}
-          cardId={_id}
+          cardId={displayCard?._id || _id}
           animationDirection={animationDirection}
           originalFlashcardIndex={originalFlashcardIndex}
           filteredFlashcards={filteredFlashcards}
@@ -157,8 +188,8 @@ const EditCardView = () => {
         />
       ) : view === "quizzes" ? (
         <QuizManagementView
-          quizzes={quizzes}
-          cardId={_id}
+          quizzes={displayQuizzes}
+          cardId={displayCard?._id || _id}
           searchTerm={searchTerm}
           handleSearchChange={handleSearchChange}
           handleReset={handleReset}
@@ -167,11 +198,15 @@ const EditCardView = () => {
           initialFilteredQuizzes={filteredQuizzes}
           handleNext={handleNext}
           handlePrev={handlePrev}
-          review={review}
+          review={displayReview}
           quizMap={quizMap}
         />
       ) : view === "review-queue" ? (
-        <ReviewQueueView cardId={_id} />
+        <ReviewQueueView
+          cardId={displayCard?._id || _id}
+          reviewQueue={displayReviewQueue}
+          reviewQueueLength={displayCard?.reviewQueueLength}
+        />
       ) : null}
     </div>
   );

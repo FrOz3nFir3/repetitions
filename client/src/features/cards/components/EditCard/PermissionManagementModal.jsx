@@ -25,6 +25,7 @@ import { ShieldCheckIcon } from "@heroicons/react/24/solid";
 const PermissionManagementModal = ({ isOpen, onClose }) => {
   const card = useSelector(selectCurrentCard);
   const currentUser = useSelector(selectCurrentUser);
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -35,6 +36,9 @@ const PermissionManagementModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      // Reset page when search term changes
+      setPage(1);
+      setAllSearchResults([]);
     }, 500);
 
     return () => clearTimeout(timer);
@@ -62,39 +66,50 @@ const PermissionManagementModal = ({ isOpen, onClose }) => {
     data: searchData,
     isLoading: searchLoading,
     error: searchError,
+    isFetching: searchFetching,
   } = useSearchUsersQuery(
-    { search: debouncedSearchTerm, limit: 10, id: card?._id },
+    { search: debouncedSearchTerm, id: card?._id, page },
     {
       skip: !debouncedSearchTerm || debouncedSearchTerm.length < 2 || !isOpen,
     }
   );
 
-  // Handle different response structures for search and fallback to empty array on error
-  const searchResults = !searchError
-    ? Array.isArray(searchData)
-      ? searchData
-      : Array.isArray(searchData?.data)
-      ? searchData.data
-      : Array.isArray(searchData?.users)
-      ? searchData.users
-      : []
-    : [];
+  // Accumulate search results across pages
+  const [allSearchResults, setAllSearchResults] = useState([]);
+
+  useEffect(() => {
+    if (searchData && !searchError) {
+      const newResults = Array.isArray(searchData)
+        ? searchData
+        : Array.isArray(searchData?.data)
+        ? searchData.data
+        : Array.isArray(searchData?.users)
+        ? searchData.users
+        : [];
+
+      if (page === 1) {
+        // Reset results for new search
+        setAllSearchResults(newResults);
+      } else {
+        // Append results for pagination - avoid duplicates
+        setAllSearchResults((prev) => {
+          const existingIds = new Set(prev.map((user) => user._id));
+          const uniqueNewResults = newResults.filter(
+            (user) => !existingIds.has(user._id)
+          );
+          return [...prev, ...uniqueNewResults];
+        });
+      }
+    }
+  }, [searchData, searchError, page]);
+
+  const searchResults = allSearchResults;
 
   const [addReviewers, { isLoading: addingReviewers, error: addError }] =
     useAddReviewersMutation();
 
   const [removeReviewer, { isLoading: removingReviewer, error: removeError }] =
     useRemoveReviewerMutation();
-
-  // Reset state when modal opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setSearchTerm("");
-      setDebouncedSearchTerm("");
-      setSelectedUsers([]);
-      setShowConfirmRemove(null);
-    }
-  }, [isOpen]);
 
   // Scroll to error when it appears
   useEffect(() => {
@@ -164,6 +179,8 @@ const PermissionManagementModal = ({ isOpen, onClose }) => {
       typeof card?.author === "object" ? card?.author?.username : card?.author;
     return autorUsername === username;
   };
+
+  const hasMore = searchData?.hasMore ?? false;
 
   return (
     <Modal
@@ -263,7 +280,7 @@ const PermissionManagementModal = ({ isOpen, onClose }) => {
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search users by username or email..."
+                  placeholder="Search users by name or username or email..."
                   className="block w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -317,7 +334,7 @@ const PermissionManagementModal = ({ isOpen, onClose }) => {
                       ))}
                     </div>
                   ) : filteredSearchResults.length > 0 ? (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
                       {filteredSearchResults.map((user) => (
                         <div
                           key={user._id}
@@ -340,6 +357,30 @@ const PermissionManagementModal = ({ isOpen, onClose }) => {
                           <PlusIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />
                         </div>
                       ))}
+                      {hasMore && (
+                        <div className="flex flex-col items-center justify-center pt-6 pb-2 border-t border-gray-200 dark:border-gray-700 mt-4">
+                          <button
+                            onClick={() => setPage((prevPage) => prevPage + 1)}
+                            disabled={searchFetching}
+                            className="cursor-pointer flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                          >
+                            {searchFetching ? (
+                              <>
+                                <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                                <span>Loading More...</span>
+                              </>
+                            ) : (
+                              <>
+                                <PlusIcon className="h-5 w-5" />
+                                <span>Load More Users</span>
+                              </>
+                            )}
+                          </button>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                            Showing {allSearchResults.length} users
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ) : debouncedSearchTerm.length >= 2 ? (
                     <div className="text-center py-6">

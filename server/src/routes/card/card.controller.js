@@ -18,9 +18,10 @@ import { getTextFromHTML, sanitizeHTML } from "../../utils/dom.js";
 
 export async function httpGetCardById(req, res) {
   const { id } = req.params;
-  const { view } = req.query;
+  const { view, skipLogs } = req.query;
+  const shouldSkipLogs = skipLogs === 'true';
   try {
-    const card = await getCardById(id, view);
+    const card = await getCardById(id, view, shouldSkipLogs);
     res.json(card);
   } catch (error) {
     console.log(error);
@@ -31,7 +32,7 @@ export async function httpGetCardById(req, res) {
 export async function httpGetCardLogs(req, res) {
   const { id } = req.params;
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
+  const limit = 10;
   const search = req.query.search || "";
 
   try {
@@ -46,7 +47,7 @@ export async function httpGetCardLogs(req, res) {
 export async function httpGetReviewQueueItems(req, res) {
   const { id } = req.params;
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 7; // Default to 7 items as requested
+  const limit = 7; // Default to 7 items as requested
 
   try {
     const data = await getReviewQueueItems(id, page, limit);
@@ -188,9 +189,8 @@ export async function httpPatchUpdateCard(req, res) {
     );
     if (quiz && quiz.options.length > minimumOptions - 1) {
       return res.status(400).json({
-        error: `Please remove existing options manually before reducing the minimum options below ${
-          quiz.options.length + 1
-        }.`,
+        error: `Please remove existing options manually before reducing the minimum options below ${quiz.options.length + 1
+          }.`,
       });
     }
     // causing issues in updating check later fixed for now

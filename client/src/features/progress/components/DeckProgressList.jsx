@@ -10,7 +10,6 @@ import { useGetUserStatsQuery } from "../../../api/apiSlice";
 import useQuizProgressWithSearch from "../../../hooks/useQuizProgressWithSearch";
 import EmptyState from "./ui/EmptyState";
 import { RocketLaunchIcon } from "@heroicons/react/24/solid";
-import ProgressPageSkeleton from "../../../components/ui/skeletons/ProgressPageSkeleton";
 import ProgressIndividualDeckListSkeleton from "../../../components/ui/skeletons/ProgressIndividualDeckListSkeleton";
 
 const DeckProgressList = ({ user, onViewReport }) => {
@@ -39,9 +38,28 @@ const DeckProgressList = ({ user, onViewReport }) => {
   const totalDecksStudied = stats?.totalDecksStudied || 0;
   const totalQuizzesCompleted = stats?.totalQuizzesFinished || 0;
 
-  // need to break this skeleton later
   if (isLoading) {
-    return <ProgressPageSkeleton />;
+    return (
+      <div className="mb-16">
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-2xl animate-pulse"></div>
+          </div>
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg w-96 mx-auto mb-4 animate-pulse"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-[600px] mx-auto animate-pulse"></div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 justify-between items-center mb-12 p-8 bg-white/70 dark:bg-gray-800/70 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl">
+          <div className="h-14 bg-gray-200 dark:bg-gray-700 rounded-2xl flex-1 max-w-2xl animate-pulse"></div>
+          <div className="flex gap-6">
+            <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+          </div>
+        </div>
+
+        <ProgressIndividualDeckListSkeleton />
+      </div>
+    );
   }
 
   if (!totalDecksStudied) {

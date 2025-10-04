@@ -199,57 +199,50 @@ export async function createNewCard(card, userId) {
   return newCard.save();
 }
 
-export async function getCardById(id, view = "overview") {
+export async function getCardById(id, view = "overview", skipLogs = false) {
   if (!Types.ObjectId.isValid(id)) return null;
 
-  // Optimized paths for simple views that don't need population
+  // Optimized paths for data-only views (no metadata needed)
   if (view === "review") {
     return Card.findById(id, {
       review: 1,
-      quizzesLength: {
-        $size: "$quizzes",
-      },
-      category: 1,
-      reviewQueueLength: {
-        $size: {
-          $filter: {
-            input: "$reviewQueue",
-            cond: {
-              $or: [
-                { $eq: ["$$this.expiresAt", null] },
-                { $gt: ["$$this.expiresAt", new Date()] },
-              ],
-            },
-          },
-        },
-      },
     }).lean();
   }
   if (view === "quiz") {
     return Card.findById(id, {
       quizzes: 1,
-      reviewLength: {
-        $size: "$review",
-      },
-      category: 1,
-      "main-topic": 1,
-      "sub-topic": 1,
-      reviewQueueLength: {
-        $size: {
-          $filter: {
-            input: "$reviewQueue",
-            cond: {
-              $or: [
-                { $eq: ["$$this.expiresAt", null] },
-                { $gt: ["$$this.expiresAt", new Date()] },
-              ],
-            },
-          },
-        },
-      },
     }).lean();
   }
+  if (view === "review-queue") {
+    const card = await Card.findById(id).lean();
+    if (!card) return null;
 
+    // Filter out expired review queue items
+    const filteredReviewQueue = card.reviewQueue?.filter(item => {
+      return !item.expiresAt || new Date(item.expiresAt) > new Date();
+    }) || [];
+
+    return {
+      _id: card._id,
+      reviewQueue: filteredReviewQueue,
+    };
+  }
+  if (view === "review_text") {
+    const card = await Card.findById(id, {
+      review: 1,
+    }).lean();
+    if (!card) return null;
+
+    card.review = card.review.map((item) => {
+      return {
+        _id: item._id,
+        question: getTextFromHTML(item.question),
+      };
+    });
+    return card;
+  }
+
+  // For overview and other views, use aggregation pipeline
   const cardId = new Types.ObjectId(`${id}`);
 
   const pipeline = [
@@ -287,56 +280,131 @@ export async function getCardById(id, view = "overview") {
         },
       },
     },
-    {
-      $lookup: {
-        from: "users",
-        localField: "reviewQueue.submittedBy",
-        foreignField: "_id",
-        as: "reviewQueueUsers",
+  ];
+
+  // Only add review queue user lookup and logs if not skipping logs
+  if (!skipLogs) {
+    pipeline.push(
+      {
+        $lookup: {
+          from: "users",
+          localField: "reviewQueue.submittedBy",
+          foreignField: "_id",
+          as: "reviewQueueUsers",
+        },
       },
-    },
-    {
-      $addFields: {
-        reviewQueue: {
-          $map: {
-            input: "$reviewQueue",
-            as: "item",
-            in: {
-              $mergeObjects: [
-                "$$item",
-                {
-                  submittedBy: {
-                    $let: {
-                      vars: {
-                        user: {
-                          $arrayElemAt: [
-                            {
-                              $filter: {
-                                input: "$reviewQueueUsers",
-                                cond: {
-                                  $eq: ["$$this._id", "$$item.submittedBy"],
+      {
+        $addFields: {
+          reviewQueue: {
+            $map: {
+              input: "$reviewQueue",
+              as: "item",
+              in: {
+                $mergeObjects: [
+                  "$$item",
+                  {
+                    submittedBy: {
+                      $let: {
+                        vars: {
+                          user: {
+                            $arrayElemAt: [
+                              {
+                                $filter: {
+                                  input: "$reviewQueueUsers",
+                                  cond: {
+                                    $eq: ["$$this._id", "$$item.submittedBy"],
+                                  },
                                 },
                               },
-                            },
-                            0,
-                          ],
+                              0,
+                            ],
+                          },
                         },
-                      },
-                      in: {
-                        _id: "$$user._id",
-                        name: "$$user.name",
-                        username: "$$user.username",
+                        in: {
+                          _id: "$$user._id",
+                          name: "$$user.name",
+                          username: "$$user.username",
+                        },
                       },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
         },
       },
-    },
-    {
+      {
+        $project: {
+          "main-topic": 1,
+          "sub-topic": 1,
+          category: 1,
+          review: 1,
+          quizzes: 1,
+          description: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          reviewers: 1,
+          reviewQueue: 1,
+          author: { name: "$author.name", username: "$author.username" },
+          lastUpdatedBy: {
+            name: "$lastUpdatedBy.name",
+            username: "$lastUpdatedBy.username",
+          },
+          logs: {
+            $sortArray: { input: "$logs", sortBy: { timestamp: -1 } },
+          },
+        },
+      },
+      {
+        $project: {
+          "main-topic": 1,
+          "sub-topic": 1,
+          category: 1,
+          review: 1,
+          quizzes: 1,
+          description: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          reviewers: 1,
+          reviewQueue: 1,
+          author: 1,
+          lastUpdatedBy: 1,
+          logs: { $slice: ["$logs", 3] },
+        },
+      },
+      { $unwind: { path: "$logs", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "logs.user",
+          foreignField: "_id",
+          as: "logs.user",
+        },
+      },
+      { $unwind: { path: "$logs.user", preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: "$_id",
+          "main-topic": { $first: "$main-topic" },
+          "sub-topic": { $first: "$sub-topic" },
+          category: { $first: "$category" },
+          review: { $first: "$review" },
+          quizzes: { $first: "$quizzes" },
+          description: { $first: "$description" },
+          author: { $first: "$author" },
+          lastUpdatedBy: { $first: "$lastUpdatedBy" },
+          reviewers: { $first: "$reviewers" },
+          reviewQueue: { $first: "$reviewQueue" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          logs: { $push: "$logs" },
+        },
+      }
+    );
+  } else {
+    // Skip logs - simpler projection
+    pipeline.push({
       $project: {
         "main-topic": 1,
         "sub-topic": 1,
@@ -353,59 +421,12 @@ export async function getCardById(id, view = "overview") {
           name: "$lastUpdatedBy.name",
           username: "$lastUpdatedBy.username",
         },
-        logs: {
-          $sortArray: { input: "$logs", sortBy: { timestamp: -1 } },
-        },
       },
-    },
-    {
-      $project: {
-        "main-topic": 1,
-        "sub-topic": 1,
-        category: 1,
-        review: 1,
-        quizzes: 1,
-        description: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        reviewers: 1,
-        reviewQueue: 1,
-        author: 1,
-        lastUpdatedBy: 1,
-        logs: { $slice: ["$logs", 6] },
-      },
-    },
-    { $unwind: { path: "$logs", preserveNullAndEmptyArrays: true } },
-    {
-      $lookup: {
-        from: "users",
-        localField: "logs.user",
-        foreignField: "_id",
-        as: "logs.user",
-      },
-    },
-    { $unwind: { path: "$logs.user", preserveNullAndEmptyArrays: true } },
-    {
-      $group: {
-        _id: "$_id",
-        "main-topic": { $first: "$main-topic" },
-        "sub-topic": { $first: "$sub-topic" },
-        category: { $first: "$category" },
-        review: { $first: "$review" },
-        quizzes: { $first: "$quizzes" },
-        description: { $first: "$description" },
-        author: { $first: "$author" },
-        lastUpdatedBy: { $first: "$lastUpdatedBy" },
-        reviewers: { $first: "$reviewers" },
-        reviewQueue: { $first: "$reviewQueue" },
-        createdAt: { $first: "$createdAt" },
-        updatedAt: { $first: "$updatedAt" },
-        logs: { $push: "$logs" },
-      },
-    },
-  ];
+    });
+  }
 
-  const baseProjection = {
+  // Final projection based on view
+  const finalProjection = {
     "main-topic": 1,
     "sub-topic": 1,
     category: 1,
@@ -414,19 +435,14 @@ export async function getCardById(id, view = "overview") {
     updatedAt: 1,
     author: 1,
     lastUpdatedBy: 1,
-    // reviewers removed - fetched separately when needed
-    reviewQueue: {
-      $filter: {
-        input: "$reviewQueue",
-        cond: {
-          $or: [
-            { $eq: ["$$this.expiresAt", null] },
-            { $gt: ["$$this.expiresAt", new Date()] },
-          ],
-        },
-      },
-    },
-    logs: {
+    reviewLength: { $size: "$review" },
+    quizzesLength: { $size: "$quizzes" },
+    reviewQueueLength: { $size: "$reviewQueue" },
+  };
+
+  // Add logs only if not skipping
+  if (!skipLogs) {
+    finalProjection.logs = {
       $map: {
         input: "$logs",
         as: "log",
@@ -442,55 +458,7 @@ export async function getCardById(id, view = "overview") {
           },
         },
       },
-    },
-  };
-
-  let finalProjection = { ...baseProjection };
-
-  // Remove the baseProjection reviewQueue filter and add proper handling
-  delete finalProjection.reviewQueue;
-
-  // Add reviewQueueLength for all views
-  finalProjection.reviewQueueLength = { $size: "$reviewQueue" };
-
-  switch (view) {
-    case "overview":
-      finalProjection.reviewLength = { $size: "$review" };
-      finalProjection.quizzesLength = { $size: "$quizzes" };
-      break;
-    case "edit_flashcards":
-      finalProjection.review = 1;
-      finalProjection.quizzesLength = { $size: "$quizzes" };
-      // Add initial reviewQueue data (5 items) - already filtered in pipeline
-      finalProjection.reviewQueue = { $slice: ["$reviewQueue", 5] };
-      break;
-    case "edit_quizzes":
-      finalProjection.quizzes = 1;
-      finalProjection.reviewLength = { $size: "$review" };
-      // Add initial reviewQueue data (5 items) - already filtered in pipeline
-      finalProjection.reviewQueue = { $slice: ["$reviewQueue", 5] };
-      break;
-    case "review-queue":
-      // For review-queue view, include initial data plus counts
-      finalProjection.reviewLength = { $size: "$review" };
-      finalProjection.quizzesLength = { $size: "$quizzes" };
-      // Add initial reviewQueue data (5 items) - already filtered in pipeline
-      finalProjection.reviewQueue = { $slice: ["$reviewQueue", 5] };
-      break;
-    case "review_text":
-      finalProjection = {};
-      finalProjection.review = {
-        $map: {
-          input: "$review",
-          as: "r",
-          in: { _id: "$$r._id", question: "$$r.question" },
-        },
-      };
-      break;
-    default: // Fallback for any unknown view
-      finalProjection.reviewLength = { $size: "$review" };
-      finalProjection.quizzesLength = { $size: "$quizzes" };
-      break;
+    };
   }
 
   pipeline.push({ $project: finalProjection });
@@ -500,18 +468,10 @@ export async function getCardById(id, view = "overview") {
   if (!result || result.length === 0) return null;
 
   const card = result[0];
+
+  // Clean up logs if present
   if (card.logs && card.logs.length === 1 && !card.logs[0]._id) {
     card.logs = [];
-  }
-
-  // Post-processing for specific views
-  if (view === "review_text") {
-    card.review = card.review.map((item) => {
-      return {
-        _id: item._id,
-        question: getTextFromHTML(item.question),
-      };
-    });
   }
 
   return card;
@@ -648,11 +608,11 @@ export async function updateCard(details) {
       quizAnswer,
       options: newOptions
         ? newOptions
-            .filter((opt) => opt && opt.trim())
-            .map((opt) => ({
-              _id: new Types.ObjectId(),
-              value: opt,
-            }))
+          .filter((opt) => opt && opt.trim())
+          .map((opt) => ({
+            _id: new Types.ObjectId(),
+            value: opt,
+          }))
         : [],
       minimumOptions: minimumOptions || 2,
     };
@@ -769,8 +729,8 @@ export async function updateCard(details) {
 
         const oldFlashcard = oldQuiz.flashcardId
           ? card.review.find(
-              (r) => r._id.toString() === oldQuiz.flashcardId.toString()
-            )
+            (r) => r._id.toString() === oldQuiz.flashcardId.toString()
+          )
           : null;
         const oldFlashcardText = oldFlashcard
           ? `"${getTextFromHTML(oldFlashcard.question).slice(0, 40)}..."`
@@ -1017,9 +977,8 @@ export async function updateCard(details) {
       if (hasChanges) {
         const questionText = otherDetails.question || oldReview.question;
         if (changedFields.length === 1) {
-          summary = `Updated ${
-            changedFields[0]
-          } in Flashcard: "${getTextFromHTML(questionText).slice(0, 250)}"`;
+          summary = `Updated ${changedFields[0]
+            } in Flashcard: "${getTextFromHTML(questionText).slice(0, 250)}"`;
         } else {
           summary = `Updated ${changedFields.join(
             " and "
@@ -1139,15 +1098,15 @@ export async function getCardLogs(cardId, page = 1, limit = 10, search = "") {
     { $unwind: { path: "$logs", preserveNullAndEmptyArrays: true } },
     ...(search && search.trim()
       ? [
-          {
-            $match: {
-              "logs.summary": {
-                $regex: normalizeWhitespace(search),
-                $options: "i",
-              },
+        {
+          $match: {
+            "logs.summary": {
+              $regex: normalizeWhitespace(search),
+              $options: "i",
             },
           },
-        ]
+        },
+      ]
       : []),
     { $skip: skip },
     { $limit: limit },

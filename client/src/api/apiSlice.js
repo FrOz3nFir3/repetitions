@@ -85,10 +85,10 @@ export const apiSlice = createApi({
   baseQuery: baseQueryWithReauth,
   tagTypes: [
     "Card",
-    "CardOverview", // For view=overview (default view)
-    "CardFlashcards", // For view=edit_flashcards, view=review and view=review_text
-    "CardQuiz", // For view=edit_quizzes and view=quiz
-    "CardReviewQueue", // For review queue data
+    "CardOverview", // For view=overview (metadata + counts)
+    "CardFlashcards", // For view=review and view=review_text (flashcard data)
+    "CardQuiz", // For view=quiz (quiz data)
+    "CardReviewQueue", // For view=review-queue (review queue data)
     "Report",
     "User",
     "CardReviewProgress",
@@ -105,10 +105,9 @@ export const apiSlice = createApi({
     }),
 
     getCategoriesPaginated: builder.query({
-      query: ({ page = 1, limit = 12, search = "" }) => {
+      query: ({ page = 1, search = "" }) => {
         const params = new URLSearchParams({
           page: page.toString(),
-          limit: limit.toString(),
         });
         if (search.trim()) {
           params.append("search", search.trim());
@@ -131,10 +130,9 @@ export const apiSlice = createApi({
     }),
 
     getCardsByCategoryPaginated: builder.query({
-      query: ({ category, page = 1, limit = 9, search = "" }) => {
+      query: ({ category, page = 1, search = "" }) => {
         const params = new URLSearchParams({
           page: page.toString(),
-          limit: limit.toString(),
         });
         if (search.trim()) {
           params.append("search", search.trim());
@@ -153,30 +151,29 @@ export const apiSlice = createApi({
     }),
 
     getIndividualCard: builder.query({
-      query: ({ id, view = "overview" }) => `/card/${id}?view=${view}`,
-      providesTags: (result, error, { id, view }) => {
-        // Only provide view-specific tags, no generic IndividualCard tag
-        if (
-          view === "edit_flashcards" ||
-          view === "review" ||
-          view === "review_text"
-        ) {
-          return [
-            { type: "CardFlashcards", id },
-            { type: "CardReviewQueue", id },
-          ];
-        } else if (view === "edit_quizzes" || view === "quiz") {
-          return [
-            { type: "CardQuiz", id },
-            { type: "CardReviewQueue", id },
-          ];
-        } else {
-          // Default case for overview and any other views
-          return [
-            { type: "CardOverview", id },
-            { type: "CardReviewQueue", id },
-          ];
+      query: ({ id, view = "overview", skipLogs = false }) => {
+        const params = new URLSearchParams();
+        if (skipLogs) {
+          params.append("skipLogs", "true");
         }
+        const queryString = params.toString();
+        return `/card/${id}?view=${view}${queryString ? `&${queryString}` : ""}`;
+      },
+      providesTags: (result, error, { id, view }) => {
+        // Provide view-specific tags for granular cache control
+        if (view === "review") {
+          return [{ type: "CardFlashcards", id }];
+        } else if (view === "quiz") {
+          return [{ type: "CardQuiz", id }];
+        } else if (view === "review-queue") {
+          return [{ type: "CardReviewQueue", id }];
+        } else if (view === "overview") {
+          return [{ type: "CardOverview", id }];
+        } else if (view === "review_text") {
+          return [{ type: "CardFlashcards", id }];
+        }
+        // Fallback
+        return [{ type: "CardOverview", id }];
       },
     }),
 
@@ -198,9 +195,8 @@ export const apiSlice = createApi({
       invalidatesTags: (result, error, arg) => {
         if (error) return [];
 
-        // TODO: later have updateType for better clarity
         const { _id, updateType } = arg;
-        const tags = ["Card", { type: "CardOverview", id: _id }]; // Only invalidate the general Card list, not individual card views
+        const tags = ["Card"]; // Always invalidate the general Card list
 
         // Auto-detect update type based on parameters if not explicitly provided
         let detectedUpdateType = updateType;
@@ -211,34 +207,42 @@ export const apiSlice = createApi({
             arg.deleteQuiz ||
             arg.quizzes ||
             arg.quizQuestion ||
-            arg.quizAnswer
+            arg.quizAnswer ||
+            arg.option ||
+            arg.deleteOption ||
+            arg.minimumOptions ||
+            arg.reorderQuizzes
           ) {
             detectedUpdateType = "quiz";
           }
           // Check for flashcard-related parameters
           else if (
-            arg.flashcardId ||
-            arg.deleteFlashcard ||
+            arg.cardId ||
+            arg.deleteCard ||
             arg.review ||
             arg.question ||
-            arg.answer
+            arg.answer ||
+            arg.reorderFlashcards
           ) {
             detectedUpdateType = "flashcards";
           } else {
+            // Main card fields (category, main-topic, sub-topic, description)
             detectedUpdateType = "overview";
           }
         }
 
         // Invalidate specific view tags based on what was updated
         if (detectedUpdateType === "flashcards") {
-          // Only invalidate flashcard-related views
+          // Only invalidate flashcard data and overview (for counts)
           tags.push({ type: "CardFlashcards", id: _id });
+          tags.push({ type: "CardOverview", id: _id });
         } else if (detectedUpdateType === "quiz") {
-          // Only invalidate quiz view
+          // Only invalidate quiz data and overview (for counts)
           tags.push({ type: "CardQuiz", id: _id });
+          tags.push({ type: "CardOverview", id: _id });
         } else if (detectedUpdateType === "overview") {
-          tags.push({ type: "CardFlashcards", id: _id });
-          tags.push({ type: "CardQuiz", id: _id });
+          // Main card fields changed - invalidate overview only
+          tags.push({ type: "CardOverview", id: _id });
         }
 
         // Always invalidate review queue data when card is updated
@@ -274,10 +278,9 @@ export const apiSlice = createApi({
     }),
 
     getUserProgressPaginated: builder.query({
-      query: ({ page = 1, limit = 9, search = "", category = "All" }) => {
+      query: ({ page = 1, search = "", category = "All" }) => {
         const params = new URLSearchParams({
           page: page.toString(),
-          limit: limit.toString(),
         });
         if (search.trim()) {
           params.append("search", search.trim());
@@ -307,10 +310,9 @@ export const apiSlice = createApi({
     }),
 
     getQuizProgress: builder.query({
-      query: ({ page = 1, limit = 9, search = "", category = "All" }) => {
+      query: ({ page = 1, search = "", category = "All" }) => {
         const params = new URLSearchParams({
           page: page.toString(),
-          limit: limit.toString(),
         });
         if (search.trim()) {
           params.append("search", search.trim());
@@ -533,13 +535,13 @@ export const apiSlice = createApi({
 
     getCardsByAuthor: builder.query({
       query: ({ username, page, limit }) =>
-        `/users/${username}/cards?page=${page}&limit=${limit}`,
+        `/users/${username}/cards?page=${page}`,
       providesTags: (result) =>
         result?.cards
           ? [
-              ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
-              { type: "Card", id: "LIST" },
-            ]
+            ...result.cards.map(({ _id }) => ({ type: "Card", id: _id })),
+            { type: "Card", id: "LIST" },
+          ]
           : [{ type: "Card", id: "LIST" }],
     }),
 
@@ -612,7 +614,10 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: (result, error, { cardId }) => {
         if (!error) {
-          return [{ type: "CardReviewQueue", id: cardId }];
+          return [
+            { type: "CardReviewQueue", id: cardId },
+            { type: "CardOverview", id: cardId },
+          ];
         }
         return [];
       },
@@ -668,10 +673,10 @@ export const apiSlice = createApi({
 
     // User Search Endpoint
     searchUsers: builder.query({
-      query: ({ search, limit = 10, id }) => {
+      query: ({ search, id, page }) => {
         const params = new URLSearchParams({
-          limit: limit.toString(),
           id: id?.toString(),
+          page: page?.toString()
         });
         if (search && search.trim()) {
           params.append("search", search.trim());
@@ -679,14 +684,16 @@ export const apiSlice = createApi({
         return `/users/search?${params.toString()}`;
       },
       providesTags: ["User"],
-      // Keep cache for 5 minutes for user search results
-      keepUnusedDataFor: 300,
-      // Serialize query args to enable proper caching
+      // Serialize query args to cache only by search term and id, not page
       serializeQueryArgs: ({ queryArgs }) => {
         return {
           search: queryArgs.search?.trim() || "",
-          limit: queryArgs.limit || 10,
+          id: queryArgs.id,
         };
+      },
+      // Force refetch when page changes
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.page !== previousArg?.page;
       },
     }),
   }),

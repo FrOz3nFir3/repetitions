@@ -1030,9 +1030,8 @@ export async function updateUserQuizProgress(userId, details) {
       $inc: {
         ...updateQuery.$inc,
         "studying.$.quiz.attempts.$[attempt].answerAttempts": 1,
-        [`studying.$.quiz.attempts.$[attempt].${
-          correct ? "timesCorrect" : "timesIncorrect"
-        }`]: 1,
+        [`studying.$.quiz.attempts.$[attempt].${correct ? "timesCorrect" : "timesIncorrect"
+          }`]: 1,
       },
       $set: {
         ...updateQuery.$set,
@@ -1155,7 +1154,7 @@ export async function updateUserStrugglingQuiz(userId, cardId, quizId, action) {
   throw new Error(`Invalid action: ${action}. Must be 'add' or 'remove'`);
 }
 /**
- * Search users by username or email with pagination
+ * Search users by name or username or email with pagination
  */
 export async function searchUsers(searchTerm, page = 1, limit = 10) {
   if (!searchTerm || searchTerm.trim().length === 0) {

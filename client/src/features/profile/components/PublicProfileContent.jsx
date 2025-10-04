@@ -23,7 +23,7 @@ const PublicProfileContent = () => {
 
   const { data: cardsData, isFetching: isFetchingCards } =
     useGetCardsByAuthorQuery(
-      { username: user?.username, page: currentPage, limit: CARDS_PER_PAGE },
+      { username: user?.username, page: currentPage },
       { skip: !user?.username }
     );
 
@@ -39,6 +39,7 @@ const PublicProfileContent = () => {
     ? Math.ceil(cardsData.total / CARDS_PER_PAGE)
     : 0;
 
+  console.log(currentPage, "page");
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
       <div className="container mx-auto 2xl:max-w-7xl p-4">
@@ -78,9 +79,9 @@ const PublicProfileContent = () => {
               {totalPages > 1 && (
                 <div className="mt-8">
                   <Pagination
-                    currentPage={currentPage - 1} // Pagination component is 0-indexed
+                    currentPage={currentPage}
                     totalPages={totalPages}
-                    onPageChange={(page) => setCurrentPage(page + 1)} // Adjust for 1-based indexing
+                    onPageChange={(page) => setCurrentPage(page)}
                     itemsCount={cardsData.total}
                     itemsPerPage={CARDS_PER_PAGE}
                   />

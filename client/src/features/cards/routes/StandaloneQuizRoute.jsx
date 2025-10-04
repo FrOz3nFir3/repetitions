@@ -16,15 +16,51 @@ const StandaloneQuizRoute = () => {
   const params = useParams();
   const dispatch = useDispatch();
 
-  // Fetch card data for quiz
+  // Fetch overview data (metadata + counts)
   const {
-    data: cardData,
-    isFetching,
-    error,
+    data: overviewData,
+    isLoading: isOverviewLoading,
+    error: overviewError,
+  } = useGetIndividualCardQuery({
+    id: params.id,
+    view: "overview",
+  });
+
+  // Fetch quiz-specific data
+  const {
+    data: quizData,
+    isLoading: isQuizLoading,
+    error: quizError,
   } = useGetIndividualCardQuery({
     id: params.id,
     view: "quiz",
   });
+
+  // Merge the data
+  const cardData = React.useMemo(() => {
+    // If quiz data is cached but overview is loading, use quiz data
+    if (quizData && !overviewData) {
+      return {
+        _id: quizData._id,
+        quizzes: quizData.quizzes || [],
+      };
+    }
+
+    if (!overviewData) return null;
+
+    // Return partial data if quiz data is still loading
+    if (!quizData) {
+      return {
+        ...overviewData,
+        quizzes: [], // Empty array while loading
+      };
+    }
+
+    return {
+      ...overviewData,
+      quizzes: quizData.quizzes || [],
+    };
+  }, [overviewData, quizData]);
 
   // Set card data in Redux store when available
   useEffect(() => {
@@ -40,8 +76,9 @@ const StandaloneQuizRoute = () => {
     };
   }, [dispatch]);
 
-  // Show loading while fetching data
-  if (isFetching) {
+  // Show loading skeleton ONLY if BOTH are loading (initial load)
+  // If quiz data is cached, don't block rendering
+  if ((isOverviewLoading && isQuizLoading) || isQuizLoading) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
         <div className="container mx-auto 2xl:max-w-7xl p-4">
@@ -52,7 +89,7 @@ const StandaloneQuizRoute = () => {
   }
 
   // Handle errors or no data
-  if (error || !cardData || !cardData._id) {
+  if (quizError || !cardData) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
         <div className="container mx-auto 2xl:max-w-7xl p-4">

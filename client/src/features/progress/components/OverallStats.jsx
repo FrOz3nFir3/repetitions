@@ -8,12 +8,45 @@ import {
 import StatCard from "../../../components/ui/StatCard";
 import { useGetUserStatsQuery } from "../../../api/apiSlice";
 
+const OverallStatsSkeleton = () => {
+  return (
+    <div className="mb-12">
+      <div className="text-center mb-8">
+        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-64 mx-auto mb-2 animate-pulse"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-lg w-96 mx-auto animate-pulse"></div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 animate-pulse"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+            </div>
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+            <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8 bg-gray-100 dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse">
+        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-4"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+      </div>
+    </div>
+  );
+};
+
 const OverallStats = ({ user }) => {
   const { data: statsData, isLoading } = useGetUserStatsQuery(undefined, {
     skip: !user?.email,
   });
 
-  if (!user || isLoading) return null;
+  if (!user) return null;
+  if (isLoading) return <OverallStatsSkeleton />;
   if (!statsData) return null;
 
   const {

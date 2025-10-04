@@ -20,7 +20,6 @@ const useUserProgressWithSearch = () => {
     useGetUserProgressPaginatedQuery(
       {
         page: currentPage,
-        limit: 9,
         search: debouncedSearchQuery,
       },
       {

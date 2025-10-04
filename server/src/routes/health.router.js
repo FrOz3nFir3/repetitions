@@ -1,16 +1,9 @@
 import express from "express";
-import { getConnectionStatus } from "../services/mongo.js";
+import { httpGetHealthStatus, httpGetCacheStats } from "../controllers/health.controller.js";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  const connectionInfo = getConnectionStatus();
-
-  res.json({
-    status: "ok",
-    mongodb: connectionInfo.status,
-    isConnected: connectionInfo.isConnected,
-  });
-});
+router.get("/", httpGetHealthStatus);
+router.get("/cache-stats", httpGetCacheStats);
 
 export default router;

@@ -17,7 +17,6 @@ const useQuizProgressWithSearch = (user) => {
     useGetQuizProgressQuery(
       {
         page: currentPage,
-        limit: 6,
         search: debouncedSearchQuery,
       },
       {

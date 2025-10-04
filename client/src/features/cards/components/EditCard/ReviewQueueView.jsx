@@ -11,11 +11,7 @@ import {
 } from "../../../../api/apiSlice";
 import toast from "react-hot-toast";
 
-const ReviewQueueView = ({ cardId }) => {
-  const card = useSelector(selectCurrentCard);
-  const { reviewQueue = [], reviewQueueLength = 0 } = card || {};
-
-  const [selectedItem, setSelectedItem] = useState(null);
+const ReviewQueueView = ({ cardId, reviewQueue, reviewQueueLength }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isListModalOpen, setIsListModalOpen] = useState(false);
 

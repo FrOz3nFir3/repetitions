@@ -59,7 +59,7 @@ const CardLogs = ({ logs, cardId }) => {
       )}
 
       {/* View All Button */}
-      {logs.length > 5 && (
+      {logs.length >= 3 && (
         <div className="mt-6 pt-4 border-t border-orange-200/50 dark:border-orange-700/50">
           <button
             onClick={toggleModal}

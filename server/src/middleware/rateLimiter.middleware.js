@@ -3,7 +3,11 @@ import { LRUCache } from "lru-cache";
 import { redis, redisConnect } from "../services/redis.js";
 import { RedisStore } from "rate-limit-redis";
 
-await redisConnect();
+try {
+  await redisConnect();
+} catch {
+
+}
 console.log(
   !redis.isReady
     ? `Redis not connected using Memory Store with lru cache for rate limiter`
@@ -82,8 +86,16 @@ export const authLimiter = rateLimit({
   },
   store: redis.isReady
     ? new RedisStore({
-        sendCommand: (...args) => redis.sendCommand(args),
-      })
+      sendCommand: (...args) => {
+        // edge case left to handle later 
+        if (!redis.isReady) return [];
+        try {
+          return redis.sendCommand(args)
+        } catch (e) {
+          // fail silently? 
+        }
+      },
+    })
     : new MemoryStore(),
 });
 
@@ -143,7 +155,15 @@ export const globalApiLimiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   store: redis.isReady
     ? new RedisStore({
-        sendCommand: (...args) => redis.sendCommand(args),
-      })
+      sendCommand: (...args) => {
+        // edge case left to handle later 
+        if (!redis.isReady) return [];
+        try {
+          return redis.sendCommand(args)
+        } catch (e) {
+          // fail silently? 
+        }
+      },
+    })
     : new MemoryStore(),
 });

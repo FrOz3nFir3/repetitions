@@ -25,24 +25,13 @@ function IndividualCardPage() {
   const location = useLocation();
   const user = useSelector(selectCurrentUser);
 
-  const getCardViewType = () => {
-    const { pathname } = location;
-    if (pathname.includes("/edit")) {
-      const view = searchParams.get("view");
-      if (view === "flashcards") return "edit_flashcards";
-      if (view === "quizzes") return "edit_quizzes";
-      if (view === "review-queue") return "review-queue"; // Use review-queue view for optimized data
+  const isEditRoute = location.pathname.includes("/edit");
 
-      // default when in edit
-      return "edit_flashcards";
-    }
-    return "overview"; // default view
-  };
-
-  // Fetch card data (only for overview and edit routes that use outlet)
+  // For edit routes, fetch overview with skipLogs
+  // For overview route, fetch with logs
   const { data: cardData, isFetching } = useGetIndividualCardQuery({
     id: params.id,
-    view: getCardViewType(),
+    view: "overview",
   });
 
   useEffect(() => {
@@ -66,10 +55,7 @@ function IndividualCardPage() {
   // Show loading while fetching data
   if (isFetching) {
     return (
-      <IndividualCardPageSkeleton
-        isFocusedActivity={false}
-        view={getCardViewType()}
-      />
+      <IndividualCardPageSkeleton isFocusedActivity={false} view="overview" />
     );
   }
 

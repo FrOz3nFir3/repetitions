@@ -17,7 +17,6 @@ const useCardsWithSearch = (category) => {
     useGetCardsByCategoryPaginatedQuery({
       category,
       page: currentPage,
-      limit: 9,
       search: debouncedSearchQuery,
     });
 

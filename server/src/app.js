@@ -53,7 +53,18 @@ app.use((req, res, next) => {
 // to save bandwidth if content not modified
 app.use((req, res, next) => {
   // personal server need this caching to save transfer cost
-  res.set("Cache-Control", "no-cache, must-revalidate");
+  const url = req.url;
+  const method = req.method;
+
+  if (method !== "GET") return next();
+
+  const isAuthenticatedRequest = url.startsWith('/api/user');
+  if (isAuthenticatedRequest) {
+    res.set('Cache-Control', "private, no-cache, must-revalidate");
+  } else {
+    res.set("Cache-Control", "no-cache, must-revalidate");
+  }
+
   next();
 });
 

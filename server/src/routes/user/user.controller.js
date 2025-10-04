@@ -647,7 +647,7 @@ export async function httpSearchUsers(req, res) {
   const token = req.token;
   const { search: searchTerm } = req.query;
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50); // Cap at 50 results
+  const limit = 10;
 
   if (!token) {
     return res.status(401).json({ error: "Authentication required" });

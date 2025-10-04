@@ -21,17 +21,37 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
     isError: isErrorReport,
   } = useGetDetailedReportQuery(cardId, { skip: !isOpen });
 
+  // Fetch overview data for metadata (category, main-topic, sub-topic, etc.)
   const {
-    data: cardData,
-    isLoading: isLoadingCard,
-    isError: isErrorCard,
+    data: overviewData,
+    isLoading: isLoadingOverview,
+    isError: isErrorOverview,
+  } = useGetIndividualCardQuery(
+    { id: cardId, view: "overview", skipLogs: true },
+    { skip: !isOpen }
+  );
+
+  // Fetch quiz data
+  const {
+    data: quizData,
+    isLoading: isLoadingQuiz,
+    isError: isErrorQuiz,
   } = useGetIndividualCardQuery(
     { id: cardId, view: "quiz" },
     { skip: !isOpen }
   );
 
-  const isLoading = isLoadingReport || isLoadingCard;
-  const isError = isErrorReport || isErrorCard;
+  // Merge overview and quiz data
+  const cardData = useMemo(() => {
+    if (!overviewData || !quizData) return null;
+    return {
+      ...overviewData,
+      quizzes: quizData.quizzes || [],
+    };
+  }, [overviewData, quizData]);
+
+  const isLoading = isLoadingReport || isLoadingOverview || isLoadingQuiz;
+  const isError = isErrorReport || isErrorOverview || isErrorQuiz;
 
   const mergedReport = useMemo(() => {
     if (!reportData || !cardData || !cardData.quizzes) return [];
