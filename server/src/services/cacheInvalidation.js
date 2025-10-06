@@ -46,32 +46,39 @@ export const invalidationMap = {
      * @returns {string[]} Tags to invalidate
      */
     cardUpdate: (cardId, updateType = 'auto', updateData = {}) => {
-        const tags = ['Card', `CardOverview:${cardId}`];
+        const tags = [];
 
         let detectedType = updateType;
 
         // Auto-detect update type if not specified
         if (updateType === 'auto') {
-            if (updateData.flashcards || updateData.flashcard_front || updateData.flashcard_back) {
+            // Check for flashcard updates (question, answer fields)
+            if (updateData.question || updateData.answer || updateData.flashcardId || updateData.deleteFlashcard) {
                 detectedType = 'flashcards';
-            } else if (updateData.quiz || updateData.quiz_question || updateData.quiz_answers || updateData.quiz_correct_answer) {
+            }
+            // Check for quiz updates (quizQuestion, quizAnswer, options, etc.)
+            else if (updateData.quizQuestion || updateData.quizAnswer || updateData.options || updateData.option || updateData.minimumOptions || updateData.quizId || updateData.deleteQuiz) {
                 detectedType = 'quiz';
-            } else if (updateData.title || updateData.description || updateData.category || updateData.overview) {
+            }
+            // Check for overview/metadata updates
+            else if (updateData['main-topic'] || updateData['sub-topic'] || updateData.description || updateData.category) {
                 detectedType = 'overview';
             }
         }
 
         // Apply type-specific invalidation
         if (detectedType === 'flashcards') {
+            // Only invalidate flashcard-related caches
             tags.push(`CardFlashcards:${cardId}`);
         } else if (detectedType === 'quiz') {
-            tags.push(`CardQuiz:${cardId}`);
-        } else if (detectedType === 'overview') {
-            // Overview changes affect both flashcards and quiz views
-            tags.push(`CardFlashcards:${cardId}`, `CardQuiz:${cardId}`);
+            // Only invalidate quiz-related caches
+            tags.push(`CardQuiz:${cardId}`,);
         }
 
-        // Always invalidate review queue when card is updated
+        // Overview changes happens always
+        tags.push(`CardOverview:${cardId}`);
+
+        // Always invalidate review queue later do this based on response body
         tags.push(`CardReviewQueue:${cardId}`);
 
         return tags;
@@ -380,7 +387,7 @@ export const invalidationUtils = {
      * @returns {string|null} Card ID
      */
     extractCardId(req) {
-        return req.params.id || req.params.cardId || req.body.cardId || req.query.cardId || null;
+        return req.params.id || req.body._id || req.params.cardId || req.body.cardId || req.query.cardId || null;
     },
 
     /**
@@ -414,13 +421,16 @@ export const invalidationUtils = {
      * @returns {string} Update type: 'flashcards', 'quiz', 'overview', or 'unknown'
      */
     determineUpdateType(updateData) {
-        if (updateData.flashcards || updateData.flashcard_front || updateData.flashcard_back) {
+        // Check for flashcard updates (question, answer fields)
+        if (updateData.question || updateData.answer || updateData.flashcardId || updateData.deleteFlashcard) {
             return 'flashcards';
         }
-        if (updateData.quiz || updateData.quiz_question || updateData.quiz_answers || updateData.quiz_correct_answer) {
+        // Check for quiz updates (quizQuestion, quizAnswer, options, etc.)
+        if (updateData.quizQuestion || updateData.quizAnswer || updateData.options || updateData.option || updateData.minimumOptions || updateData.quizId || updateData.deleteQuiz) {
             return 'quiz';
         }
-        if (updateData.title || updateData.description || updateData.category || updateData.overview) {
+        // Check for overview/metadata updates
+        if (updateData['main-topic'] || updateData['sub-topic'] || updateData.description || updateData.category) {
             return 'overview';
         }
         return 'unknown';

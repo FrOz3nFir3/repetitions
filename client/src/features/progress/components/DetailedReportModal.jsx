@@ -15,23 +15,14 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState("");
 
+  // Fetch report data (attempts + basic card info)
   const {
     data: reportData,
     isLoading: isLoadingReport,
     isError: isErrorReport,
   } = useGetDetailedReportQuery(cardId, { skip: !isOpen });
 
-  // Fetch overview data for metadata (category, main-topic, sub-topic, etc.)
-  const {
-    data: overviewData,
-    isLoading: isLoadingOverview,
-    isError: isErrorOverview,
-  } = useGetIndividualCardQuery(
-    { id: cardId, view: "overview", skipLogs: true },
-    { skip: !isOpen }
-  );
-
-  // Fetch quiz data
+  // Fetch quiz data separately (for proper cache invalidation)
   const {
     data: quizData,
     isLoading: isLoadingQuiz,
@@ -41,39 +32,53 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
     { skip: !isOpen }
   );
 
-  // Merge overview and quiz data
-  const cardData = useMemo(() => {
-    if (!overviewData || !quizData) return null;
-    return {
-      ...overviewData,
-      quizzes: quizData.quizzes || [],
-    };
-  }, [overviewData, quizData]);
-
-  const isLoading = isLoadingReport || isLoadingOverview || isLoadingQuiz;
-  const isError = isErrorReport || isErrorOverview || isErrorQuiz;
+  const cardData = reportData?.cardData;
+  const isLoading = isLoadingReport || isLoadingQuiz;
+  const isError = isErrorReport || isErrorQuiz;
 
   const mergedReport = useMemo(() => {
-    if (!reportData || !cardData || !cardData.quizzes) return [];
+    if (!quizData?.quizzes) return [];
 
-    const quizMap = new Map(cardData.quizzes.map((quiz) => [quiz._id, quiz]));
+    // Create a map of attempts by quizId for quick lookup
+    const attemptsMap = new Map();
+    if (reportData?.attempts) {
+      reportData.attempts.forEach((attempt) => {
+        attemptsMap.set(attempt.quizId, attempt);
+      });
+    }
 
-    // when the ordering of quizzes has change user still has old data probably fix this later
-    return reportData
-      .map((attempt) => {
-        const quizDetails = quizMap.get(attempt.quizId);
-        if (!quizDetails) return null;
+    // Map ALL quizzes, with attempts data if available, otherwise defaults
+    return quizData.quizzes.map((quiz) => {
+      const attempt = attemptsMap.get(quiz._id);
 
+      if (attempt) {
+        // Quiz has been attempted - use actual data
         return {
           ...attempt,
-          question: quizDetails.quizQuestion,
-          answer: quizDetails.quizAnswer,
-          options:
-            [...quizDetails.options, { value: quizDetails.quizAnswer }] || [],
+          question: quiz.quizQuestion,
+          answer: quiz.quizAnswer,
+          options: [...quiz.options, { value: quiz.quizAnswer }] || [],
         };
-      })
-      .filter(Boolean);
-  }, [reportData, cardData]);
+      } else {
+        // Quiz not attempted - use default values
+        return {
+          quizId: quiz._id,
+          question: quiz.quizQuestion,
+          answer: quiz.quizAnswer,
+          options: [...quiz.options, { value: quiz.quizAnswer }] || [],
+          // Default stats
+          totalAttempts: 0,
+          timesCorrect: 0,
+          answerAttempts: 0,
+          correctAttempts: 0,
+          incorrectAttempts: 0,
+          accuracy: 0,
+          lastAttemptedAt: null,
+          userAnswers: [],
+        };
+      }
+    });
+  }, [reportData, quizData]);
 
   const currentQuestion = mergedReport[currentQuestionIndex];
 
@@ -92,7 +97,10 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
     if (currentQuestionIndex < mergedReport.length - 1) {
       setSlideDirection("left");
       setTimeout(() => {
-        setCurrentQuestionIndex((prev) => prev + 1);
+        setCurrentQuestionIndex((prev) => {
+          if (prev >= mergedReport.length - 1) return prev;
+          return prev + 1;
+        });
         setSlideDirection("in-right");
       }, 150);
     }
@@ -102,7 +110,10 @@ function DetailedReportModal({ cardId, isOpen, onClose }) {
     if (currentQuestionIndex > 0) {
       setSlideDirection("right");
       setTimeout(() => {
-        setCurrentQuestionIndex((prev) => prev - 1);
+        setCurrentQuestionIndex((prev) => {
+          if (prev <= 0) return prev;
+          return prev - 1;
+        });
         setSlideDirection("in-left");
       }, 150);
     }

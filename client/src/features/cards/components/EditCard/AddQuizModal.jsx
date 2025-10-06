@@ -37,12 +37,17 @@ const AddQuizModal = ({ cardId }) => {
   const [selectedFlashcardId, setSelectedFlashcardId] = useState(null);
   const [options, setOptions] = useState([]);
   const [minimumOptions, setMinimumOptions] = useState(2);
+  const [shouldFetchFlashcards, setShouldFetchFlashcards] = useState(false);
   const user = useSelector(selectCurrentUser);
 
-  const { data: reviewTextData } = useGetIndividualCardQuery({
-    id: cardId,
-    view: "review_text",
-  });
+  const { data: reviewTextData, isLoading: isLoadingFlashcards } =
+    useGetIndividualCardQuery(
+      {
+        id: cardId,
+        view: "review_text",
+      },
+      { skip: !shouldFetchFlashcards }
+    );
   const [updateCard, { error, isLoading }] = usePatchUpdateCardMutation();
   const questionEditorRef = useRef(null);
   const answerEditorRef = useRef(null);
@@ -283,6 +288,8 @@ const AddQuizModal = ({ cardId }) => {
                     value={selectedFlashcardId}
                     onChange={setSelectedFlashcardId}
                     placeholder="Search for a flashcard..."
+                    isLoading={isLoadingFlashcards}
+                    onOpen={() => setShouldFetchFlashcards(true)}
                   />
                 </div>
 

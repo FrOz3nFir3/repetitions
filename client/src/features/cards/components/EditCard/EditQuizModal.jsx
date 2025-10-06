@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Modal from "../../../../components/ui/Modal";
-import { usePatchUpdateCardMutation } from "../../../../api/apiSlice";
+import {
+  usePatchUpdateCardMutation,
+  useGetIndividualCardQuery,
+} from "../../../../api/apiSlice";
 import RichTextEditor from "../../../../components/ui/RichTextEditor";
 import {
   ArrowPathIcon,
@@ -28,17 +31,22 @@ import toast from "react-hot-toast";
 
 let tempIdCounter = 0;
 
-const EditQuizModal = ({
-  isOpen,
-  onClose,
-  cardId,
-  flashcardId,
-  quiz,
-  flashcards,
-}) => {
+const EditQuizModal = ({ isOpen, onClose, cardId, flashcardId, quiz }) => {
   const user = useSelector(selectCurrentUser);
+  const [shouldFetchFlashcards, setShouldFetchFlashcards] = useState(false);
   const [updateCard, { error, isLoading }] = usePatchUpdateCardMutation();
   const errorRef = useRef(null);
+
+  const { data: reviewTextData, isLoading: isLoadingFlashcards } =
+    useGetIndividualCardQuery(
+      {
+        id: cardId,
+        view: "review_text",
+      },
+      { skip: !shouldFetchFlashcards }
+    );
+
+  const flashcards = reviewTextData?.review || [];
 
   const originalState = useMemo(
     () => ({
@@ -351,6 +359,8 @@ const EditQuizModal = ({
                     value={selectedFlashcardId}
                     onChange={setSelectedFlashcardId}
                     placeholder="Search for a flashcard..."
+                    isLoading={isLoadingFlashcards}
+                    onOpen={() => setShouldFetchFlashcards(true)}
                   />
                 </div>
 

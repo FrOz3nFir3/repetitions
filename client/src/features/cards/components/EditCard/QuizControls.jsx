@@ -14,6 +14,8 @@ const QuizControls = ({
   onFlashcardSelect,
   flashcardOptions,
   filteredCount,
+  isLoadingFlashcards,
+  onFlashcardDropdownOpen,
 }) => {
   const handleSearchChange = (e) => {
     onSearchChange(e);
@@ -67,6 +69,8 @@ const QuizControls = ({
                 value={selectedFlashcardId}
                 onChange={onFlashcardSelect}
                 placeholder="Filter by flashcard..."
+                isLoading={isLoadingFlashcards}
+                onOpen={onFlashcardDropdownOpen}
               />
             </div>
           </div>

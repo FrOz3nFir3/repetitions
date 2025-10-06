@@ -37,13 +37,18 @@ const QuizManagementView = ({
     searchParams.get("flashcardFilter") || null
   );
 
+  const [shouldFetchFlashcards, setShouldFetchFlashcards] = useState(false);
   const [updateCard] = usePatchUpdateCardMutation();
 
-  // Fetch review text data for flashcard dropdown options
-  const { data: reviewTextData } = useGetIndividualCardQuery({
-    id: cardId,
-    view: "review_text",
-  });
+  // Lazy load review text data only when dropdown is opened
+  const { data: reviewTextData, isLoading: isLoadingFlashcards } =
+    useGetIndividualCardQuery(
+      {
+        id: cardId,
+        view: "review_text",
+      },
+      { skip: !shouldFetchFlashcards }
+    );
 
   const filteredQuizzes = useMemo(() => {
     if (!selectedFlashcardId) {
@@ -140,6 +145,8 @@ const QuizManagementView = ({
           onFlashcardSelect={handleFlashcardSelect}
           flashcardOptions={flashcardDropdownOptions}
           filteredCount={filteredQuizzes.length}
+          isLoadingFlashcards={isLoadingFlashcards}
+          onFlashcardDropdownOpen={() => setShouldFetchFlashcards(true)}
         />
 
         {/* Navigation Section - Only show if we have quizzes */}
@@ -199,7 +206,6 @@ const QuizManagementView = ({
           quiz={selectedQuiz}
           cardId={cardId}
           flashcardId={selectedQuiz.flashcardId}
-          flashcards={reviewTextData?.review || []}
         />
       )}
 

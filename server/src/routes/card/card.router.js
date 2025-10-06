@@ -25,7 +25,7 @@ cardRouter.get("/:id/reviewers", requireAuthenticationWithCSRF, checkReviewPermi
 // Apply invalidation middleware to mutation endpoints
 cardRouter.post("/:id/reviewers", requireAuthenticationWithCSRF, checkReviewPermissions, createInvalidationMiddleware.auto(), httpAddCardReviewers);
 cardRouter.delete("/:id/reviewers/:userId", requireAuthenticationWithCSRF, checkReviewPermissions, createInvalidationMiddleware.auto(), httpRemoveCardReviewer);
-cardRouter.patch("/", requireAuthenticationWithCSRF, checkReviewPermissions, createInvalidationMiddleware.cards(), httpPatchUpdateCard);
+cardRouter.patch("/", requireAuthenticationWithCSRF, checkReviewPermissions, createInvalidationMiddleware.auto(), httpPatchUpdateCard);
 cardRouter.post("/:id/review-queue/:itemId/accept", requireAuthenticationWithCSRF, checkReviewPermissions, createInvalidationMiddleware.auto(), httpAcceptReviewItem);
 cardRouter.post("/:id/review-queue/:itemId/reject", requireAuthenticationWithCSRF, checkReviewPermissions, createInvalidationMiddleware.auto(), httpRejectReviewItem);
 

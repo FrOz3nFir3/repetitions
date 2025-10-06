@@ -254,13 +254,12 @@ export async function getUserQuizProgress(
   return { cards, total };
 }
 
-// later have the cardId data itself on here to optimize api call
 export async function getDetailedReport(userId, cardId) {
   if (
     !mongoose.Types.ObjectId.isValid(userId) ||
     !mongoose.Types.ObjectId.isValid(cardId)
   ) {
-    return [];
+    return { attempts: [], cardData: null };
   }
 
   const userObjectId = new mongoose.Types.ObjectId(`${userId}`);
@@ -271,17 +270,33 @@ export async function getDetailedReport(userId, cardId) {
     { $unwind: "$studying" },
     { $match: { "studying.cardId": cardObjectId } },
     {
+      $lookup: {
+        from: "cards",
+        localField: "studying.cardId",
+        foreignField: "_id",
+        as: "cardInfo",
+      },
+    },
+    { $unwind: { path: "$cardInfo", preserveNullAndEmptyArrays: true } },
+    {
       $project: {
         _id: 0,
         attempts: { $ifNull: ["$studying.quiz.attempts", []] },
+        cardData: {
+          _id: "$cardInfo._id",
+          category: "$cardInfo.category",
+          "main-topic": "$cardInfo.main-topic",
+          "sub-topic": "$cardInfo.sub-topic",
+          // Don't include quizzes - frontend will fetch separately
+        },
       },
     },
   ]);
 
   if (result.length > 0) {
-    return result[0].attempts;
+    return result[0];
   } else {
-    return [];
+    return { attempts: [], cardData: null };
   }
 }
 

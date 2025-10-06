@@ -334,10 +334,14 @@ function extractTagsFromRequest(req, responseData, customTagExtractor) {
         // Add specific card tags if card ID is present
         const cardId = params.id || params.cardId || query.cardId;
         if (cardId) {
-            tags.push(`CardOverview:${cardId}`);
-
             // Add view-specific tags based on query parameters
             const view = query.view;
+
+            // Only add CardOverview tag for overview view or when no view is specified
+            if (!view || view === 'overview') {
+                tags.push(`CardOverview:${cardId}`);
+            }
+
             if (view === 'edit_flashcards' || view === 'review' || view === 'review_text') {
                 tags.push(`CardFlashcards:${cardId}`);
             }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { createPortal } from "react-dom";
 
@@ -7,13 +7,15 @@ const SearchableDropdown = ({
   value,
   onChange,
   placeholder = "Select an option",
+  isLoading = false,
+  onOpen,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef(null);
 
   const selectedOption = useMemo(() => {
-    const found = options.find((opt) => opt.value === value);
+    const found = options?.find((opt) => opt.value === value);
     return found;
   }, [options, value]);
 
@@ -62,12 +64,18 @@ const SearchableDropdown = ({
     setSearchTerm(e.target.value);
     if (!isOpen) {
       setIsOpen(true);
+      onOpen?.();
     }
+  };
+
+  const handleFocus = () => {
+    setIsOpen(true);
+    onOpen?.();
   };
 
   const filteredOptions = useMemo(
     () =>
-      options.filter((option) => {
+      options?.filter((option) => {
         if (!searchTerm) return true;
         // When a user is typing, we should still allow them to search
         if (searchTerm !== selectedOption?.label || "") {
@@ -85,7 +93,7 @@ const SearchableDropdown = ({
         // If a selection is made, searchTerm will match the label,
         // but we should still show all options so the user can change their selection
         return true;
-      }),
+      }) || [],
     [options, searchTerm, selectedOption]
   );
 
@@ -96,7 +104,7 @@ const SearchableDropdown = ({
           type="text"
           value={searchTerm}
           onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
+          onFocus={handleFocus}
           placeholder={placeholder}
           className="w-full px-4 py-3 pr-12 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl hover:border-indigo-500 dark:hover:border-indigo-400 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/20 focus:outline-none shadow-lg hover:shadow-xl transition-all duration-300"
         />
@@ -138,7 +146,27 @@ const SearchableDropdown = ({
 
           {/* Dropdown */}
           <div className="absolute z-[10000] w-full mt-2 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl shadow-2xl max-h-80 overflow-y-auto">
-            {filteredOptions.length > 0 ? (
+            {isLoading ? (
+              /* Loading Skeleton - Matches dropdown item structure */
+              <div className="py-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="px-4 py-4 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        {/* Label skeleton */}
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-2"></div>
+                        {/* Description skeleton - 3 lines */}
+                        <div className="space-y-1.5">
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
                 <button
                   key={option.value}
