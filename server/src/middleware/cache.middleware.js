@@ -56,13 +56,7 @@ export function cacheMiddleware(options = {}) {
                 res.set('X-Cache', 'HIT');
                 res.set('X-Cache-Key', cacheKey);
 
-                // Strip ETag and Last-Modified headers to prevent 304 responses
-                // When serving from Redis cache, always return 200 with full data
                 const headers = { ...(cachedData.headers || {}) };
-                delete headers['etag'];
-                delete headers['ETag'];
-                delete headers['last-modified'];
-                delete headers['Last-Modified'];
 
                 // Return cached response with appropriate status and headers
                 return res.status(cachedData.statusCode || 200)
@@ -115,6 +109,7 @@ export function cacheMiddleware(options = {}) {
 
             // Override res.send to capture non-JSON responses
             res.send = function (data) {
+
                 if (!responseSent) {
                     responseBody = data;
                     responseSent = true;
@@ -264,13 +259,8 @@ function inferCacheTypeFromUrl(path) {
  */
 async function cacheResponse(req, responseData, cacheKey, options) {
     try {
-        // Handle 304 Not Modified - skip caching (client already has data)
-        if (responseData.statusCode === 304) {
-            return;
-        }
-
-        // Only cache successful responses (2xx status codes)
-        if (responseData.statusCode < 200 || responseData.statusCode >= 300) {
+        // Only cache successful responses (2xx status codes) and only one 304 not modified request
+        if (responseData.statusCode < 200 || (responseData.statusCode >= 300 && responseData.statusCode !== 304)) {
             return;
         }
 
