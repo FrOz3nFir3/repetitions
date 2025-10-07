@@ -8,6 +8,7 @@ import {
 import { Toaster } from "react-hot-toast";
 
 import Header from "../components/layout/Header/Header";
+import ErrorBoundary from "../components/ErrorBoundary/ErrorBoundary";
 
 // Lazy-loaded route wrappers
 const LandingPageRoute = lazy(() =>
@@ -40,27 +41,29 @@ const NotFoundRoute = lazy(() =>
 
 // Root layout component
 const RootLayout = () => (
-  <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
-    <Header />
-    <Outlet />
-    <Toaster />
-    <ScrollRestoration
-      getKey={(location, matches) => {
-        // probably look into this later
-        if (
-          location.search.includes("cardNo") ||
-          location.search.includes("quizNo") ||
-          location.search.includes("flashcardFilter") ||
-          location.search.includes("search") ||
-          location.pathname === "/categories" ||
-          location.pathname.startsWith("/category")
-        ) {
-          return location.pathname;
-        }
-        return location.key;
-      }}
-    />
-  </div>
+  <ErrorBoundary>
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen">
+      <Header />
+      <Outlet />
+      <Toaster />
+      <ScrollRestoration
+        getKey={(location, matches) => {
+          // probably look into this later
+          if (
+            location.search.includes("cardNo") ||
+            location.search.includes("quizNo") ||
+            location.search.includes("flashcardFilter") ||
+            location.search.includes("search") ||
+            location.pathname === "/categories" ||
+            location.pathname.startsWith("/category")
+          ) {
+            return location.pathname;
+          }
+          return location.key;
+        }}
+      />
+    </div>
+  </ErrorBoundary>
 );
 
 // Create the router
@@ -110,8 +113,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  // have error boundary later
-  return <RouterProvider router={router} />;
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
+  );
 }
 
 export default App;
