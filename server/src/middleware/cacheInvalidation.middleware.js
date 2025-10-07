@@ -82,7 +82,7 @@ export function invalidationMiddleware(options = {}) {
 
         } catch (error) {
             // Log invalidation middleware error but don't interrupt request flow
-            console.log(`Cache invalidation middleware error for ${req.method} ${req.originalUrl}:`, error.message);
+            console.log('Cache invalidation middleware error for %s %s:', req.method, req.originalUrl, error.message);
             next();
         }
     };
@@ -101,7 +101,7 @@ async function performCacheInvalidation(req, res, responseData, options) {
         // Only invalidate for successful responses (2xx status codes)
         if (res.statusCode < 200 || res.statusCode >= 300) {
             if (CACHE_CONFIG.DEBUG?.ENABLED) {
-                console.log(`[INVALIDATION] Skipped - non-2xx status: ${res.statusCode} for ${req.method} ${req.originalUrl}`);
+                console.log('[INVALIDATION] Skipped - non-2xx status: %s for %s %s', res.statusCode, req.method, req.originalUrl);
             }
             return;
         }
@@ -110,12 +110,12 @@ async function performCacheInvalidation(req, res, responseData, options) {
         const tagsToInvalidate = await extractInvalidationTags(req, responseData, options);
 
         if (CACHE_CONFIG.DEBUG?.ENABLED) {
-            console.log(`[INVALIDATION] ${req.method} ${req.originalUrl} - Tags to invalidate:`, tagsToInvalidate);
+            console.log('[INVALIDATION] %s %s - Tags to invalidate:', req.method, req.originalUrl, tagsToInvalidate);
         }
 
         if (tagsToInvalidate.length === 0) {
             if (CACHE_CONFIG.DEBUG?.ENABLED) {
-                console.log(`[INVALIDATION] No tags to invalidate for ${req.method} ${req.originalUrl}`);
+                console.log('[INVALIDATION] No tags to invalidate for %s %s', req.method, req.originalUrl);
             }
             return;
         }
@@ -123,12 +123,14 @@ async function performCacheInvalidation(req, res, responseData, options) {
         // Perform cache invalidation
         const invalidatedCount = await cacheService.invalidateByTags(tagsToInvalidate);
 
-        // Always log invalidations (not just when DEBUG is enabled)
-        console.log(`[CACHE INVALIDATION] ${req.method} ${req.originalUrl}: ${invalidatedCount} keys invalidated for tags [${tagsToInvalidate.join(', ')}]`);
+        // log invalidations (not just when DEBUG is enabled)
+        if (CACHE_CONFIG.DEBUG.ENABLED) {
+            console.log('[CACHE INVALIDATION] %s %s: %s keys invalidated for tags [%s]', req.method, req.originalUrl, invalidatedCount, tagsToInvalidate.join(', '));
+        }
 
 
     } catch (error) {
-        console.log(`Error performing cache invalidation for ${req.originalUrl}:`, error.message);
+        console.log('Error performing cache invalidation for %s:', req.originalUrl, error.message);
     }
 }
 
@@ -186,7 +188,7 @@ async function extractStandardInvalidationTags(req, responseData) {
     const skipFlags = invalidationUtils.extractSkipFlags(req);
 
     if (CACHE_CONFIG.DEBUG?.ENABLED) {
-        console.log(`[INVALIDATION EXTRACT] ${method} ${fullPath} - userId: ${userId}, cardId: ${cardId}`);
+        console.log('[INVALIDATION EXTRACT] %s %s - userId: %s, cardId: %s', method, fullPath, userId, cardId);
     }
 
     // Card operations invalidation
@@ -252,7 +254,7 @@ async function extractStandardInvalidationTags(req, responseData) {
                     req.body.cardId || req.body.card_id || req.body._id || req.body.id;
 
                 if (CACHE_CONFIG.DEBUG?.ENABLED && CACHE_CONFIG.DEBUG?.LOG_INVALIDATIONS) {
-                    console.log(`[INVALIDATION] Review progress - reviewId: ${reviewId}, userId: ${userId}`);
+                    console.log('[INVALIDATION] Review progress - reviewId: %s, userId: %s', reviewId, userId);
                 }
 
                 if (reviewId && userId) {

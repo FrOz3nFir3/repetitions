@@ -49,7 +49,7 @@ export function cacheMiddleware(options = {}) {
             if (cachedData) {
                 // Cache hit - return cached response immediately
                 if (CACHE_CONFIG.DEBUG.ENABLED && CACHE_CONFIG.DEBUG.LOG_CACHE_HITS) {
-                    console.log(`[CACHE HIT] ${req.method} ${req.originalUrl}`);
+                    console.log('[CACHE HIT] %s %s', req.method, req.originalUrl);
                 }
 
                 // Set cache headers to indicate cached response
@@ -66,7 +66,7 @@ export function cacheMiddleware(options = {}) {
 
             // Cache miss - continue to next middleware and intercept response
             if (CACHE_CONFIG.DEBUG.ENABLED && CACHE_CONFIG.DEBUG.LOG_CACHE_MISSES) {
-                console.log(`[CACHE MISS] ${req.method} ${req.originalUrl}`);
+                console.log('[CACHE MISS] %s %s', req.method, req.originalUrl);
             }
 
             // Store original response methods for interception
@@ -150,7 +150,7 @@ export function cacheMiddleware(options = {}) {
 
         } catch (error) {
             // Log cache error but don't interrupt request flow
-            console.log(`Cache middleware error for ${req.method} ${req.originalUrl}:`, error.message);
+            console.log('Cache middleware error for %s %s:', req.method, req.originalUrl, error.message);
             next();
         }
     };
@@ -280,11 +280,11 @@ async function cacheResponse(req, responseData, cacheKey, options) {
         const success = await cacheService.set(cacheKey, responseData, ttl, tags);
 
         if (CACHE_CONFIG.DEBUG.ENABLED && !success) {
-            console.log(`[CACHE] Failed to cache ${req.originalUrl}`);
+            console.log('[CACHE] Failed to cache %s', req.originalUrl);
         }
 
     } catch (error) {
-        console.log(`Error caching response for ${req.originalUrl}:`, error.message);
+        console.log('Error caching response for %s:', req.originalUrl, error.message);
     }
 }
 

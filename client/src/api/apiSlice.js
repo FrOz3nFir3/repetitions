@@ -645,10 +645,10 @@ export const apiSlice = createApi({
     }),
 
     addReviewers: builder.mutation({
-      query: ({ cardId, userIds }) => ({
+      query: ({ cardId, usernames }) => ({
         url: `/card/${cardId}/reviewers`,
         method: "POST",
-        body: { userIds },
+        body: { usernames },
       }),
       invalidatesTags: (result, error, { cardId }) => {
         if (!error) {
@@ -659,8 +659,8 @@ export const apiSlice = createApi({
     }),
 
     removeReviewer: builder.mutation({
-      query: ({ cardId, userId }) => ({
-        url: `/card/${cardId}/reviewers/${userId}`,
+      query: ({ cardId, username }) => ({
+        url: `/card/${cardId}/reviewers/${username}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, { cardId }) => {

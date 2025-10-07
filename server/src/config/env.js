@@ -37,7 +37,7 @@ export const env = {
     REDIS_URI: process.env.REDIS_URI || "",
     // Cache Configuration
     REDIS_CACHE_ENABLED: process.env.REDIS_CACHE_ENABLED !== "false", // Default: true
-    REDIS_CACHE_DEBUG_ENABLED: process.env.REDIS_CACHE_DEBUG_ENABLED !== "true", // Default: false
+    REDIS_CACHE_DEBUG_ENABLED: process.env.REDIS_CACHE_DEBUG_ENABLED === "true", // Default: false
 
 
     // Rate Limiting

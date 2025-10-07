@@ -18,10 +18,13 @@ export const getClientIp = (req) => {
   let ip = req.ip;
 
   if (env.ENABLE_PROXY) {
-    const clientIp = req.headers['cf-connecting-ip'] ||
-      req.headers["x-vercel-forwarded-for"] ||
+    // later have req headers as per the proxy setup
+    const clientIp =
       req.headers["x-forwarded-for"]
-    ip = clientIp;
+
+    if (clientIp) {
+      ip = clientIp;
+    }
   }
 
   return ip ?? req.socket.remoteAddress;

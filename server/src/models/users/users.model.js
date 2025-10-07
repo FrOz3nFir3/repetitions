@@ -1199,6 +1199,7 @@ export async function searchUsers(searchTerm, page = 1, limit = 10) {
           { $limit: limit },
           {
             $project: {
+              _id: 0,
               name: 1,
               username: 1,
             },

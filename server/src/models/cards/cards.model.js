@@ -1988,6 +1988,65 @@ export async function processUpdateRequest(
 }
 
 /**
+ * Add reviewers to a card using usernames instead of IDs
+ * @param {string} cardId - Card ID
+ * @param {string[]} usernames - Array of usernames
+ * @param {string} addedByUserId - User ID of person adding reviewers
+ * @returns {Promise<Object>} Updated card
+ */
+export async function addCardReviewersByUsername(cardId, usernames, addedByUserId) {
+  if (!Types.ObjectId.isValid(cardId)) {
+    throw new Error("Invalid card ID");
+  }
+
+  if (!Array.isArray(usernames) || usernames.length === 0) {
+    throw new Error("Usernames must be a non-empty array");
+  }
+
+  // Look up user IDs from usernames
+  const User = (await import("../users/users.mongo.js")).default;
+  const users = await User.find(
+    { username: { $in: usernames } },
+    { _id: 1, username: 1 }
+  );
+
+  if (users.length !== usernames.length) {
+    const foundUsernames = users.map(u => u.username);
+    const notFound = usernames.filter(u => !foundUsernames.includes(u));
+    throw new Error(`Users not found: ${notFound.join(", ")}`);
+  }
+
+  const userIds = users.map(u => u._id.toString());
+
+  // Use existing function with IDs
+  return await addCardReviewers(cardId, userIds, addedByUserId);
+}
+
+/**
+ * Remove a reviewer from a card using username instead of ID
+ * @param {string} cardId - Card ID
+ * @param {string} username - Username to remove
+ * @param {string} removedByUserId - User ID of person removing reviewer
+ * @returns {Promise<Object>} Updated card
+ */
+export async function removeCardReviewerByUsername(cardId, username, removedByUserId) {
+  if (!Types.ObjectId.isValid(cardId)) {
+    throw new Error("Invalid card ID");
+  }
+
+  // Look up user ID from username
+  const User = (await import("../users/users.mongo.js")).default;
+  const user = await User.findOne({ username }, { _id: 1 });
+
+  if (!user) {
+    throw new Error(`User not found: ${username}`);
+  }
+
+  // Use existing function with ID
+  return await removeCardReviewer(cardId, user._id.toString(), removedByUserId);
+}
+
+/**
  * Accept a review queue item and apply the change to the card
  */
 export async function acceptReviewItem(cardId, itemId, userId) {
@@ -2705,7 +2764,6 @@ export async function getCardReviewers(cardId) {
             input: "$reviewerDetails",
             as: "reviewer",
             in: {
-              _id: "$$reviewer._id",
               name: "$$reviewer.name",
               username: "$$reviewer.username",
             },

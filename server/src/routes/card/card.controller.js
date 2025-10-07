@@ -406,7 +406,7 @@ export async function httpGetCardReviewers(req, res) {
 export async function httpAddCardReviewers(req, res) {
   const token = req.token;
   const { id: cardId } = req.params;
-  const { userIds } = req.body;
+  const { usernames } = req.body;
 
   if (!token) {
     return res.status(401).json({ error: "Authentication required" });
@@ -420,14 +420,15 @@ export async function httpAddCardReviewers(req, res) {
   }
 
   // Validate input
-  if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+  if (!usernames || !Array.isArray(usernames) || usernames.length === 0) {
     return res.status(400).json({
-      error: "userIds must be a non-empty array of user IDs",
+      error: "usernames must be a non-empty array of usernames",
     });
   }
 
   try {
-    await addCardReviewers(cardId, userIds, token.id);
+    const { addCardReviewersByUsername } = await import("../../models/cards/cards.model.js");
+    await addCardReviewersByUsername(cardId, usernames, token.id);
     res.json({
       ok: true,
       message: "Reviewers added successfully",
@@ -437,13 +438,13 @@ export async function httpAddCardReviewers(req, res) {
 
     if (
       error.message.includes("Invalid card ID") ||
-      error.message.includes("invalid user IDs")
+      error.message.includes("Usernames must")
     ) {
       return res.status(400).json({ error: error.message });
     }
     if (
       error.message.includes("Card not found") ||
-      error.message.includes("users not found")
+      error.message.includes("Users not found")
     ) {
       return res.status(404).json({ error: error.message });
     }
@@ -456,7 +457,7 @@ export async function httpAddCardReviewers(req, res) {
 }
 export async function httpRemoveCardReviewer(req, res) {
   const token = req.token;
-  const { id: cardId, userId } = req.params;
+  const { id: cardId, username } = req.params;
 
   if (!token) {
     return res.status(401).json({ error: "Authentication required" });
@@ -470,7 +471,8 @@ export async function httpRemoveCardReviewer(req, res) {
   }
 
   try {
-    const updatedCard = await removeCardReviewer(cardId, userId, token.id);
+    const { removeCardReviewerByUsername } = await import("../../models/cards/cards.model.js");
+    await removeCardReviewerByUsername(cardId, username, token.id);
     res.json({
       ok: true,
       message: "Reviewer removed successfully",
@@ -480,12 +482,14 @@ export async function httpRemoveCardReviewer(req, res) {
 
     if (
       error.message.includes("Invalid card ID") ||
-      error.message.includes("Invalid") ||
-      error.message.includes("user ID")
+      error.message.includes("Invalid")
     ) {
       return res.status(400).json({ error: error.message });
     }
-    if (error.message.includes("Card not found")) {
+    if (
+      error.message.includes("Card not found") ||
+      error.message.includes("User not found")
+    ) {
       return res.status(404).json({ error: error.message });
     }
     if (
