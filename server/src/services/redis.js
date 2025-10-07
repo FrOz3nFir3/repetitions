@@ -1,13 +1,10 @@
 import { createClient } from "redis";
-import dotenv from "dotenv";
-
-// Load env first for faster access
-dotenv.config({ path: "../.env" });
+import env from "../config/env.js";
 
 const MAX_RETRIES = 5;
 
 const client = createClient({
-  url: process.env.REDIS_URI,
+  url: env.REDIS_URI,
   socket: {
     reconnectStrategy: (retryCount) => {
       // Log the retry attempt

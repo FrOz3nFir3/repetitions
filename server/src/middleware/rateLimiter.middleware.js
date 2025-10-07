@@ -2,25 +2,29 @@ import rateLimit, { MemoryStore } from "express-rate-limit";
 import { LRUCache } from "lru-cache";
 import { redis, redisConnect } from "../services/redis.js";
 import { RedisStore } from "rate-limit-redis";
+import env from "../config/env.js";
 
 try {
   await redisConnect();
-} catch {
+} catch { }
 
-}
 console.log(
   !redis.isReady
     ? `Redis not connected using Memory Store with lru cache for rate limiter`
     : `Redis connected to rate limiter`
 );
 
-const getClientIp = (req) => {
-  const ip =
-    req.headers["x-vercel-forwarded-for"] ||
-    req.headers["x-forwarded-for"] ||
-    req.socket.remoteAddress;
+export const getClientIp = (req) => {
+  let ip = req.ip;
 
-  return ip || req.ip;
+  if (env.ENABLE_PROXY) {
+    const clientIp = req.headers['cf-connecting-ip'] ||
+      req.headers["x-vercel-forwarded-for"] ||
+      req.headers["x-forwarded-for"]
+    ip = clientIp;
+  }
+
+  return ip ?? req.socket.remoteAddress;
 };
 
 const ttl = 12 * 60 * 60 * 1000; // 12 hours;
@@ -87,12 +91,12 @@ export const authLimiter = rateLimit({
   store: redis.isReady
     ? new RedisStore({
       sendCommand: (...args) => {
-        // edge case left to handle later 
+        // edge case left to handle later
         if (!redis.isReady) return [];
         try {
-          return redis.sendCommand(args)
+          return redis.sendCommand(args);
         } catch (e) {
-          // fail silently? 
+          // fail silently?
         }
       },
     })
@@ -102,12 +106,13 @@ export const authLimiter = rateLimit({
 // A more general rate limiter authenticated API endpoints
 export const globalApiLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1-minute window
+  skip: (req) => {
+    const key = getClientIp(req);
+    const whiteListIp = env.WHITELIST_IP;
+    return whiteListIp.includes(key);
+  },
   max: async (req, res) => {
     const key = req.token ? req.token.id : getClientIp(req);
-    const whiteListIp = process.env.WHITELIST_IP?.split(",") || [];
-    if (whiteListIp.includes(key)) {
-      return Number.MAX_SAFE_INTEGER;
-    }
 
     const strikes = redis.isReady
       ? Number(await redis.get(key))
@@ -156,12 +161,12 @@ export const globalApiLimiter = rateLimit({
   store: redis.isReady
     ? new RedisStore({
       sendCommand: (...args) => {
-        // edge case left to handle later 
+        // edge case left to handle later
         if (!redis.isReady) return [];
         try {
-          return redis.sendCommand(args)
+          return redis.sendCommand(args);
         } catch (e) {
-          // fail silently? 
+          // fail silently?
         }
       },
     })

@@ -1,6 +1,15 @@
 import { getConnectionStatus } from "../services/mongo.js";
 import { cacheService } from "../services/cache.js";
+import { getClientIp } from "../middleware/rateLimiter.middleware.js"
+import env from "../config/env.js";
 
+export async function httpGetClientIp(req, res) {
+    res.json({
+        rateLimitIp: getClientIp(req),
+        ip: req.ip,
+        socketAddress: req.socket.remoteAddress
+    })
+}
 
 export async function httpGetHealthStatus(req, res) {
     const mongoStatus = getConnectionStatus();
@@ -21,7 +30,7 @@ export async function httpGetHealthStatus(req, res) {
         },
         uptime: process.uptime(),
         timestamp: new Date().toLocaleString(),
-        environment: process.env.NODE_ENV || "development",
+        environment: env.NODE_ENV,
     });
 }
 

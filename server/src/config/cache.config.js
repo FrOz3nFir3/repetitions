@@ -5,9 +5,11 @@
  * cache-related settings based on environment variables and defaults.
  */
 
+import env from "./env.js";
+
 export const CACHE_CONFIG = {
     // Cache behavior settings
-    ENABLED: process.env.REDIS_CACHE_ENABLED !== "false", // Enabled by default
+    ENABLED: env.REDIS_CACHE_ENABLED !== false, // Enabled by default
 
     // Time To Live (TTL) values in seconds - hardcoded for consistency
     TTL: {
@@ -43,17 +45,17 @@ export const CACHE_CONFIG = {
     // Cache statistics and monitoring - always enabled
     STATS: {
         ENABLED: true,
-        LOG_INTERVAL: 300000, // 5 minutes
+        LOG_INTERVAL: 900000, // 15 minutes
     },
 
     // Debug logging - controlled by single env var
     DEBUG: {
-        ENABLED: process.env.CACHE_DEBUG_ENABLED === "true", // Disabled by default
+        ENABLED: env.REDIS_CACHE_DEBUG_ENABLED === true, // Disabled by default
         // When debug is enabled, log everything
-        LOG_CACHE_HITS: process.env.CACHE_DEBUG_ENABLED === "true",
-        LOG_CACHE_MISSES: process.env.CACHE_DEBUG_ENABLED === "true",
-        LOG_INVALIDATIONS: process.env.CACHE_DEBUG_ENABLED === "true",
-        LOG_TAG_OPERATIONS: process.env.CACHE_DEBUG_ENABLED === "true",
+        LOG_CACHE_HITS: env.REDIS_CACHE_DEBUG_ENABLED === true,
+        LOG_CACHE_MISSES: env.REDIS_CACHE_DEBUG_ENABLED === true,
+        LOG_INVALIDATIONS: env.REDIS_CACHE_DEBUG_ENABLED === true,
+        LOG_TAG_OPERATIONS: env.REDIS_CACHE_DEBUG_ENABLED === true,
     },
 };
 

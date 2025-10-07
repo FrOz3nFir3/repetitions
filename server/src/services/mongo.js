@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
 import { setServers } from "node:dns/promises";
-import dotenv from "dotenv";
+import env from "../config/env.js";
 
-// Load env first for faster access
-dotenv.config({ path: "../.env" });
 // Set DNS servers for faster MongoDB Atlas resolution
 setServers(["1.1.1.1", "8.8.8.8"]);
 
-// Update below to match your own MongoDB connection string.
-const MONGO_URI = process.env.MONGO_URI;
+// MongoDB connection string from environment
+const MONGO_URI = env.MONGO_URI;
 
 mongoose.connection.once("open", () => {
   console.log("MongoDB connection ready!");

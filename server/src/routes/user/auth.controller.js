@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+import env from "../../config/env.js";
+
+const ACCESS_TOKEN_SECRET = env.ACCESS_TOKEN_SECRET;
+const REFRESH_TOKEN_SECRET = env.REFRESH_TOKEN_SECRET;
 
 const ACCESS_TOKEN_EXPIRY_HOURS = 3;
 const REFRESH_TOKEN_EXPIRY_DAYS = 30;
@@ -109,7 +109,7 @@ export function setTokens(res, user) {
   const refreshToken = createRefreshToken(user._id);
   const csrfToken = createCSRFToken(); // Generate CSRF token
 
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = env.NODE_ENV === "production";
 
   // TODO: make samesite back to lax after domain is same
   res.cookie("jwt_access", accessToken, {

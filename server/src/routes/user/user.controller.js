@@ -36,7 +36,9 @@ import EmailValidator from "email-deep-validator";
 const emailValidator = new EmailValidator({ timeout: 10000 });
 import { userDetailsProjection } from "../../utils/constants.js";
 
-const isProduction = process.env.NODE_ENV === "production";
+import env from "../../config/env.js";
+
+const isProduction = env.NODE_ENV === "production";
 
 export async function httpGetPublicUserByUsername(req, res) {
   const { username } = req.params;

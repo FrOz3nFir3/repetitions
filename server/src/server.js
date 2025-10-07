@@ -1,7 +1,8 @@
 import app from "./app.js";
 import { initMongoDB } from "./services/mongo.js";
+import env from "./config/env.js";
 
-const PORT = process.env.PORT || 80;
+const PORT = env.PORT;
 
 async function startServer() {
   const localStartTime = Date.now();

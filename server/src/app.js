@@ -1,6 +1,6 @@
-// Fast environment loading
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+// Environment configuration - load first
+import env from "./config/env.js";
+
 // Core imports - load upfront for better response times
 import express from "express";
 import path from "node:path";
@@ -14,9 +14,9 @@ import { attachTokenIfAuthenticated } from "./middleware/auth.middleware.js";
 
 const app = express();
 const __dirname = import.meta.dirname;
-const cookieSecret = process.env.COOKIE_SECRET;
+const cookieSecret = env.COOKIE_SECRET;
 // Basic app configuration
-const runningInProduction = process.env.NODE_ENV == "production";
+const runningInProduction = env.NODE_ENV === "production";
 
 // helmet js for fixing common vulnerabilities
 app.use(
@@ -42,13 +42,15 @@ app.use(
 );
 
 // HTTPS redirect first
-app.set("trust proxy", 1);
-app.use((req, res, next) => {
-  if (runningInProduction && req.secure == false) {
-    res.redirect("https://" + req.headers.host + req.url);
-  }
-  next();
-});
+if (env.ENABLE_PROXY) {
+  app.set("trust proxy", 1);
+  app.use((req, res, next) => {
+    if (runningInProduction && req.secure == false) {
+      res.redirect("https://" + req.headers.host + req.url);
+    }
+    next();
+  });
+}
 
 // to save bandwidth if content not modified
 app.use((req, res, next) => {

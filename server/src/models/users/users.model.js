@@ -29,7 +29,7 @@ export async function findUserByEmailOrUsername(
       $or: [{ email: loginIdentifier }, { username: loginIdentifier }],
     },
     projection
-  );
+  ).lean();
 }
 
 export async function findUserByGoogleId(googleId, projection = {}) {
