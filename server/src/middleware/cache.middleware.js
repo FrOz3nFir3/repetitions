@@ -78,11 +78,6 @@ export function cacheMiddleware(options = {}) {
             let responseBody = null;
             let responseSent = false;
 
-            // Override res.status to capture status code
-            res.status = function (code) {
-                responseStatusCode = code;
-                return originalStatus.call(this, code);
-            };
 
             // Override res.json to capture response data
             res.json = function (data) {
@@ -338,7 +333,7 @@ function extractTagsFromRequest(req, responseData, customTagExtractor) {
             if (view === 'edit_quizzes' || view === 'quiz') {
                 tags.push(`CardQuiz:${cardId}`);
             }
-            if (fullPath.includes('/review-queue')) {
+            if (view === 'review-queue' || fullPath.includes('/review-queue')) {
                 tags.push(`CardReviewQueue:${cardId}`);
             }
         }

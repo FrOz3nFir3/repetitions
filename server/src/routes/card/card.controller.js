@@ -187,14 +187,14 @@ export async function httpPatchUpdateCard(req, res) {
       otherBody.quizId,
       otherBody.quizId
     );
-    if (quiz && quiz.options.length > minimumOptions - 1) {
+    if (quiz && quiz.options?.length > minimumOptions - 1) {
       return res.status(400).json({
         error: `Please remove existing options manually before reducing the minimum options below ${quiz.options.length + 1
           }.`,
       });
     }
     // causing issues in updating check later fixed for now
-    if (quiz && newOptions.length < minimumOptions - 1) {
+    if (quiz && newOptions?.length < minimumOptions - 1) {
       return res.status(400).json({
         error: `Add more options as per minimum options.`,
       });
@@ -250,7 +250,7 @@ export async function httpPatchUpdateCard(req, res) {
   }
 
   try {
-    const updatedCard = await processUpdateRequest(
+    await processUpdateRequest(
       otherBody._id,
       {
         question,
@@ -274,7 +274,6 @@ export async function httpPatchUpdateCard(req, res) {
       return res.json({
         ok: true,
         message: "Your changes have been added to Review Queue for approval",
-        card: updatedCard,
         reviewQueue: true,
       });
     }

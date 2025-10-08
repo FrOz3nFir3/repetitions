@@ -7,6 +7,50 @@ import {
 import Card from "./cards.mongo.js";
 import { Types } from "mongoose";
 
+/**
+ * Helper function to create a simplified log change entry
+ * Stores field name + preview for identification
+ * @param {string} field - The field name that changed
+ * @param {string} content - The content to extract preview from (can be HTML or plain text)
+ * @param {string} targetId - Optional ID of the specific item (flashcardId, quizId, optionId)
+ * @returns {object} Change entry object
+ */
+function createChangeEntry(field, content = "", targetId = null) {
+  const entry = { field };
+
+  // Fields that should have preview for identification/context
+  const fieldsWithPreview = [
+    'Question',      // Flashcard/Quiz questions
+    'Category',      // Card category
+    'Main Topic',    // Card metadata
+    'Sub Topic',     // Card metadata
+    'Description'    // Card description
+  ];
+
+  const shouldHavePreview = fieldsWithPreview.some(f => field.includes(f));
+
+  if (shouldHavePreview && content !== null && content !== undefined && content !== "") {
+    try {
+      // Extract plain text from HTML if needed (for Description field)
+      const plainText = typeof content === 'string' ? getTextFromHTML(content) : String(content);
+      // Truncate to 100 characters for identification
+      let preview = plainText.slice(0, 100);
+      if (plainText.length > 100) {
+        preview += "...";
+      }
+      if (preview) entry.preview = preview;
+    } catch (error) {
+      // If extraction fails, use content as-is (truncated)
+      const preview = String(content).slice(0, 100);
+      if (preview) entry.preview = preview;
+    }
+  }
+
+  if (targetId) entry.targetId = targetId;
+
+  return entry;
+}
+
 export async function getCardsByCategoryPaginated(
   category,
   { skip, limit, search } = {}
@@ -214,7 +258,9 @@ export async function getCardById(id, view = "overview", skipLogs = false) {
     }).lean();
   }
   if (view === "review-queue") {
-    const card = await Card.findById(id).lean();
+    const card = await Card.findById(id)
+      .populate('reviewQueue.submittedBy', 'name username -_id')
+      .lean();
     if (!card) return null;
 
     // Filter out expired review queue items
@@ -481,7 +527,7 @@ export async function updateCard(details) {
   const {
     _id,
     cardId,
-    deleteCard,
+    deleteFlashcard,
     userId,
     quizId,
     quizQuestion,
@@ -492,7 +538,6 @@ export async function updateCard(details) {
     optionId,
     deleteQuiz,
     deleteOption,
-    reverted,
     reorderFlashcards,
     reorderQuizzes,
     isCollaborativeEdit, // Flag to indicate this is from review queue acceptance
@@ -526,33 +571,16 @@ export async function updateCard(details) {
       updateQuery.$set = { review: reorderedReview };
       summary = "Reordered Flashcards";
 
-      const oldDisplayText = card.review
+      // Create preview showing new order
+      const orderPreview = reorderedReview
+        .slice(0, 3) // Show first 3 items
         .map((item, index) => {
-          let plainText = getTextFromHTML(item.question);
-          if (plainText.length > 100) {
-            plainText = plainText.slice(0, 100) + "...";
-          }
-          return `#${index + 1} - ${plainText}`;
+          const plainText = getTextFromHTML(item.question).slice(0, 50);
+          return `#${index + 1}: ${plainText}`;
         })
-        .join("\n");
+        .join(", ");
 
-      const newDisplayText = reorderedReview
-        .map((item, index) => {
-          let plainText = getTextFromHTML(item.question);
-          if (plainText.length > 100) {
-            plainText = plainText.slice(0, 100) + "...";
-          }
-          return `#${index + 1} - ${plainText}`;
-        })
-        .join("\n");
-
-      changes.push({
-        field: "Flashcard Order",
-        oldValue: card.review.map((r) => r._id.toString()),
-        newValue: validIds,
-        oldDisplayText,
-        newDisplayText,
-      });
+      changes.push(createChangeEntry("Flashcard Order", orderPreview + (reorderedReview.length > 3 ? "..." : "")));
     }
   } else if (reorderQuizzes) {
     const validIds = reorderQuizzes.filter((id) =>
@@ -572,32 +600,16 @@ export async function updateCard(details) {
       updateQuery.$set = { quizzes: reorderedQuizzes };
       summary = "Reordered quizzes";
 
-      const oldDisplayText = card.quizzes
+      // Create preview showing new order
+      const orderPreview = reorderedQuizzes
+        .slice(0, 3) // Show first 3 items
         .map((item, index) => {
-          let plainText = getTextFromHTML(item.quizQuestion);
-          if (plainText.length > 100) {
-            plainText = plainText.slice(0, 100) + "...";
-          }
-          return `#${index + 1} - ${plainText}`;
+          const plainText = getTextFromHTML(item.quizQuestion).slice(0, 50);
+          return `#${index + 1}: ${plainText}`;
         })
-        .join("\n");
-      const newDisplayText = reorderedQuizzes
-        .map((item, index) => {
-          let plainText = getTextFromHTML(item.quizQuestion);
-          if (plainText.length > 100) {
-            plainText = plainText.slice(0, 100) + "...";
-          }
-          return `#${index + 1} - ${plainText}`;
-        })
-        .join("\n");
+        .join(", ");
 
-      changes.push({
-        field: "Quiz Order",
-        oldValue: card.quizzes.map((q) => q._id.toString()),
-        newValue: validIds,
-        oldDisplayText,
-        newDisplayText,
-      });
+      changes.push(createChangeEntry("Quiz Order", orderPreview + (reorderedQuizzes.length > 3 ? "..." : "")));
     }
   }
 
@@ -623,7 +635,10 @@ export async function updateCard(details) {
 
     if (cardId) {
       const flashcard = card.review.find((r) => r._id.toString() === cardId);
-      summary = `Added new Quiz to Flashcard: "${getTextFromHTML(
+      summary = `Added new Quiz "${getTextFromHTML(quizQuestion).slice(
+        0,
+        250
+      )}" to Flashcard: "${getTextFromHTML(
         flashcard.question
       ).slice(0, 250)}"`;
     } else {
@@ -632,27 +647,12 @@ export async function updateCard(details) {
         250
       )}"`;
     }
-    changes.push({
-      field: "New Quiz Question",
-      oldValue: "",
-      newValue: quizQuestion,
-      cardId,
-    });
-    changes.push({
-      field: "New Quiz Answer",
-      oldValue: "",
-      newValue: quizAnswer,
-      cardId,
-    });
+    changes.push(createChangeEntry("New Quiz Question", quizQuestion, cardId));
+    changes.push(createChangeEntry("New Quiz Answer", quizAnswer, cardId));
 
     // Log minimum options if provided
     if (minimumOptions && minimumOptions !== 2) {
-      changes.push({
-        field: "New Quiz Minimum Options",
-        oldValue: "",
-        newValue: minimumOptions.toString(),
-        cardId,
-      });
+      changes.push(createChangeEntry("New Quiz Minimum Options", minimumOptions.toString(), cardId));
     }
 
     // Log additional options if provided
@@ -660,12 +660,7 @@ export async function updateCard(details) {
       newOptions
         .filter((opt) => opt && opt.trim())
         .forEach((option, index) => {
-          changes.push({
-            field: `New Quiz Option ${index + 2}`,
-            oldValue: "",
-            newValue: option,
-            cardId,
-          });
+          changes.push(createChangeEntry(`New Quiz Option ${index + 2}`, option, cardId));
         });
     }
   }
@@ -679,16 +674,8 @@ export async function updateCard(details) {
     summary = `Added new Flashcard: ${getTextFromHTML(
       otherDetails.question
     ).slice(0, 250)}`;
-    changes.push({
-      field: "New Flashcard Question",
-      oldValue: "",
-      newValue: otherDetails.question,
-    });
-    changes.push({
-      field: "New Flashcard Answer",
-      oldValue: "",
-      newValue: otherDetails.answer,
-    });
+    changes.push(createChangeEntry("New Flashcard Question", otherDetails.question));
+    changes.push(createChangeEntry("New Flashcard Answer", otherDetails.answer));
   }
   // Case 3: Operations on existing quizzes (distinguished by quizId)
   else if (quizId) {
@@ -706,18 +693,8 @@ export async function updateCard(details) {
         0,
         250
       )}"`;
-      changes.push({
-        field: `Deleted Quiz Question`,
-        oldValue: oldQuiz.quizQuestion,
-        newValue: "",
-        quizId,
-      });
-      changes.push({
-        field: `Deleted Quiz Answer`,
-        oldValue: oldQuiz.quizAnswer,
-        newValue: "",
-        quizId,
-      });
+      changes.push(createChangeEntry("Deleted Quiz Question", oldQuiz.quizQuestion, quizId));
+      changes.push(createChangeEntry("Deleted Quiz Answer", oldQuiz.quizAnswer, quizId));
     } else {
       const changedFields = [];
       if (cardId !== undefined && oldQuiz.flashcardId?.toString() !== cardId) {
@@ -741,36 +718,20 @@ export async function updateCard(details) {
           : null;
         const newFlashcardText = newFlashcard
           ? `"${getTextFromHTML(newFlashcard.question).slice(0, 40)}..."`
-          : "";
+          : "None";
 
-        changes.push({
-          field: `Quiz Flashcard Association`,
-          oldValue: oldFlashcardText,
-          newValue: newFlashcardText,
-          quizId,
-          cardId: oldQuiz.flashcardId?.toString() || null,
-        });
+        changes.push(createChangeEntry("Quiz Flashcard Association", newFlashcardText, quizId));
         changedFields.push("flashcard association");
       }
       const updateFields = {};
       if (quizQuestion !== undefined && oldQuiz.quizQuestion !== quizQuestion) {
         updateFields[`${quizPath}.quizQuestion`] = quizQuestion;
-        changes.push({
-          field: `Quiz Question`,
-          oldValue: oldQuiz.quizQuestion || "",
-          newValue: quizQuestion,
-          quizId,
-        });
+        changes.push(createChangeEntry("Quiz Question", quizQuestion, quizId));
         changedFields.push("question");
       }
       if (quizAnswer !== undefined && oldQuiz.quizAnswer !== quizAnswer) {
         updateFields[`${quizPath}.quizAnswer`] = quizAnswer;
-        changes.push({
-          field: `Quiz Answer`,
-          oldValue: oldQuiz.quizAnswer || "",
-          newValue: quizAnswer,
-          quizId,
-        });
+        changes.push(createChangeEntry("Quiz Answer", quizAnswer, quizId));
         changedFields.push("answer");
       }
       if (Object.keys(updateFields).length > 0) {
@@ -788,12 +749,7 @@ export async function updateCard(details) {
           ...updateQuery.$set,
           [`${quizPath}.minimumOptions`]: newMinOptions,
         };
-        changes.push({
-          field: `Quiz Minimum Options`,
-          oldValue: (oldQuiz.minimumOptions || "").toString(),
-          newValue: newMinOptions.toString(),
-          quizId,
-        });
+        changes.push(createChangeEntry("Quiz Minimum Options", newMinOptions.toString(), quizId));
         changedFields.push("minimum options");
       }
       if (newOptions !== undefined) {
@@ -818,22 +774,11 @@ export async function updateCard(details) {
             (oldOpt && newOptValue && oldOpt.value !== newOptValue)
           ) {
             const isDeletion = !newOptValue;
-            changes.push({
-              field: isDeletion
-                ? `Deleted Quiz Option ${i + 1}`
-                : `Quiz Option ${i + 1}`,
-              oldValue: oldOpt.value,
-              newValue: isDeletion ? "" : newOptValue,
-              quizId,
-              optionId: oldOpt._id.toString(),
-            });
+            const fieldName = isDeletion ? `Deleted Quiz Option ${i + 1}` : `Quiz Option ${i + 1}`;
+            const content = isDeletion ? oldOpt.value : newOptValue;
+            changes.push(createChangeEntry(fieldName, content, oldOpt._id.toString()));
           } else if (!oldOpt && newOptValue) {
-            changes.push({
-              field: `New Quiz Option`,
-              oldValue: "",
-              newValue: newOptValue,
-              quizId,
-            });
+            changes.push(createChangeEntry("New Quiz Option", newOptValue, quizId));
           }
         }
         changedFields.push("options");
@@ -851,13 +796,7 @@ export async function updateCard(details) {
               ...updateQuery.$set,
               [`${quizPath}.options.${optionIndex}.value`]: option,
             };
-            changes.push({
-              field: `Quiz Option ${optionIndex + 1}`,
-              oldValue: oldQuiz.options[optionIndex].value || "",
-              newValue: option,
-              quizId,
-              optionId,
-            });
+            changes.push(createChangeEntry(`Quiz Option ${optionIndex + 1}`, option, optionId));
             changedFields.push("options");
           }
         } else {
@@ -865,12 +804,7 @@ export async function updateCard(details) {
             ...updateQuery.$push,
             [`${quizPath}.options`]: { value: option },
           };
-          changes.push({
-            field: `New Quiz Option`,
-            oldValue: "",
-            newValue: option,
-            quizId,
-          });
+          changes.push(createChangeEntry("New Quiz Option", option, quizId));
           changedFields.push("options");
         }
       }
@@ -884,13 +818,7 @@ export async function updateCard(details) {
             ...updateQuery.$pull,
             [`${quizPath}.options`]: { _id: optionId },
           };
-          changes.push({
-            field: `Deleted Quiz Option ${deletedOptionIndex + 1}`,
-            oldValue: deletedOption.value || "",
-            newValue: "",
-            quizId,
-            optionId,
-          });
+          changes.push(createChangeEntry(`Deleted Quiz Option ${deletedOptionIndex + 1}`, deletedOption.value, optionId));
           changedFields.push("options");
         }
       }
@@ -913,7 +841,7 @@ export async function updateCard(details) {
     const reviewPath = `review.${reviewIndex}`;
     const oldReview = card.review[reviewIndex];
 
-    if (deleteCard) {
+    if (deleteFlashcard) {
       updateQuery.$pull = {
         review: { _id: cardId },
         quizzes: { flashcardId: cardId },
@@ -921,18 +849,8 @@ export async function updateCard(details) {
       summary = `Deleted flashcard: "${getTextFromHTML(
         oldReview.question
       ).slice(0, 250)}"`;
-      changes.push({
-        field: `Deleted Flashcard Question`,
-        oldValue: oldReview.question,
-        newValue: "",
-        cardId,
-      });
-      changes.push({
-        field: `Deleted Flashcard Answer`,
-        oldValue: oldReview.answer,
-        newValue: "",
-        cardId,
-      });
+      changes.push(createChangeEntry("Deleted Flashcard Question", oldReview.question, cardId));
+      changes.push(createChangeEntry("Deleted Flashcard Answer", oldReview.answer, cardId));
     } else {
       // Handle flashcard updates (question and/or answer)
       const changedFields = [];
@@ -946,12 +864,7 @@ export async function updateCard(details) {
           ...updateQuery.$set,
           [`${reviewPath}.question`]: otherDetails.question,
         };
-        changes.push({
-          field: "Flashcard Question",
-          oldValue: oldReview.question || "",
-          newValue: otherDetails.question,
-          cardId,
-        });
+        changes.push(createChangeEntry("Flashcard Question", otherDetails.question, cardId));
         changedFields.push("question");
         hasChanges = true;
       }
@@ -964,12 +877,7 @@ export async function updateCard(details) {
           ...updateQuery.$set,
           [`${reviewPath}.answer`]: otherDetails.answer,
         };
-        changes.push({
-          field: "Flashcard Answer",
-          oldValue: oldReview.answer || "",
-          newValue: otherDetails.answer,
-          cardId,
-        });
+        changes.push(createChangeEntry("Flashcard Answer", otherDetails.answer, cardId));
         changedFields.push("answer");
         hasChanges = true;
       }
@@ -1001,12 +909,8 @@ export async function updateCard(details) {
     if (category !== undefined && card.category !== normalizedCategory) {
       // Normalize category when updating
       updateQuery.$set = { ...updateQuery.$set, category: normalizedCategory };
-      changes.push({
-        field: "Category",
-        oldValue: card.category || "",
-        newValue: normalizedCategory,
-      });
-      changedFields.push("Category");
+      changes.push(createChangeEntry("Category", normalizedCategory));
+      changedFields.push(`Category: "${normalizedCategory}"`);
     }
 
     const normalizedMainTopic = mainTopic && normalizeWhitespace(mainTopic);
@@ -1015,12 +919,9 @@ export async function updateCard(details) {
         ...updateQuery.$set,
         "main-topic": normalizedMainTopic,
       };
-      changes.push({
-        field: "Main Topic",
-        oldValue: card["main-topic"] || "",
-        newValue: normalizedMainTopic,
-      });
-      changedFields.push("Main Topic");
+      changes.push(createChangeEntry("Main Topic", normalizedMainTopic));
+      const preview = normalizedMainTopic.slice(0, 250);
+      changedFields.push(`Main Topic: "${preview}${normalizedMainTopic.length > 250 ? '...' : ''}"`);
     }
 
     const normalizedSubTopic = subTopic && normalizeWhitespace(subTopic);
@@ -1029,21 +930,15 @@ export async function updateCard(details) {
         ...updateQuery.$set,
         "sub-topic": normalizedSubTopic,
       };
-      changes.push({
-        field: "Sub Topic",
-        oldValue: card["sub-topic"] || "",
-        newValue: normalizedSubTopic,
-      });
-      changedFields.push("Sub Topic");
+      changes.push(createChangeEntry("Sub Topic", normalizedSubTopic));
+      const preview = normalizedSubTopic.slice(0, 250);
+      changedFields.push(`Sub Topic: "${preview}${normalizedSubTopic.length > 250 ? '...' : ''}"`);
     }
     if (description !== undefined && card.description !== description) {
       updateQuery.$set = { ...updateQuery.$set, description };
-      changes.push({
-        field: "Description",
-        oldValue: card.description || "",
-        newValue: description,
-      });
-      changedFields.push("Description");
+      changes.push(createChangeEntry("Description", description));
+      const descPreview = getTextFromHTML(description).slice(0, 250);
+      changedFields.push(`Description: "${descPreview}${getTextFromHTML(description).length > 250 ? '...' : ''}"`);
     }
     if (changedFields.length > 0) {
       summary = `Updated ${changedFields.join(", ")}`;
@@ -1052,17 +947,13 @@ export async function updateCard(details) {
 
   if (changes.length > 0) {
     let finalSummary = summary || "Card updated";
-    if (reverted) {
-      finalSummary = `Reverted: ${finalSummary
-        .charAt(0)
-        .toLowerCase()}${finalSummary.slice(1)}`;
-    } else if (isCollaborativeEdit) {
+    if (isCollaborativeEdit) {
       finalSummary = `Collaborative Edit: ${finalSummary
         .charAt(0)
         .toLowerCase()}${finalSummary.slice(1)}`;
     }
     const logEntry = {
-      eventType: reverted ? "reverted" : "updated",
+      eventType: "updated",
       user: userId,
       summary: finalSummary,
       changes,
@@ -1395,14 +1286,14 @@ export async function processUpdateRequest(
     cardId: flashcardId,
     quizId,
     optionId,
-    deleteCard,
+    deleteFlashcard,
     deleteQuiz,
     deleteOption,
     ...otherDetails
   } = updateDetails;
 
   // Handle different types of changes
-  if (deleteCard && flashcardId) {
+  if (deleteFlashcard && flashcardId) {
     const flashcard = card.review.find((r) => r._id.toString() === flashcardId);
     if (flashcard) {
       changes.push({
@@ -2099,7 +1990,7 @@ export async function acceptReviewItem(cardId, itemId, userId) {
         if (change.changeType === "deletion") {
           // Handle deletions
           if (change.field === "Flashcard" && change.targetId) {
-            updateDetails.deleteCard = true;
+            updateDetails.deleteFlashcard = true;
             updateDetails.cardId = change.targetId;
           } else if (change.field === "Quiz" && change.targetId) {
             updateDetails.deleteQuiz = true;

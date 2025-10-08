@@ -5,6 +5,7 @@ import FlashcardList from "./FlashcardList";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 const FlashcardManagementView = ({
+  review,
   searchTerm,
   handleSearchChange,
   handleReset,
@@ -69,6 +70,7 @@ const FlashcardManagementView = ({
           }`}
         >
           <FlashcardList
+            review={review}
             flashcard={currentFlashcard}
             cardId={cardId}
             direction={animationDirection}

@@ -170,6 +170,7 @@ const EditCardView = () => {
 
       {view === "flashcards" ? (
         <FlashcardManagementView
+          review={displayReview}
           searchTerm={searchTerm}
           handleSearchChange={handleSearchChange}
           handleReset={handleReset}

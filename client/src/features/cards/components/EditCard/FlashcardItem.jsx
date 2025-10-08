@@ -18,25 +18,26 @@ import DeleteConfirmationModal from "../../../../components/ui/DeleteConfirmatio
 import EditFlashcardModal from "./EditFlashcardModal";
 import ReorderModal from "./ReorderModal";
 import FlashcardTips from "./FlashcardTips";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../../../authentication/state/authSlice";
-import { selectCurrentCard } from "../../state/cardSlice";
 import toast from "react-hot-toast";
 
-const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
+const FlashcardItem = ({
+  review,
+  flashcard,
+  cardId,
+  currentIndex,
+  originalIndex,
+}) => {
   const [updateCard, { error, isSuccess }] = usePatchUpdateCardMutation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
   const errorRef = React.useRef(null);
-  const user = useSelector(selectCurrentUser);
-  const card = useSelector(selectCurrentCard);
 
   const handleDeleteFlashcard = () => {
     const updateDetails = {
       _id: cardId,
       cardId: flashcard._id,
-      deleteCard: true,
+      deleteFlashcard: true,
     };
     updateCard(updateDetails).then((response) => {
       if (response.data) {
@@ -134,7 +135,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
               </div>
             </button>
 
-            {card?.review?.length > 1 && (
+            {review?.length > 1 && (
               <button
                 onClick={() => setIsReorderModalOpen(true)}
                 className="flex items-center gap-2 group cursor-pointer relative px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 backdrop-blur-sm rounded-xl hover:border-emerald-300 dark:hover:border-emerald-600 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 text-white"
@@ -232,7 +233,7 @@ const FlashcardItem = ({ flashcard, cardId, currentIndex, originalIndex }) => {
         onClose={() => setIsReorderModalOpen(false)}
         cardId={cardId}
         contentType="flashcards"
-        items={card?.review || []}
+        items={review || []}
       />
 
       <DeleteConfirmationModal

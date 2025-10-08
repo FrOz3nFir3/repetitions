@@ -585,11 +585,19 @@ const ReviewQueueModal = ({
             </div>
 
             <div className="flex flex-col sm:items-end gap-2">
-              {submittedBy && (
+              {submittedBy && submittedBy.name && (
                 <div className="flex items-center gap-2 text-sm">
                   <UserCircleIcon className="h-4 w-4 text-indigo-500" />
                   <span className="text-gray-700 dark:text-gray-300 font-medium">
                     {submittedBy.name} (@{submittedBy.username})
+                  </span>
+                </div>
+              )}
+              {submittedBy && !submittedBy.name && (
+                <div className="flex items-center gap-2 text-sm">
+                  <UserCircleIcon className="h-4 w-4 text-indigo-500" />
+                  <span className="text-gray-700 dark:text-gray-300 font-medium italic">
+                    User information loading...
                   </span>
                 </div>
               )}

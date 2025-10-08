@@ -36,9 +36,9 @@ export const CACHE_CONFIG = {
         DELETE: 5000, // 5 seconds
     },
 
-    // Cache key compression settings - hardcoded (disabled by default)
+    // Cache key compression settings - hardcoded (enabled by default)
     COMPRESSION: {
-        ENABLED: false,
+        ENABLED: true,
         MIN_SIZE: 1024, // 1KB
     },
 

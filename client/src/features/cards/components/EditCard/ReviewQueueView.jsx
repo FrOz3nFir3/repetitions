@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { selectCurrentCard } from "../../state/cardSlice";
+import { useState } from "react";
 import ReviewQueueItem from "./ReviewQueueItem";
 import ReviewQueueModal from "./ReviewQueueModal";
 import ReviewQueueListModal from "./ReviewQueueListModal";
@@ -14,6 +12,7 @@ import toast from "react-hot-toast";
 const ReviewQueueView = ({ cardId, reviewQueue, reviewQueueLength }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isListModalOpen, setIsListModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const [acceptReviewItem, { isLoading: isAccepting }] =
     useAcceptReviewItemMutation();

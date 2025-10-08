@@ -3,6 +3,7 @@ import FlashcardItem from "./FlashcardItem";
 import { DocumentIcon } from "@heroicons/react/24/solid";
 
 const FlashcardList = ({
+  review,
   flashcard,
   cardId,
   currentIndex,
@@ -30,6 +31,7 @@ const FlashcardList = ({
   return (
     <div className="mt-4">
       <FlashcardItem
+        review={review}
         flashcard={flashcard}
         cardId={cardId}
         currentIndex={currentIndex}

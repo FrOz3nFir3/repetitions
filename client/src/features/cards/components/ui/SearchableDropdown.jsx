@@ -64,13 +64,17 @@ const SearchableDropdown = ({
     setSearchTerm(e.target.value);
     if (!isOpen) {
       setIsOpen(true);
-      onOpen?.();
+      if (!value?.trim()) {
+        onOpen?.();
+      }
     }
   };
 
   const handleFocus = () => {
     setIsOpen(true);
-    onOpen?.();
+    if (!value?.trim()) {
+      onOpen?.();
+    }
   };
 
   const filteredOptions = useMemo(
@@ -96,6 +100,11 @@ const SearchableDropdown = ({
       }) || [],
     [options, searchTerm, selectedOption]
   );
+
+  useEffect(() => {
+    if (!value?.trim()) return;
+    onOpen?.();
+  }, [value]);
 
   return (
     <div ref={containerRef} className="relative w-full">

@@ -127,12 +127,12 @@ class CacheService {
 
         return {
             ...this.stats,
+            compressionSaved: `${(this.stats.compressionSaved / (1024 * 1024)).toFixed(2)} MB`,
             uptime: Math.floor(uptime / 1000), // seconds
             hitRate: `${hitRate}%`,
             totalOperations,
-        };
+        }
     }
-
     /**
      * Log cache statistics to console
      */

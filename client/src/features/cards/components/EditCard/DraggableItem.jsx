@@ -105,25 +105,25 @@ const DraggableItem = ({
           : "hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-sm"
       }`}
     >
-      <div className="flex items-center gap-4 p-4">
-        {/* Drag Handle */}
+      <div className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4">
+        {/* Drag Handle - Larger touch target for mobile */}
         <div
           {...attributes}
           {...listeners}
-          className="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing transition-colors duration-200"
+          className="flex-shrink-0 p-2 sm:p-1 -ml-1 sm:ml-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing transition-colors duration-200 touch-none"
           title="Drag to reorder"
         >
-          ⠿
+          <Bars3Icon className="h-6 w-6 sm:h-5 sm:w-5" />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
-            <span className="flex-shrink-0 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="flex-shrink-0 text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-md">
               #{index + 1}
             </span>
             {/* have this expanded later based on click */}
-            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-4 leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 line-clamp-4 leading-relaxed">
               {displayText || "No content available"}
             </p>
           </div>

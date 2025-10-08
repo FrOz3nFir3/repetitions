@@ -18,11 +18,11 @@ const cardSlicer = createSlice({
           cardId,
           optionIndex,
           option,
-          deleteCard,
+          deleteFlashcard,
           ...flashCardUpdate
         } = updateDetails;
 
-        if (deleteCard) {
+        if (deleteFlashcard) {
           state.card.review.splice(cardId - 1, 1);
           return;
         }

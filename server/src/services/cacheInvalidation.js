@@ -52,12 +52,12 @@ export const invalidationMap = {
 
         // Auto-detect update type if not specified
         if (updateType === 'auto') {
-            // Check for flashcard updates (question, answer fields)
-            if (updateData.question || updateData.answer || updateData.flashcardId || updateData.deleteFlashcard) {
+            // Check for flashcard updates (question, answer fields, reordering)
+            if (updateData.question || updateData.answer || updateData.flashcardId || updateData.deleteFlashcard || updateData.reorderFlashcards) {
                 detectedType = 'flashcards';
             }
-            // Check for quiz updates (quizQuestion, quizAnswer, options, etc.)
-            else if (updateData.quizQuestion || updateData.quizAnswer || updateData.options || updateData.option || updateData.minimumOptions || updateData.quizId || updateData.deleteQuiz) {
+            // Check for quiz updates (quizQuestion, quizAnswer, options, reordering, etc.)
+            else if (updateData.quizQuestion || updateData.quizAnswer || updateData.options || updateData.option || updateData.minimumOptions || updateData.quizId || updateData.deleteQuiz || updateData.reorderQuizzes) {
                 detectedType = 'quiz';
             }
             // Check for overview/metadata updates
@@ -422,11 +422,11 @@ export const invalidationUtils = {
      */
     determineUpdateType(updateData) {
         // Check for flashcard updates (question, answer fields)
-        if (updateData.question || updateData.answer || updateData.flashcardId || updateData.deleteFlashcard) {
+        if (updateData.question || updateData.answer || updateData.flashcardId || updateData.deleteFlashcard || updateData.reorderFlashcards) {
             return 'flashcards';
         }
         // Check for quiz updates (quizQuestion, quizAnswer, options, etc.)
-        if (updateData.quizQuestion || updateData.quizAnswer || updateData.options || updateData.option || updateData.minimumOptions || updateData.quizId || updateData.deleteQuiz) {
+        if (updateData.quizQuestion || updateData.quizAnswer || updateData.options || updateData.option || updateData.minimumOptions || updateData.quizId || updateData.deleteQuiz || updateData.reorderQuizzes) {
             return 'quiz';
         }
         // Check for overview/metadata updates

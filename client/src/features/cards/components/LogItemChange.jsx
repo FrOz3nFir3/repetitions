@@ -1,59 +1,66 @@
-import React, { useState } from "react";
-import { EyeIcon } from "@heroicons/react/24/solid";
-import useDarkMode from "../../../hooks/useDarkMode";
-import RevertChangeModal from "./RevertChangeModal";
-import LazyDiffViewer from "./LazyDiffViewer";
+import {
+  PencilSquareIcon,
+  TrashIcon,
+  PlusCircleIcon,
+  ArrowsUpDownIcon,
+} from "@heroicons/react/24/outline";
 
 const LogItemChange = ({ change }) => {
-  const [theme] = useDarkMode();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Determine icon based on field type
+  const getIcon = () => {
+    if (change.field.includes("Deleted")) {
+      return <TrashIcon className="w-4 h-4 text-red-600 dark:text-red-400" />;
+    }
+    if (change.field.includes("New")) {
+      return (
+        <PlusCircleIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
+      );
+    }
+    if (change.field.includes("Order")) {
+      return (
+        <ArrowsUpDownIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+      );
+    }
+    return (
+      <PencilSquareIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+    );
+  };
 
-  // Use displayText for order changes when available, fallback to original values
-  const displayOldValue = change.oldDisplayText ?? change.oldValue;
-  const displayNewValue = change.newDisplayText ?? change.newValue;
-  const hasRevertButton = change.oldValue && change.newValue;
+  // Determine background color based on field type
+  const getBgColor = () => {
+    if (change.field.includes("Deleted")) {
+      return "from-red-100 to-red-50 dark:from-red-900/30 dark:to-red-900/20";
+    }
+    if (change.field.includes("New")) {
+      return "from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-900/20";
+    }
+    if (change.field.includes("Order")) {
+      return "from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/20";
+    }
+    return "from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30";
+  };
 
   return (
-    <li className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3 border border-orange-200/50 dark:border-orange-700/50">
-      <div className="flex flex-wrap justify-between items-center mb-3">
-        <div className="flex items-center gap-2">
-          <strong className="font-semibold text-orange-800 dark:text-orange-200 capitalize text-sm">
+    <li className="bg-white/60 dark:bg-gray-800/60 rounded-lg p-3 border border-orange-200/50 dark:border-orange-700/50 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-200 hover:shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 mt-0.5">
+          <div
+            className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getBgColor()} flex items-center justify-center shadow-sm`}
+          >
+            {getIcon()}
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <strong className="font-semibold text-gray-800 dark:text-gray-200 text-sm block">
             {change.field}
           </strong>
+          {change.preview && (
+            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed break-words mt-1">
+              {change.preview}
+            </p>
+          )}
         </div>
-        {hasRevertButton && (
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="shrink-0 cursor-pointer flex items-center gap-1 px-3 py-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800/50 transition-all duration-200 text-xs font-medium group"
-            title="View and Revert Change"
-          >
-            <EyeIcon className="h-3.5 w-3.5 group-hover:scale-110 transition-transform duration-200" />
-            <span>View & Revert</span>
-          </button>
-        )}
       </div>
-      <div className="rounded-lg overflow-hidden border border-orange-200/30 dark:border-orange-700/30">
-        <LazyDiffViewer
-          className="max-w-full"
-          oldValue={displayOldValue}
-          newValue={displayNewValue}
-          splitView={false}
-          hideLineNumbers
-          useDarkTheme={theme === "dark"}
-          styles={{
-            diffContainer: {
-              minWidth: "100%",
-            },
-          }}
-        />
-      </div>
-      {isModalOpen && (
-        <RevertChangeModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          change={change}
-        />
-      )}
     </li>
   );
 };

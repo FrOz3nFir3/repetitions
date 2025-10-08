@@ -3,13 +3,10 @@ import { Schema, model } from "mongoose";
 const changeSchema = new Schema(
   {
     field: { type: String, required: true },
-    oldValue: { type: Schema.Types.Mixed },
-    newValue: { type: Schema.Types.Mixed },
-    oldDisplayText: { type: Schema.Types.Mixed },
-    newDisplayText: { type: Schema.Types.Mixed },
-    cardId: { type: String },
-    quizId: { type: String },
-    optionId: { type: String },
+    // Store truncated plain text preview (max 200 chars) for context
+    preview: { type: String, maxlength: 200 },
+    // Optional: store which specific item was changed
+    targetId: { type: String }, // flashcardId, quizId, optionId
   },
   { _id: false }
 );
@@ -18,7 +15,7 @@ const logEntrySchema = new Schema({
   eventType: {
     type: String,
     required: true,
-    enum: ["created", "updated", "deleted", "reverted"],
+    enum: ["created", "updated", "deleted"],
   },
   timestamp: {
     type: Date,

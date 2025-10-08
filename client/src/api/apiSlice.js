@@ -218,7 +218,7 @@ export const apiSlice = createApi({
           // Check for flashcard-related parameters
           else if (
             arg.cardId ||
-            arg.deleteCard ||
+            arg.deleteFlashcard ||
             arg.review ||
             arg.question ||
             arg.answer ||
