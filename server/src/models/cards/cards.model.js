@@ -2537,11 +2537,11 @@ export async function cleanupExpiredReviewItems() {
     );
 
     console.log(
-      `Cleaned up expired review items from ${result.modifiedCount} cards`
+      `Cleaned up expired review queue items from ${result.modifiedCount} cards`
     );
     return result;
   } catch (error) {
-    console.error("Error cleaning up expired review items:", error);
+    console.error("Error cleaning up expired review queue items:", error.message);
     throw error;
   }
 }
