@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node src/server.js",
     "watch": "nodemon src/server.js",
-    "test": "jest test"
+    "cron:cleanup": "node src/cron-jobs/index.js"
   },
   "keywords": [],
   "author": "",
