@@ -117,7 +117,7 @@ export function setTokens(res, user) {
     signed: true,
     maxAge: ACCESS_TOKEN_MAX_AGE_MS,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "lax",
     path: "/api",
   });
 
@@ -126,7 +126,7 @@ export function setTokens(res, user) {
     signed: true,
     maxAge: REFRESH_TOKEN_MAX_AGE_MS,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "lax",
     path: "/api/user",
   });
 
@@ -144,7 +144,7 @@ export function setTokens(res, user) {
   res.cookie("csrf_token", csrfToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "lax",
     path: "/api",
   });
 

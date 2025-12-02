@@ -93,7 +93,7 @@ app.use("/api", cookieParser(cookieSecret));
 // CORS configuration
 const corsOptions = {
   origin: runningInProduction
-    ? "https://repetitions.learnapp.workers.dev"
+    ? true
     : "http://localhost",
   credentials: true,
   optionsSuccessStatus: 200, // For legacy browser support
